@@ -52,13 +52,13 @@
   let _bdayTarget = 'self';
 
   function loadBirth(entry, target) {
-    if (typeof window.loadDateInFinder !== 'function') return;
-    window.loadDateInFinder(entry.month, entry.day, target);
     // "You" picks also carry the person's current age into Quadrations —
     // setAge/currentAge are bare classic-script globals from spread-grid.js.
     if (target !== 'partner' && typeof setAge === 'function') {
       setAge(ageFromBirthYear(entry.year, entry.month, entry.day));
     }
+    if (typeof window.loadDateInFinder !== 'function') return;
+    window.loadDateInFinder(entry.month, entry.day, target);
     if (typeof window.closeFinderTray === 'function') window.closeFinderTray('bday');
   }
 
@@ -156,7 +156,6 @@
   function openBirthAddPanel() {
     const dEl = document.getElementById('baDay');
     const mEl = document.getElementById('baMonth');
-    const yEl = document.getElementById('baYear');
     const fMonth = document.getElementById('fMonth');
     const fDay = document.getElementById('fDay');
     const fM = fMonth ? parseInt(fMonth.value, 10) : NaN;
@@ -165,7 +164,6 @@
       dEl.value = String(fD).padStart(2, '0');
       mEl.value = String(fM).padStart(2, '0');
     }
-    if (!yEl.value) yEl.value = String(new Date().getFullYear());
     document.getElementById('birthAddPanel').classList.add('open');
     setTimeout(() => {
       const firstEmpty = ['baDay', 'baMonth', 'baYear', 'baName'].find(id => !document.getElementById(id).value);

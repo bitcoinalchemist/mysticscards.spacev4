@@ -1,26 +1,35 @@
-// in-time.js — the "In Time" 6-card row (Birth / 13-Year / 7-Year /
-// Yearly / 52-Day / Daily) for the Finder's picked card. Ported from
-// v3/js/in-time.js 2026-07-10.
+// in-time.js — the "In Time" 5-card row (13-Year / 7-Year / Yearly /
+// 52-Day / Daily) for the Finder's picked card, plus the
+// date-scroll nav that lets you view the row "as of" any date. Ported
+// from v3/js/in-time.js 2026-07-10; date-nav ported 2026-07-10 (was
+// deferred in the first pass).
 //
-// v3 also owned a date-nav bar (view "as of" any date), five lazy-
-// loaded ~490KB period-reading data files, and a period-reading
-// popup with prev/next timeline nav. This first pass ships the
-// visible 6-card row only; the date-nav + period popups can come
-// back once we have the popup chrome and are ready to move that data
-// into the bundle.
+// v3 also had a period-reading popup with its own prev/next timeline
+// nav (opened by clicking a Daily/52-Day card), backed by five lazy-
+// loaded ~490KB reading data files and the compare-card popup chrome.
+// That part is intentionally still deferred — it needs infrastructure
+// (openCompareCard + those data files) that doesn't exist in v4 yet.
+// This pass is the date-scroll nav only: the ‹ › year/month/day
+// steppers, the clickable date label (native date picker), and the
+// "Today" reset, all recomputing the 6-card row for the chosen date.
 //
 // The card math: for a given birth-card index B and current age A:
-//   • Birth      → B (fixed for life)
 //   • 13-Year    → deckAtAge(⌊A/91⌋+1) at position B, offset ⌊(A%91)/13⌋
 //   • 7-Year     → deckAtAge(⌊A/49⌋+1) at position B, offset ⌊(A%49)/7⌋
 //   • Yearly     → deckAtAge(⌊A/7⌋+1)  at position B, offset A%7
 //   • 52-Day     → deckAtAge(A+1)      at position B, offset ⌊daysSinceBday/52⌋
 //   • Daily      → deckAtAge(weeksAlive%90+1) at position B, offset weekdayShift
+// A (age) is now derived from the VIEWED date, not just the Quadrations
+// stepper: the stepper anchors the reader's real birth year (today's
+// real age minus the stepper value), then age-at-viewDate is that birth
+// year measured against the viewed date's last-birthday year — same
+// two-step anchor v3 used, so scrolling the date changes which age's
+// cards show.
 //
 // Reads deckAtAge / SPREAD_PLANETS / SPREAD_PLANET_SYM / CARDS /
 // spreadCardPips via classic-script globals. Loaded after cardsdata.js
 // and after spread-grid.js (which owns the `currentAge` global that
-// tells us the reader's real age).
+// tells us the reader's real-today age).
 //
 // PUBLIC on window:
 //   window.renderInTime(card) — populates `#fInTime`. Returns TRUE
@@ -32,6 +41,107 @@
   'use strict';
 
   const WD_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  // ── Date-scroll state ────────────────────────────────────────────
+  // viewDate is a local-midnight epoch (ms). renderInTime always shows
+  // the row "as of" this date; the nav buttons/date input/Today button
+  // shift it and re-render. _lastCard remembers the last card passed to
+  // renderInTime so the nav controls (which don't get a card reference
+  // themselves) can trigger a re-render.
+  let viewDate = localMidnight(new Date());
+  let _lastCard = null;
+
+  function isViewingToday() {
+    return viewDate === localMidnight(new Date());
+  }
+  function formatViewDate(ms) {
+    const d = new Date(ms);
+    const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    return `${wd}, ${d.getDate()} ${mo} ${d.getFullYear()}`;
+  }
+  function isoFromMs(ms) {
+    const d = new Date(ms);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function setViewDate(ms) {
+    viewDate = localMidnight(new Date(ms));
+    renderInTime(_lastCard);
+  }
+  function shiftViewDays(n) {
+    const d = new Date(viewDate);
+    d.setDate(d.getDate() + n);
+    d.setHours(0, 0, 0, 0); // normalize across DST
+    setViewDate(d.getTime());
+  }
+  function shiftViewYears(n) {
+    const d = new Date(viewDate);
+    d.setFullYear(d.getFullYear() + n);
+    d.setHours(0, 0, 0, 0);
+    setViewDate(d.getTime());
+  }
+  function shiftViewMonths(n) {
+    // Step by whole months — clamp the day to the target month's last day so
+    // e.g. Mar 31 → −1 month lands on Feb 28 (or 29), not the JS-default Mar 3.
+    const d = new Date(viewDate);
+    const targetDay = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + n);
+    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(targetDay, lastDay));
+    d.setHours(0, 0, 0, 0);
+    setViewDate(d.getTime());
+  }
+  function dateNavHTML() {
+    return `<div class="it-date-bar">
+      <button class="it-date-nav" type="button" data-shift-year="-1"  title="−1 year"  aria-label="Back one year">«</button>
+      <button class="it-date-nav" type="button" data-shift-month="-1" title="−1 month" aria-label="Back one month">‹‹</button>
+      <button class="it-date-nav" type="button" data-shift-day="-1"   title="Previous day" aria-label="Previous day">‹</button>
+      <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">${formatViewDate(viewDate)}</button>
+      <input class="it-date-input" type="date" tabindex="-1" aria-hidden="true" value="${isoFromMs(viewDate)}" />
+      <button class="it-date-nav" type="button" data-shift-day="1"    title="Next day"    aria-label="Next day">›</button>
+      <button class="it-date-nav" type="button" data-shift-month="1"  title="+1 month"    aria-label="Forward one month">››</button>
+      <button class="it-date-nav" type="button" data-shift-year="1"   title="+1 year"     aria-label="Forward one year">»</button>
+    </div>
+    <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>`;
+  }
+  function wireDateNav() {
+    const root = document.getElementById('fInTime');
+    if (!root) return;
+    root.addEventListener('click', function (ev) {
+      const navBtn = ev.target.closest('.it-date-nav');
+      if (navBtn) {
+        const dy = parseInt(navBtn.dataset.shiftYear  || '0', 10);
+        const dm = parseInt(navBtn.dataset.shiftMonth || '0', 10);
+        const dd = parseInt(navBtn.dataset.shiftDay   || '0', 10);
+        if (dy) shiftViewYears(dy);
+        if (dm) shiftViewMonths(dm);
+        if (dd) shiftViewDays(dd);
+        return;
+      }
+      const todayBtn = ev.target.closest('.it-date-today');
+      if (todayBtn) { setViewDate(Date.now()); return; }
+      const label = ev.target.closest('.it-date-label');
+      if (label) {
+        const input = root.querySelector('.it-date-input');
+        if (!input) return;
+        if (typeof input.showPicker === 'function') {
+          try { input.showPicker(); return; } catch (e) { /* fall through */ }
+        }
+        input.focus();
+        input.click();
+      }
+    });
+    root.addEventListener('change', function (ev) {
+      const input = ev.target.closest('.it-date-input');
+      if (!input || !input.value) return;
+      const [y, m, d] = input.value.split('-').map(Number);
+      setViewDate(new Date(y, m - 1, d).getTime());
+    });
+  }
 
   function pcReadCard(spreadIdx, birthCardIdx, posIdx) {
     const deck = deckAtAge(spreadIdx + 1);
@@ -73,11 +183,26 @@
     if (birthSv < 1 || birthSv > 52) return '';   // Joker guard (also handled by isEmpty in renderInTime)
     const birthIdx = birthSv - 1;
 
-    const age = (typeof currentAge === 'number' ? currentAge : 0);
-    const viewDate = localMidnight(new Date());
+    // The Quadrations stepper anchors the reader's REAL birth year (their
+    // real-today age against real-today's last birthday). Age-at-viewDate
+    // is then that fixed birth year measured against the VIEWED date's
+    // last-birthday year, so scrolling the date changes which age's cards
+    // show — same two-step anchor v3 used.
+    const anchorAge  = (typeof currentAge === 'number' ? currentAge : 0);
     const realLbYear = lastBdayYearOf(Date.now(), date.m, date.d);
-    const birthYear  = realLbYear - age;
+    const birthYear  = realLbYear - anchorAge;
     const viewLbYear = lastBdayYearOf(viewDate, date.m, date.d);
+    const age = Math.max(0, viewLbYear - birthYear);
+
+    if (viewLbYear - birthYear < 0) {
+      // Scrolled to before this birth date — nothing to compute, but keep
+      // the nav bar live so the reader can scroll back into range.
+      return `<div class="it-header">
+        <h3 class="it-title">In Time</h3>
+        <p class="it-lede">That date is before this birthday.</p>
+      </div>
+      ${dateNavHTML()}`;
+    }
 
     // Date math (UTC to avoid DST drift on day counts)
     const now = new Date(viewDate);
@@ -107,7 +232,6 @@
     const cStart = Math.floor(age / 7)  * 7,  cEnd = cStart + 6;
 
     const cards = [
-      { idx: birthIdx, label: 'Birth',   planet: null,                    sub: (CARDS[birthIdx] && CARDS[birthIdx].name) || '' },
       { idx: tIdx,     label: '13-Year', planet: SPREAD_PLANETS[tPos],    sub: 'age ' + tStart + '–' + tEnd },
       { idx: cIdx,     label: '7-Year',  planet: SPREAD_PLANETS[cPos],    sub: 'age ' + cStart + '–' + cEnd },
       { idx: yIdx,     label: 'Yearly',  planet: SPREAD_PLANETS[yPos],    sub: 'age ' + age },
@@ -129,16 +253,16 @@
       </div>`;
     }).join('');
 
-    // Human-readable "as of" line so readers know the Daily / 52-Day cards
-    // are tied to today. When a date-nav bar comes back, this row updates
-    // itself.
+    // Human-readable "as of" line — tracks the date-nav bar's viewDate,
+    // so scrolling to another day updates this line too.
     const asOfDate = new Date(viewDate);
     const asOf = asOfDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     return `<div class="it-header">
       <h3 class="it-title">In Time</h3>
-      <p class="it-lede">Your birth card, and the derived cards you're currently ruled by. As of <em>${asOf}</em>, age ${age}.</p>
+      <p class="it-lede">The cards you're ruled by as of <em>${asOf}</em>, age ${age}.</p>
     </div>
-    <div class="it-row">${rowHTML}</div>`;
+    <div class="it-row">${rowHTML}</div>
+    ${dateNavHTML()}`;
   }
 
   function renderInTime(card) {
@@ -146,6 +270,7 @@
     if (!root) return false;
     const inner = root.querySelector('.it-inner') || root;
     root.classList.remove('is-empty');
+    _lastCard = card || null;
     if (!card || card.suit === 'joker') {
       root.classList.add('is-empty');
       inner.innerHTML = '';
@@ -158,4 +283,5 @@
   }
 
   window.renderInTime = renderInTime;
+  document.addEventListener('DOMContentLoaded', wireDateNav);
 })();

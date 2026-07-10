@@ -5,11 +5,47 @@
                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const DAYS_IN_MONTH = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
+  // Populate CARDS[i].dates (ported from v3's buildDates in finder.js) —
+  // v4's CARDS array shipped with every entry's `dates` field as a stray
+  // literal '', so nothing downstream (About header, Life Script) ever
+  // had a birth-date list to show. Every real calendar date maps to
+  // exactly one card via the solar-value formula, so walk the whole
+  // year once and collect each card's dates. `solarValue` is a function
+  // declaration below — hoisted, so it's already callable here.
+  (function buildCardDates() {
+    if (typeof CARDS === 'undefined' || !CARDS.length) return;
+    const lists = Array.from({ length: 52 }, () => []);
+    for (let m = 1; m <= 12; m++) {
+      for (let d = 1; d <= DAYS_IN_MONTH[m]; d++) {
+        const sv = solarValue(m, d);
+        if (sv >= 1 && sv <= 52) lists[sv - 1].push(`${MONTH_NAMES[m]} ${d}`);
+      }
+    }
+    CARDS.forEach((c, i) => { if (i < 52) c.dates = lists[i].join(', '); });
+  })();
+
+  const RANK_NAMES = {
+    A: 'Ace',
+    '2': 'Two',
+    '3': 'Three',
+    '4': 'Four',
+    '5': 'Five',
+    '6': 'Six',
+    '7': 'Seven',
+    '8': 'Eight',
+    '9': 'Nine',
+    '10': 'Ten',
+    J: 'Jack',
+    Q: 'Queen',
+    K: 'King'
+  };
+
   let _renderMode = 'empty';
   let dom = null;
   let _selectedCard = null;
   let _selectedPartner = null;
   let _finderOverride = null;
+  let _finderSnapshot = null;
 
   function cacheDom() {
     const root = document.getElementById('finder');
@@ -34,10 +70,10 @@
       },
       about: {
         root:        document.getElementById('fAbout'),
-        subtitle:    document.getElementById('fAboutSubtitle'),
-        vow:         document.getElementById('fAboutVow'),
+        bond:        document.getElementById('fAboutBond'),
         kws:         document.getElementById('fAboutKws'),
         personality: document.getElementById('fAboutPersonality'),
+        vow:         document.getElementById('fAboutVow'),
         strengths:   document.getElementById('fAboutStrengths'),
         challenges:  document.getElementById('fAboutChallenges')
       },
@@ -182,6 +218,74 @@
       }
     });
   }
+
+  // Scroll/swipe stepping — hovering the mouse/trackpad wheel over either
+  // field steps it by one, no click/focus needed first; on touch, a
+  // vertical drag over the field steps it (one step per STEP_PX of
+  // travel, so a short flick moves several units — the wheel's
+  // one-notch-per-step feel). Both fields clamp the same way typed input
+  // does (1..12 for month, 1..daysInMonth for day) rather than wrapping.
+  // onCommit runs after every step — pass the same clear-override + find()
+  // pipeline the 'change' listeners already use for that field pair.
+  function wireScrollStep(dayInput, monthInput, onCommit) {
+    if (!dayInput || !monthInput || typeof onCommit !== 'function') return;
+
+    function step(input, isMonth, delta) {
+      const monthVal = parseInt(monthInput.value, 10) || 0;
+      const max = isMonth ? 12 : (DAYS_IN_MONTH[monthVal] || 31);
+      const cur = parseInt(input.value, 10);
+      let next = Number.isInteger(cur) ? cur + delta : (delta > 0 ? 1 : max);
+      next = Math.min(max, Math.max(1, next));
+      input.value = String(next).padStart(2, '0');
+      if (isMonth) syncDayInput(dayInput, next);
+      onCommit();
+    }
+
+    [dayInput, monthInput].forEach(function (input) {
+      const isMonth = input === monthInput;
+
+      let wheelAccum = 0;
+      const WHEEL_STEP = 80;
+      input.addEventListener('wheel', function (e) {
+        if (!e.deltaY) return;
+        e.preventDefault();
+        wheelAccum += e.deltaY;
+        while (Math.abs(wheelAccum) >= WHEEL_STEP) {
+          step(input, isMonth, wheelAccum < 0 ? 1 : -1);
+          wheelAccum += wheelAccum < 0 ? WHEEL_STEP : -WHEEL_STEP;
+        }
+      }, { passive: false });
+
+      // Touch has no hover, so a vertical drag over the field stands in
+      // for the wheel. Only claims the gesture (and blocks page scroll)
+      // once the drag reads as more than incidental jitter.
+      let touchY = null;
+      let touchAccum = 0;
+      const STEP_PX = 14;
+      input.addEventListener('touchstart', function (e) {
+        touchY = e.touches[0].clientY;
+        touchAccum = 0;
+        wheelAccum = 0;
+      }, { passive: true });
+      input.addEventListener('touchmove', function (e) {
+        if (touchY === null) return;
+        const y = e.touches[0].clientY;
+        const dy = touchY - y;
+        touchY = y;
+        if (!dy) return;
+        touchAccum += dy;
+        if (Math.abs(touchAccum) < STEP_PX) return;
+        e.preventDefault();
+        while (Math.abs(touchAccum) >= STEP_PX) {
+          step(input, isMonth, touchAccum > 0 ? 1 : -1);
+          touchAccum += touchAccum > 0 ? -STEP_PX : STEP_PX;
+        }
+      }, { passive: false });
+      input.addEventListener('touchend', function () { touchY = null; touchAccum = 0; wheelAccum = 0; });
+      input.addEventListener('touchcancel', function () { touchY = null; touchAccum = 0; wheelAccum = 0; });
+    });
+  }
+
   function syncDayInput(input, month) {
     if (!input) return;
     input.value = input.value.replace(/\D+/g, '').slice(0, 2);
@@ -200,6 +304,45 @@
     _finderOverride = null;
     updateResetButton();
   }
+  function discardFinderSnapshot() {
+    _finderSnapshot = null;
+  }
+  function snapshotFinderInputs() {
+    if (!dom) return null;
+    return {
+      relOn: !!(dom.root && dom.root.classList.contains('rel-on')),
+      you: {
+        month: dom.you && dom.you.month ? dom.you.month.value : '',
+        day: dom.you && dom.you.day ? dom.you.day.value : ''
+      },
+      partner: {
+        month: dom.partner && dom.partner.month ? dom.partner.month.value : '',
+        day: dom.partner && dom.partner.day ? dom.partner.day.value : ''
+      }
+    };
+  }
+  function restoreFinderSnapshot() {
+    if (!dom || !_finderSnapshot) return false;
+    const snap = _finderSnapshot;
+    if (dom.you.month) dom.you.month.value = snap.you.month || '';
+    if (dom.you.day) dom.you.day.value = snap.you.day || '';
+    if (dom.partner.month) dom.partner.month.value = snap.partner.month || '';
+    if (dom.partner.day) dom.partner.day.value = snap.partner.day || '';
+    if (dom.you.month) syncMonthInput(dom.you.month);
+    if (dom.you.day) syncDayInput(dom.you.day, +dom.you.month.value || null);
+    if (dom.partner.month) syncMonthInput(dom.partner.month);
+    if (dom.partner.day) syncDayInput(dom.partner.day, +dom.partner.month.value || null);
+    if (dom.root) dom.root.classList.toggle('rel-on', !!snap.relOn);
+    if (dom.relBtn) {
+      dom.relBtn.classList.toggle('on', !!snap.relOn);
+      dom.relBtn.textContent = snap.relOn ? '−' : '+';
+      dom.relBtn.setAttribute('aria-label', snap.relOn ? 'Remove partner' : 'Add partner');
+      dom.relBtn.setAttribute('aria-pressed', snap.relOn ? 'true' : 'false');
+    }
+    if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
+    _finderSnapshot = null;
+    return true;
+  }
   function updateResetButton() {
     if (!dom || !dom.resetBtn) return;
     const hasDate = !!readPerson(dom.you);
@@ -211,57 +354,98 @@
   function cardName(card) {
     return card.suit === 'joker'
       ? 'The Joker'
-      : `${card.rank} of ${suitName(card.suit)}`;
+      : `${RANK_NAMES[card.rank] || card.rank} of ${suitName(card.suit)}`;
   }
 
   function cardFaceHTML(card) {
-    if (card.suit === 'joker') {
-      return '<div class="spread-card joker finder-joker-card">Joker</div>';
-    }
     return `<div class="spread-card ${card.suit}">${spreadCardPips(card)}</div>`;
   }
 
+  function cardSubtitle(card) {
+    const key = `${card.rank}_${card.suit === 'joker' ? 'joker' : card.suit}`;
+    const jokerKey = card.suit === 'joker' ? '✦_joker' : null;
+    return (window.SUBTITLES || {})[jokerKey || key] || '';
+  }
+
+  function cardVow(card) {
+    const key = `${card.rank}_${card.suit === 'joker' ? 'joker' : card.suit}`;
+    const jokerKey = card.suit === 'joker' ? '✦_joker' : null;
+    return (window.VOWS || {})[jokerKey || key] || '';
+  }
+
   function resultHTML(card) {
+    const subtitle = cardSubtitle(card);
     return [
       cardFaceHTML(card),
       `<div class="finder-result-name">${cardName(card)}</div>`,
-      `<div class="finder-result-sub">Solar Value · ${card.sv}</div>`
+      `<div class="finder-result-sub">${subtitle}</div>`
     ].join('');
   }
 
   function renderResult(result, card) {
     if (!result) return;
+    result.onclick = null;
+    result.onkeydown = null;
+    result.onmousedown = null;
     if (!card) {
       result.innerHTML = '';
       result.classList.remove('has-card');
+      result.style.cursor = '';
       return;
     }
     result.classList.add('has-card');
     result.innerHTML = resultHTML(card);
+    const face = result.querySelector('.spread-card');
+    const isSideRelationshipCard = result.id === 'fResult' || result.id === 'fpResult';
+    if (face && typeof window.loadCardInFinder === 'function' && card.suit !== 'joker' && isSideRelationshipCard) {
+      const open = function (e) {
+        if (e) e.preventDefault();
+        window.loadCardInFinder(card.sv - 1, result);
+      };
+      face.style.cursor = 'pointer';
+      result.style.cursor = 'pointer';
+      face.onmousedown = function (e) { e.preventDefault(); };
+      face.onclick = open;
+    } else {
+      result.style.cursor = '';
+      if (face) {
+        face.style.cursor = '';
+        face.onclick = null;
+        face.onmousedown = null;
+      }
+    }
   }
 
   // About panel — the ported v3 reading. Content populated whenever a
   // card is picked (solo or triptych); panel visibility is controlled
-  // by the tab wrapper #fPanels. Joker keeps the head-only render
-  // (subtitle + vow, no reading body).
+  // by the tab wrapper #fPanels. The Joker now has a full reading entry
+  // (CARD_READINGS['✦_joker'], restored from v3) so it renders kws /
+  // personality / strengths+challenges same as any other card.
   //
   // Returns true if the panel has renderable content, false if it
   // should be marked empty (used by the picker to grey out its chip).
-  function renderAbout(card) {
+  function renderAbout(card, rel) {
     const box = dom.about;
     if (!box || !box.root) return false;
-    box.root.classList.remove('is-joker', 'is-empty');
+    box.root.classList.remove('is-joker', 'is-empty', 'is-relationship');
     if (!card) { box.root.classList.add('is-empty'); return false; }
     const key       = `${card.rank}_${card.suit === 'joker' ? 'joker' : card.suit}`;
     const jokerKey  = card.suit === 'joker' ? '✦_joker' : null;
-    const lookupKey = jokerKey || key;
-    const subtitle  = (window.SUBTITLES || {})[lookupKey] || '';
-    const vow       = (window.VOWS      || {})[lookupKey] || '';
-    const reading   = (window.CARD_READINGS || {})[key] || null;
-    if (!subtitle && !vow && !reading) { box.root.classList.add('is-empty'); return false; }
+    const reading   = (window.CARD_READINGS || {})[jokerKey || key] || null;
+    const vow       = !rel ? cardVow(card) : '';
+    const bondEntry = rel && rel.comp ? (window.REL_TEXT || {})[`${rel.comp.rank}_${rel.comp.suit}`] : null;
+    if (!reading && !bondEntry && card.suit !== 'joker') { box.root.classList.add('is-empty'); return false; }
 
-    if (box.subtitle) box.subtitle.textContent = subtitle;
-    if (box.vow)      box.vow.textContent = vow ? `“${vow}”` : '';
+    if (box.bond) {
+      if (bondEntry) {
+        box.bond.innerHTML =
+          `<p class="finder-about-bond-syn">${bondEntry.syn}</p>` +
+          `<p class="finder-about-bond-text">${bondEntry.text}</p>`;
+        box.root.classList.add('is-relationship');
+      } else {
+        box.bond.innerHTML = '';
+      }
+    }
 
     const kwsHTML = reading && reading.kws
       ? reading.kws.map(k => `<span class="finder-kw">${k}</span>`).join('')
@@ -272,6 +456,7 @@
       ? reading.personality.split(/\n\n+/).map(p => `<p>${p}</p>`).join('')
       : '';
     if (box.personality) box.personality.innerHTML = paras;
+    if (box.vow) box.vow.textContent = vow ? `“${vow}”` : '';
 
     const listHTML = arr => (arr || []).map(x => `<li>${x}</li>`).join('');
     if (box.strengths)  box.strengths.innerHTML  = reading ? listHTML(reading.strengths)  : '';
@@ -494,15 +679,19 @@
     // for THIS card; empty panels get `.is-empty` so the placeholder
     // note shows and the chip is styled disabled.
     const isSolo = state.targetMode === 'solo';
+    const isRelationship = state.targetMode === 'triptych' && !!state.comp;
     if (dom.panels.wrap) {
-      const showPanels = !!state.you && isSolo;
+      const showPanels = !!state.you && (isSolo || isRelationship);
       dom.panels.wrap.hidden = !showPanels;
+      dom.panels.wrap.classList.toggle('is-relationship', isRelationship);
       if (showPanels) {
         const flags = {
-          about:      renderAbout(state.you),
-          olney:      typeof window.renderOlney      === 'function' ? window.renderOlney(state.you)      : false,
-          lifescript: typeof window.renderLifeScript === 'function' ? window.renderLifeScript(state.you) : false,
-          intime:     typeof window.renderInTime     === 'function' ? window.renderInTime(state.you)     : false
+          about:      renderAbout(isRelationship ? state.comp : state.you, isRelationship ? state : null),
+          olney:      !isRelationship && typeof window.renderOlney      === 'function' ? window.renderOlney(state.you)      : false,
+          lifescript: isRelationship
+            ? (typeof window.renderRelationshipConnections === 'function' ? window.renderRelationshipConnections(state.you, state.partner) : false)
+            : (typeof window.renderLifeScript === 'function' ? window.renderLifeScript(state.you) : false),
+          intime:     !isRelationship && typeof window.renderInTime     === 'function' ? window.renderInTime(state.you)     : false
         };
         // Toggle chip disabled state from each renderer's return value.
         if (dom.panels.picker) {
@@ -515,7 +704,11 @@
         // On every fresh card pick, reset to the About panel — unless
         // the currently active panel is still valid for this card.
         const active = dom.panels.body && dom.panels.body.dataset.panelActive;
-        if (!active || flags[active] === false) setFinderPanel('about');
+        if (isRelationship) {
+          if (dom.panels.body) dom.panels.body.dataset.panelActive = 'about';
+        } else if (!active || flags[active] === false) {
+          setFinderPanel('about');
+        }
       }
     }
   }
@@ -539,13 +732,24 @@
     if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
   }
 
-  function loadCardInFinder(idx) {
+  function loadCardInFinder(idx, anchorEl) {
     if (!dom) dom = cacheDom();
     if (!dom || !dom.you.month || !dom.you.day) return;
     const c = SPREAD_CARDS[idx];
     if (!c) return;
-    const anchor = document.querySelector(`#annualGrid .spread-card[data-idx="${idx}"]`);
+    const anchor = anchorEl || document.querySelector(`#annualGrid .spread-card[data-idx="${idx}"]`);
     preserveAnchorPosition(anchor, function () {
+      if (!_finderOverride) _finderSnapshot = snapshotFinderInputs();
+      if (dom.partner.month) dom.partner.month.value = '';
+      if (dom.partner.day) dom.partner.day.value = '';
+      if (dom.root) dom.root.classList.remove('rel-on');
+      if (dom.relBtn) {
+        dom.relBtn.classList.remove('on');
+        dom.relBtn.textContent = '+';
+        dom.relBtn.setAttribute('aria-label', 'Add partner');
+        dom.relBtn.setAttribute('aria-pressed', 'false');
+      }
+      if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
       setFinderOverride({ rank: c.rank, suit: c.suit, sym: c.sym, sv: idx + 1 });
       find();
     });
@@ -563,7 +767,10 @@
     const slot = isPartner ? dom.partner : dom.you;
     if (!slot.month || !slot.day) return;
     if (isPartner && !dom.root.classList.contains('rel-on')) toggleRel();
-    if (!isPartner) clearFinderOverride();
+    if (!isPartner) {
+      clearFinderOverride();
+      discardFinderSnapshot();
+    }
     slot.month.value = String(month);
     syncMonthInput(slot.month);
     syncDayInput(slot.day, month);
@@ -594,15 +801,17 @@
       syncDayInput(dom.partner.day, null);
     }
 
-    dom.you.month.addEventListener('input', function () { clearFinderOverride(); syncDayInput(dom.you.day, +this.value); find(); });
-    dom.you.month.addEventListener('change', function () { clearFinderOverride(); normalizeMonthInput(this); syncDayInput(dom.you.day, +this.value); find(); });
-    dom.you.day.addEventListener('input', function () { clearFinderOverride(); syncDayInput(this, +dom.you.month.value); find(); });
-    dom.you.day.addEventListener('change', function () { clearFinderOverride(); normalizeDayInput(this, +dom.you.month.value); find(); });
+    dom.you.month.addEventListener('input', function () { clearFinderOverride(); discardFinderSnapshot(); syncDayInput(dom.you.day, +this.value); find(); });
+    dom.you.month.addEventListener('change', function () { clearFinderOverride(); discardFinderSnapshot(); normalizeMonthInput(this); syncDayInput(dom.you.day, +this.value); find(); });
+    dom.you.day.addEventListener('input', function () { clearFinderOverride(); discardFinderSnapshot(); syncDayInput(this, +dom.you.month.value); find(); });
+    dom.you.day.addEventListener('change', function () { clearFinderOverride(); discardFinderSnapshot(); normalizeDayInput(this, +dom.you.month.value); find(); });
     wireDatePair(dom.you.day, dom.you.month);
+    wireScrollStep(dom.you.day, dom.you.month, function () { clearFinderOverride(); discardFinderSnapshot(); find(); });
     if (dom.partner.month && dom.partner.day) {
       dom.partner.month.addEventListener('input', function () { syncDayInput(dom.partner.day, +this.value); find(); });
       dom.partner.month.addEventListener('change', function () { normalizeMonthInput(this); syncDayInput(dom.partner.day, +this.value); find(); });
       wireDatePair(dom.partner.day, dom.partner.month);
+      wireScrollStep(dom.partner.day, dom.partner.month, find);
     }
     if (dom.partner.day) {
       dom.partner.day.addEventListener('input', function () { syncDayInput(this, +dom.partner.month.value); find(); });
@@ -611,6 +820,7 @@
     if (dom.resetBtn) {
       dom.resetBtn.addEventListener('click', function () {
         clearFinderOverride();
+        restoreFinderSnapshot();
         find();
       });
     }

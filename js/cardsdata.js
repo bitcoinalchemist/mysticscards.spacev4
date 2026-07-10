@@ -136,6 +136,17 @@ const COURT_PIP_POS = {};
 
 function spreadCardPips(c) {
   const { rank, sym } = c;
+  if (c.suit === 'joker') {
+    // Original "Quinta Essentia" art (ported verbatim from v3). The classic
+    // Joker corners are drawn live like a court index: a Jack-style "J"
+    // (same serif + position as J/Q/K) with "oker" descending vertically,
+    // mirrored bottom-right.
+    const jokerCorner = (cls) =>
+      `<div class="card-corner ${cls}"><span class="cc-rank">J</span>` +
+      `<span class="cc-rest">oker</span></div>`;
+    return jokerCorner('card-tl') + jokerCorner('card-br') +
+      `<img class="court-art" src="assets/cards/JOKER.webp" alt="Joker — Quinta Essentia">`;
+  }
   const corners =
     `<div class="card-corner card-tl"><span class="cc-rank">${rank}</span></div>` +
     `<div class="card-corner card-br"><span class="cc-rank">${rank}</span></div>`;
@@ -163,8 +174,9 @@ function spreadCardPips(c) {
 
 // ── About / Reading data (ported from v3 cardsdata.js) ─────────────
 // 52 card readings — one entry per Ace..King × Hearts/Clubs/Diamonds/
-// Spades. Locked Sage voice. The Joker is not in this list; it has its
-// own subtitle and vow via the SUBTITLES / VOWS maps below.
+// Spades — plus the Joker (pushed below, keyed '✦_joker'). Locked Sage
+// voice. Subtitle/vow for every card, including the Joker, live in the
+// SUBTITLES / VOWS maps further down this file.
 //
 // Shape per entry: { rank, suit, sym, name, dates, teaser, kws[],
 // personality, strengths[], challenges[] }. Data intentionally
@@ -492,6 +504,19 @@ const CARDS = [
     strengths:['The pinnacle of authority and accumulated wisdom in the entire deck','Brilliant, strategic mind capable of shouldering the heaviest of burdens','Deeply responsible, resilient, and genuinely protective of those in their care','When fully realised, a presence that commands deep and lasting respect'],
     challenges:['The weight of this card is real and requires sustained, honest inner work throughout life','Reluctance to bend even to constructive guidance; autonomy is a double-edged gift','The path includes serious physical, psychological, and life challenges that cannot be bypassed or rushed'] },
 ];
+
+// Joker — outside the 52-card system (ported verbatim from v3 finder.js,
+// which pushed this at runtime; kept here so cardsdata.js is the single
+// source of truth for reading data). Keyed '✦_joker' via the CARD_READINGS
+// build below, matching SUBTITLES / VOWS' '✦_joker' key.
+CARDS.push({
+  rank:'✦', suit:'joker', sym:'✦', name:'The Joker', dates:'Dec 31',
+  teaser:'Alpha and Omega, valued at zero, pure potential standing between the Ace of Hearts and the King of Spades and belonging to no suit at all. The whole task of a life lived here is discovering which card you are truly choosing to play, and why.',
+  kws:['Wild card','5th element','Fool'],
+  personality:'Alpha and Omega, the Joker carries the numeric value of zero — pure potential, and in a sense the highest card of all, its influence lying beyond what the system can contain. Standing at the midpoint between the Ace of Hearts and the King of Spades, you belong to no suit and no system: a shapeshifter who can be all things to all people.\n\nAn inventor, a healer, and a powerful agent of change, you are fascinating to others and a mystery even unto yourself. In the deck\'s calendar the Joker is the remainder, the one day the system needs but cannot hold; you exist above the Sun Line, beholden to no single planetary influence. The life task is to discover which card you are truly choosing to play, and why, embodying the open heart of the Ace alongside the disciplined mastery of the King.',
+  strengths:['Extraordinary adaptability, genuinely able to inhabit any role, field, or environment','Remarkable creative potential, with a natural affinity for performance, music, and art','Personal magnetism that draws people in across every context and culture','Unconstrained by the fixed path of any single card; the full deck is available to you'],
+  challenges:['The absence of a fixed identity can make sustained commitment feel genuinely elusive','Chameleon energy, when unconscious, can shade into dishonesty or shape-shifting for approval','Prestige and control are shadow poles worth examining honestly when they arise','Emotional insecurity, reflected in the 3 of Hearts, can cloud judgement and create mistrust','The freedom of this card is also its greatest responsibility: choose your card deliberately']
+});
 
 const CARD_READINGS = {};
 CARDS.forEach(c => { CARD_READINGS[`${c.rank}_${c.suit}`] = c; });

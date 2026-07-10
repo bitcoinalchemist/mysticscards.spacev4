@@ -11,7 +11,9 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="canonical" href="https://mysticscards.space/" />
   <meta name="theme-color" content="#100c1e" />
+  <meta name="version" content="2026-07-10" />
   <meta name="description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/castfield.css" />
@@ -24,14 +26,15 @@
 <script src="js/site.js"></script>
 <script src="js/castfield.js" defer></script>
 <script src="js/store.js"></script>
-<script src="js/cardsdata.js?v=20260710c"></script>
+<script src="js/cardsdata.js?v=20260710d"></script>
+<script src="js/reltext.js?v=20260710a"></script>
 <script src="js/richmonddata.js?v=20260710c"></script>
 <script src="js/spread-grid.js"></script>
 <script src="js/quadrations.js"></script>
-<script src="js/finder.js?v=20260710c"></script>
+<script src="js/finder.js?v=20260710f"></script>
 <script src="js/olney.js?v=20260710c"></script>
-<script src="js/lifescript.js?v=20260710c"></script>
-<script src="js/in-time.js?v=20260710c"></script>
+<script src="js/lifescript.js?v=20260710d"></script>
+<script src="js/in-time.js?v=20260710d"></script>
 <script src="js/birthdays.js?v=20260710d"></script>
 <script src="js/finder-trays.js?v=20260710d"></script>
 
@@ -123,6 +126,10 @@
                   <span class="bday-inline-title">Saved birthdays</span>
                   <span class="finder-tool-badge bday-inline-badge" id="bdayCount" aria-hidden="true"></span>
                 </div>
+                <div class="pick-target" id="bdayTarget" hidden>
+                  <button type="button" class="pick-target-btn is-active" id="bdayTargetSelf" data-target="self">You</button>
+                  <button type="button" class="pick-target-btn" id="bdayTargetPartner" data-target="partner">Partner</button>
+                </div>
                 <div class="bday-toolbar">
                   <button class="btn btn--gold" id="bdayAddBtn" type="button">+ Add birthday</button>
                   <div class="bday-io">
@@ -130,10 +137,6 @@
                     <button class="btn" id="bdayExportBtn" type="button" title="Download your saved birthdays">Export</button>
                     <input type="file" id="bdayImportFile" accept="application/json" hidden>
                   </div>
-                </div>
-                <div class="pick-target" id="bdayTarget" hidden>
-                  <button type="button" class="pick-target-btn is-active" id="bdayTargetSelf" data-target="self">You</button>
-                  <button type="button" class="pick-target-btn" id="bdayTargetPartner" data-target="partner">Partner</button>
                 </div>
                 <div class="birth-add-panel" id="birthAddPanel">
                   <div class="birth-add-row">
@@ -212,16 +215,14 @@
             </div>
             <div class="finder-panels-body" id="fPanelBody" data-panel-active="about">
 
-              <!-- About panel — subtitle, vow, keyword chips, personality
-                   prose, Light / Shadow. Joker gets a head-only render. -->
+              <!-- About panel — keyword chips, personality prose, and
+                   Light / Shadow. Joker keeps the content area empty. -->
               <div class="finder-about ns-panel" id="fAbout" role="tabpanel" aria-labelledby="chipAbout">
                 <div class="finder-about-inner">
-                  <div class="finder-about-head">
-                    <div class="finder-about-subtitle" id="fAboutSubtitle"></div>
-                    <p class="finder-about-vow" id="fAboutVow"></p>
-                  </div>
+                  <div class="finder-about-bond" id="fAboutBond"></div>
                   <div class="finder-about-kws" id="fAboutKws"></div>
                   <div class="finder-about-personality" id="fAboutPersonality"></div>
+                  <p class="finder-about-vow" id="fAboutVow"></p>
                   <div class="finder-about-lightshadow">
                     <div class="finder-about-light">
                       <h4 class="finder-about-h">Light</h4>
@@ -245,8 +246,7 @@
               </div>
 
               <!-- Life Script — the picked card's seven ruling cards
-                   (Mercury→Neptune), each with its planetary connection
-                   text. Populated by js/lifescript.js. -->
+                   shown as a single row. Populated by js/lifescript.js. -->
               <div class="finder-lifescript ns-panel" id="fLifeScript" role="tabpanel" aria-labelledby="chipLifeScript">
                 <div class="ls-inner"></div>
                 <div class="ns-panel-empty">Life Script isn't available for this card.</div>
