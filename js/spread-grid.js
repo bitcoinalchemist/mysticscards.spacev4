@@ -181,12 +181,73 @@ function setAge(age) {
   const inp = document.getElementById('ageInput');
   if (inp) inp.value = age;
   buildAnnualGrid(age + 1);
+  if (typeof window.refreshInTime === 'function') window.refreshInTime();
 }
 function changeAge(d) {
   let a = currentAge + d;
   if (a > 89) a = 0;
   if (a < 0)  a = 89;
   setAge(a);
+}
+
+function wireAgeScrollStep(input) {
+  if (!input) return;
+
+  let wheelAccum = 0;
+  const WHEEL_STEP = 80;
+  input.addEventListener('wheel', function (e) {
+    if (!e.deltaY) return;
+    e.preventDefault();
+    wheelAccum += e.deltaY;
+    while (Math.abs(wheelAccum) >= WHEEL_STEP) {
+      changeAge(wheelAccum < 0 ? 1 : -1);
+      wheelAccum += wheelAccum < 0 ? WHEEL_STEP : -WHEEL_STEP;
+    }
+  }, { passive: false });
+
+  let touchY = null;
+  let touchAccum = 0;
+  const STEP_PX = 14;
+  input.addEventListener('touchstart', function (e) {
+    touchY = e.touches[0].clientY;
+    touchAccum = 0;
+    wheelAccum = 0;
+  }, { passive: true });
+  input.addEventListener('touchmove', function (e) {
+    if (touchY === null) return;
+    const y = e.touches[0].clientY;
+    const dy = touchY - y;
+    touchY = y;
+    if (!dy) return;
+    touchAccum += dy;
+    if (Math.abs(touchAccum) < STEP_PX) return;
+    e.preventDefault();
+    while (Math.abs(touchAccum) >= STEP_PX) {
+      changeAge(touchAccum > 0 ? 1 : -1);
+      touchAccum += touchAccum > 0 ? -STEP_PX : STEP_PX;
+    }
+  }, { passive: false });
+  input.addEventListener('touchend', function () { touchY = null; touchAccum = 0; wheelAccum = 0; });
+  input.addEventListener('touchcancel', function () { touchY = null; touchAccum = 0; wheelAccum = 0; });
+}
+
+function wireAgeSelectAll(input) {
+  if (!input) return;
+
+  function selectAll() {
+    if (document.activeElement !== input) return;
+    requestAnimationFrame(function () {
+      input.select();
+    });
+  }
+
+  input.addEventListener('focus', selectAll);
+  input.addEventListener('click', selectAll);
+  input.addEventListener('pointerup', function (e) {
+    if (document.activeElement !== input) return;
+    e.preventDefault();
+    selectAll();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -205,5 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (e.key === 'ArrowUp')   { e.preventDefault(); changeAge(+1); }
       if (e.key === 'ArrowDown') { e.preventDefault(); changeAge(-1); }
     });
+    wireAgeScrollStep(inp);
+    wireAgeSelectAll(inp);
   }
 });

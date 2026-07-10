@@ -176,9 +176,17 @@
     return { m, d };
   }
 
+  function missingDateHTML() {
+    return `<div class="it-header">
+      <h3 class="it-title">In Time</h3>
+      <p class="it-lede">This section needs a birthday context.</p>
+    </div>
+    <p class="it-empty-note">Add a <b>DD/MM</b>, load a saved birthday, or pick a calendar date to see the age-based In Time cards for this selection.</p>`;
+  }
+
   function panelHTML(card) {
     const date = readFinderDate();
-    if (!date) return '';
+    if (!date) return missingDateHTML();
     const birthSv = 55 - (2 * date.m + date.d);
     if (birthSv < 1 || birthSv > 52) return '';   // Joker guard (also handled by isEmpty in renderInTime)
     const birthIdx = birthSv - 1;
@@ -283,5 +291,6 @@
   }
 
   window.renderInTime = renderInTime;
+  window.refreshInTime = function () { renderInTime(_lastCard); };
   document.addEventListener('DOMContentLoaded', wireDateNav);
 })();

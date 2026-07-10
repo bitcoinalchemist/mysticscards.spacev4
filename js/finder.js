@@ -46,6 +46,60 @@
   let _selectedPartner = null;
   let _finderOverride = null;
   let _finderSnapshot = null;
+  let _transitionSource = null;
+  // When a snapshot is restored (reset button), this remembers which side
+  // the overridden card came from so the solo→triptych entrance sends that
+  // card back to its own slot instead of always replaying the left-card
+  // entrance. Consumed + cleared on the next captureAnimationContext call.
+  let _pendingEnterOrigin = null;
+
+  const finderSnapshot = {
+    has() {
+      return !!_finderSnapshot;
+    },
+    clear() {
+      _finderSnapshot = null;
+    },
+    capture() {
+      if (!dom) return null;
+      _finderSnapshot = {
+        relOn: !!(dom.root && dom.root.classList.contains('rel-on')),
+        you: {
+          month: dom.you && dom.you.month ? dom.you.month.value : '',
+          day: dom.you && dom.you.day ? dom.you.day.value : ''
+        },
+        partner: {
+          month: dom.partner && dom.partner.month ? dom.partner.month.value : '',
+          day: dom.partner && dom.partner.day ? dom.partner.day.value : ''
+        }
+      };
+      return _finderSnapshot;
+    },
+    restore() {
+      if (!dom || !_finderSnapshot) return false;
+      const snap = _finderSnapshot;
+      if (dom.you.month) dom.you.month.value = snap.you.month || '';
+      if (dom.you.day) dom.you.day.value = snap.you.day || '';
+      if (dom.partner.month) dom.partner.month.value = snap.partner.month || '';
+      if (dom.partner.day) dom.partner.day.value = snap.partner.day || '';
+      if (dom.you.month) syncMonthInput(dom.you.month);
+      if (dom.you.day) syncDayInput(dom.you.day, +dom.you.month.value || null);
+      if (dom.partner.month) syncMonthInput(dom.partner.month);
+      if (dom.partner.day) syncDayInput(dom.partner.day, +dom.partner.month.value || null);
+      setRelationshipMode(!!snap.relOn);
+      _finderSnapshot = null;
+      return true;
+    }
+  };
+
+  function getFinderUiState() {
+    const relOn = !!(dom && dom.root && dom.root.classList.contains('rel-on'));
+    return {
+      relOn,
+      override: _finderOverride,
+      snapshot: finderSnapshot.has()
+    };
+  }
 
   function cacheDom() {
     const root = document.getElementById('finder');
@@ -196,6 +250,24 @@
     const len = input.value.length;
     input.setSelectionRange(len, len);
   }
+  function wireSelectAllOnFocus(input) {
+    if (!input) return;
+
+    function selectAll() {
+      if (document.activeElement !== input) return;
+      requestAnimationFrame(function () {
+        input.select();
+      });
+    }
+
+    input.addEventListener('focus', selectAll);
+    input.addEventListener('click', selectAll);
+    input.addEventListener('pointerup', function (e) {
+      if (document.activeElement !== input) return;
+      e.preventDefault();
+      selectAll();
+    });
+  }
   function wireDatePair(dayInput, monthInput) {
     if (!dayInput || !monthInput) return;
 
@@ -305,43 +377,10 @@
     updateResetButton();
   }
   function discardFinderSnapshot() {
-    _finderSnapshot = null;
-  }
-  function snapshotFinderInputs() {
-    if (!dom) return null;
-    return {
-      relOn: !!(dom.root && dom.root.classList.contains('rel-on')),
-      you: {
-        month: dom.you && dom.you.month ? dom.you.month.value : '',
-        day: dom.you && dom.you.day ? dom.you.day.value : ''
-      },
-      partner: {
-        month: dom.partner && dom.partner.month ? dom.partner.month.value : '',
-        day: dom.partner && dom.partner.day ? dom.partner.day.value : ''
-      }
-    };
+    finderSnapshot.clear();
   }
   function restoreFinderSnapshot() {
-    if (!dom || !_finderSnapshot) return false;
-    const snap = _finderSnapshot;
-    if (dom.you.month) dom.you.month.value = snap.you.month || '';
-    if (dom.you.day) dom.you.day.value = snap.you.day || '';
-    if (dom.partner.month) dom.partner.month.value = snap.partner.month || '';
-    if (dom.partner.day) dom.partner.day.value = snap.partner.day || '';
-    if (dom.you.month) syncMonthInput(dom.you.month);
-    if (dom.you.day) syncDayInput(dom.you.day, +dom.you.month.value || null);
-    if (dom.partner.month) syncMonthInput(dom.partner.month);
-    if (dom.partner.day) syncDayInput(dom.partner.day, +dom.partner.month.value || null);
-    if (dom.root) dom.root.classList.toggle('rel-on', !!snap.relOn);
-    if (dom.relBtn) {
-      dom.relBtn.classList.toggle('on', !!snap.relOn);
-      dom.relBtn.textContent = snap.relOn ? '−' : '+';
-      dom.relBtn.setAttribute('aria-label', snap.relOn ? 'Remove partner' : 'Add partner');
-      dom.relBtn.setAttribute('aria-pressed', snap.relOn ? 'true' : 'false');
-    }
-    if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
-    _finderSnapshot = null;
-    return true;
+    return finderSnapshot.restore();
   }
   function updateResetButton() {
     if (!dom || !dom.resetBtn) return;
@@ -521,13 +560,51 @@
   }
 
   function readFinderState() {
-    const relOn = dom.root.classList.contains('rel-on');
+    const ui = getFinderUiState();
+    const relOn = ui.relOn;
     const youDate = readPerson(dom.you);
-    const you = _finderOverride || youDate;
+    const you = ui.override || youDate;
     const partner = relOn ? readPerson(dom.partner) : null;
     const comp = relOn ? compositeCard(you, partner) : null;
     const targetMode = computeMode(relOn, you, partner, comp);
     return { you, partner, comp, targetMode };
+  }
+
+  function setRelationshipMode(on) {
+    if (!dom || !dom.root || !dom.relBtn) return;
+    dom.root.classList.toggle('rel-on', !!on);
+    dom.relBtn.classList.toggle('on', !!on);
+    dom.relBtn.textContent = on ? '−' : '+';
+    dom.relBtn.setAttribute('aria-label', on ? 'Remove partner' : 'Add partner');
+    dom.relBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
+  }
+
+  function clearPartnerInputs() {
+    if (!dom || !dom.partner) return;
+    if (dom.partner.month) dom.partner.month.value = '';
+    if (dom.partner.day) dom.partner.day.value = '';
+  }
+
+  function clearYouTransientState() {
+    clearFinderOverride();
+    finderSnapshot.clear();
+  }
+
+  function syncSlotDate(slot, month, day) {
+    if (!slot || !slot.month || !slot.day) return;
+    slot.month.value = String(month);
+    syncMonthInput(slot.month);
+    syncDayInput(slot.day, month);
+    slot.day.value = String(day);
+  }
+
+  function runFinderUpdate(options) {
+    options = options || {};
+    const state = readFinderState();
+    const animation = options.animate === false ? null : captureAnimationContext(state.targetMode);
+    renderFinderState(state);
+    if (animation) playFinderAnimation(animation);
   }
 
   function ghostAt(src, rect) {
@@ -541,33 +618,60 @@
     return g;
   }
 
-  function flipEnterRel(soloRect) {
+  function markTransitionSource(slotName, anchorEl) {
+    if (!anchorEl || _renderMode !== 'triptych') {
+      _transitionSource = null;
+      return;
+    }
+    // Clone the CARD for the exit ghost, never its .finder-result wrapper.
+    // The wrapper is a fixed-width column (inline-size clamp ~140px) that's
+    // far wider than the 5:7 card it centers, so cloning it produced a
+    // landscape, squashed ghost that scaled DOWN toward center. Resolve to
+    // the inner .spread-card so the ghost keeps the card's aspect ratio and
+    // grows into the solo slot like the other transition ghosts do.
+    const cardEl = anchorEl.classList && anchorEl.classList.contains('spread-card')
+      ? anchorEl
+      : (anchorEl.querySelector && anchorEl.querySelector('.spread-card')) || anchorEl;
+    const rect = cardEl.getBoundingClientRect();
+    _transitionSource = rect && rect.width ? { slot: slotName, rect, el: cardEl } : null;
+  }
+
+  function flipEnterRel(soloRect, origin) {
     if (reduceMotion() || !soloRect || !soloRect.width) return;
-    const p1 = resultCard(dom.you);
-    const mid = resultCard(dom.composite);
-    const rgt = resultCard(dom.partner);
-    if (!p1) return;
-    const p1Rect = p1.getBoundingClientRect();
-    if (!p1Rect.width) return;
-    const dx = Math.round((soloRect.left + soloRect.width  / 2) - (p1Rect.left + p1Rect.width  / 2));
-    const dy = Math.round((soloRect.top  + soloRect.height / 2) - (p1Rect.top  + p1Rect.height / 2));
-    const scaleUp = soloRect.width / p1Rect.width;
+    origin = origin === 'partner' ? 'partner' : 'you';
+    const slots = {
+      you:       resultCard(dom.you),
+      composite: resultCard(dom.composite),
+      partner:   resultCard(dom.partner)
+    };
+    // The card that was solo emanates from the centre back to its own
+    // slot; the other two fade + scale in. `origin` tracks which side the
+    // solo came from — a reset after clicking the RIGHT card sends it back
+    // to the right rather than replaying the left-card entrance.
+    const lead   = slots[origin];
+    const others = [slots.composite, slots[origin === 'partner' ? 'you' : 'partner']];
+    if (!lead) return;
+    const leadRect = lead.getBoundingClientRect();
+    if (!leadRect.width) return;
+    const dx = Math.round((soloRect.left + soloRect.width  / 2) - (leadRect.left + leadRect.width  / 2));
+    const dy = Math.round((soloRect.top  + soloRect.height / 2) - (leadRect.top  + leadRect.height / 2));
+    const scaleUp = soloRect.width / leadRect.width;
 
-    p1.style.zIndex     = '5';
-    p1.style.transition = 'none';
-    p1.style.transform  = `translate(${dx}px, ${dy}px) scale(${scaleUp})`;
+    lead.style.zIndex     = '5';
+    lead.style.transition = 'none';
+    lead.style.transform  = `translate(${dx}px, ${dy}px) scale(${scaleUp})`;
 
-    [mid, rgt].forEach((el) => {
+    others.forEach((el) => {
       if (!el) return;
       el.style.transition = 'none';
       el.style.opacity    = '0';
       el.style.transform  = 'scale(.85)';
     });
-    p1.getBoundingClientRect();
+    lead.getBoundingClientRect();
     requestAnimationFrame(() => {
-      p1.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1)';
-      p1.style.transform  = '';
-      [mid, rgt].forEach((el, i) => {
+      lead.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1)';
+      lead.style.transform  = '';
+      others.forEach((el, i) => {
         if (!el) return;
         const delay = 0.15 + i * 0.08;
         el.style.transition =
@@ -577,7 +681,7 @@
       });
     });
     setTimeout(() => {
-      [p1, mid, rgt].forEach((el) => {
+      [lead].concat(others).forEach((el) => {
         if (!el) return;
         el.style.removeProperty('transition');
         el.style.removeProperty('transform');
@@ -587,34 +691,40 @@
     }, 800);
   }
 
-  function flipExitRel(p1Rect) {
-    if (reduceMotion() || !p1Rect || !p1Rect.width) return;
+  function flipExitRel(sourceEl, sourceRect) {
+    if (reduceMotion() || !sourceEl || !sourceRect || !sourceRect.width) return;
     const solo = resultCard(dom.you);
     if (!solo) return;
     const soloRect = solo.getBoundingClientRect();
     if (!soloRect.width) return;
-    const dx = Math.round((p1Rect.left + p1Rect.width  / 2) - (soloRect.left + soloRect.width  / 2));
-    const dy = Math.round((p1Rect.top  + p1Rect.height / 2) - (soloRect.top  + soloRect.height / 2));
-    const scaleDown = p1Rect.width / soloRect.width;
-    solo.style.zIndex     = '5';
+    const dx = Math.round((soloRect.left + soloRect.width  / 2) - (sourceRect.left + sourceRect.width  / 2));
+    const dy = Math.round((soloRect.top  + soloRect.height / 2) - (sourceRect.top  + sourceRect.height / 2));
+    const scaleUp = soloRect.width / sourceRect.width;
+    const ghost = ghostAt(sourceEl, sourceRect);
+
+    solo.style.opacity = '0';
     solo.style.transition = 'none';
-    solo.style.transform  = `translate(${dx}px, ${dy}px) scale(${scaleDown})`;
-    solo.getBoundingClientRect();
+    ghost.style.transform = 'translate(0, 0) scale(1)';
+    ghost.getBoundingClientRect();
     requestAnimationFrame(() => {
-      solo.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1)';
-      solo.style.transform  = '';
+      ghost.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1), opacity .2s ease .35s';
+      ghost.style.transform  = `translate(${dx}px, ${dy}px) scale(${scaleUp})`;
+      solo.style.transition = 'opacity .18s ease .38s';
+      solo.style.opacity = '';
     });
     setTimeout(() => {
+      ghost.remove();
       solo.style.removeProperty('transition');
-      solo.style.removeProperty('transform');
-      solo.style.removeProperty('z-index');
+      solo.style.removeProperty('opacity');
     }, 700);
   }
 
   function captureAnimationContext(targetMode) {
     const solo2trip = _renderMode === 'solo' && targetMode === 'triptych';
     const trip2solo = _renderMode === 'triptych' && targetMode === 'solo';
-    const ctx = { solo2trip, trip2solo, soloRect: null, p1Rect: null, gMid: null, gRgt: null };
+    const enterOrigin = _pendingEnterOrigin || 'you';
+    _pendingEnterOrigin = null;
+    const ctx = { solo2trip, trip2solo, enterOrigin, soloRect: null, sourceRect: null, sourceEl: null, ghosts: [] };
 
     if (solo2trip) {
       const soloEl = resultCard(dom.you);
@@ -624,41 +734,54 @@
 
     if (!trip2solo) return ctx;
 
-    const p1El = resultCard(dom.you);
-    const midEl = resultCard(dom.composite);
-    const rgtEl = resultCard(dom.partner);
-    const midRect = midEl ? midEl.getBoundingClientRect() : null;
-    const rgtRect = rgtEl ? rgtEl.getBoundingClientRect() : null;
-    ctx.p1Rect = p1El ? p1El.getBoundingClientRect() : null;
+    const slotEls = {
+      you: resultCard(dom.you),
+      composite: resultCard(dom.composite),
+      partner: resultCard(dom.partner)
+    };
+    const sourceSlot = _transitionSource && _transitionSource.slot ? _transitionSource.slot : 'you';
+    const sourceEl = slotEls[sourceSlot] || slotEls.you;
+    ctx.sourceEl = _transitionSource && _transitionSource.el ? _transitionSource.el : sourceEl;
+    ctx.sourceRect = _transitionSource && _transitionSource.rect
+      ? _transitionSource.rect
+      : (sourceEl ? sourceEl.getBoundingClientRect() : null);
 
-    if (!reduceMotion() && midEl && rgtEl && midRect && rgtRect) {
-      ctx.gMid = ghostAt(midEl, midRect);
-      ctx.gRgt = ghostAt(rgtEl, rgtRect);
+    if (!reduceMotion()) {
+      Object.keys(slotEls).forEach(function (slot) {
+        if (slot === sourceSlot) return;
+        const el = slotEls[slot];
+        const rect = el ? el.getBoundingClientRect() : null;
+        if (!el || !rect || !rect.width) return;
+        ctx.ghosts.push(ghostAt(el, rect));
+      });
     }
+    _transitionSource = null;
     return ctx;
   }
 
-  function animateGhostExit(gMid, gRgt) {
-    if (!gMid || !gRgt) return;
+  function animateGhostExit(ghosts) {
+    if (!ghosts || !ghosts.length) return;
     requestAnimationFrame(() => {
-      gMid.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1), opacity .45s ease';
-      gMid.style.transform  = 'scale(.5) translateY(-10px)';
-      gMid.style.opacity    = '0';
-      gRgt.style.transition = 'transform .6s cubic-bezier(.4,0,.2,1) .06s, opacity .5s ease .06s';
-      gRgt.style.transform  = 'translateX(56px) scale(.78) rotate(8deg)';
-      gRgt.style.opacity    = '0';
+      ghosts.forEach((ghost, i) => {
+        const delay = i * 0.06;
+        ghost.style.transition = `transform .58s cubic-bezier(.4,0,.2,1) ${delay}s, opacity .48s ease ${delay}s`;
+        ghost.style.transform  = i === 0
+          ? 'scale(.5) translateY(-10px)'
+          : 'translateX(56px) scale(.78) rotate(8deg)';
+        ghost.style.opacity    = '0';
+      });
     });
-    setTimeout(() => { gMid.remove(); gRgt.remove(); }, 750);
+    setTimeout(() => { ghosts.forEach(g => g.remove()); }, 800);
   }
 
   function playFinderAnimation(ctx) {
     if (ctx.solo2trip && ctx.soloRect) {
-      flipEnterRel(ctx.soloRect);
+      flipEnterRel(ctx.soloRect, ctx.enterOrigin);
       return;
     }
-    if (ctx.trip2solo && ctx.p1Rect) {
-      flipExitRel(ctx.p1Rect);
-      animateGhostExit(ctx.gMid, ctx.gRgt);
+    if (ctx.trip2solo && ctx.sourceEl && ctx.sourceRect) {
+      flipExitRel(ctx.sourceEl, ctx.sourceRect);
+      animateGhostExit(ctx.ghosts);
     }
   }
 
@@ -714,22 +837,13 @@
   }
 
   function find() {
-    const state = readFinderState();
-    const animation = captureAnimationContext(state.targetMode);
-    renderFinderState(state);
-    playFinderAnimation(animation);
+    runFinderUpdate();
   }
 
   function toggleRel() {
-    const btn = dom.relBtn;
-    const willBeOn = !dom.root.classList.contains('rel-on');
-    dom.root.classList.toggle('rel-on', willBeOn);
-    btn.classList.toggle('on', willBeOn);
-    btn.textContent = willBeOn ? '−' : '+';
-    btn.setAttribute('aria-label', willBeOn ? 'Remove partner' : 'Add partner');
-    btn.setAttribute('aria-pressed', willBeOn ? 'true' : 'false');
+    const willBeOn = !getFinderUiState().relOn;
+    setRelationshipMode(willBeOn);
     find();
-    if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
   }
 
   function loadCardInFinder(idx, anchorEl) {
@@ -738,20 +852,19 @@
     const c = SPREAD_CARDS[idx];
     if (!c) return;
     const anchor = anchorEl || document.querySelector(`#annualGrid .spread-card[data-idx="${idx}"]`);
+    const sourceSlot = anchorEl === dom.partner.result ? 'partner'
+      : anchorEl === dom.composite.result ? 'composite'
+      : 'you';
+    markTransitionSource(sourceSlot, anchor);
     preserveAnchorPosition(anchor, function () {
-      if (!_finderOverride) _finderSnapshot = snapshotFinderInputs();
-      if (dom.partner.month) dom.partner.month.value = '';
-      if (dom.partner.day) dom.partner.day.value = '';
-      if (dom.root) dom.root.classList.remove('rel-on');
-      if (dom.relBtn) {
-        dom.relBtn.classList.remove('on');
-        dom.relBtn.textContent = '+';
-        dom.relBtn.setAttribute('aria-label', 'Add partner');
-        dom.relBtn.setAttribute('aria-pressed', 'false');
+      if (!getFinderUiState().override) {
+        finderSnapshot.capture();
+        if (_finderSnapshot) _finderSnapshot.sourceSlot = sourceSlot;
       }
-      if (typeof window.refreshFinderTrayTargets === 'function') window.refreshFinderTrayTargets();
+      clearPartnerInputs();
+      setRelationshipMode(false);
       setFinderOverride({ rank: c.rank, suit: c.suit, sym: c.sym, sv: idx + 1 });
-      find();
+      runFinderUpdate();
     });
   }
 
@@ -766,16 +879,12 @@
     const isPartner = target === 'partner';
     const slot = isPartner ? dom.partner : dom.you;
     if (!slot.month || !slot.day) return;
-    if (isPartner && !dom.root.classList.contains('rel-on')) toggleRel();
+    if (isPartner && !getFinderUiState().relOn) setRelationshipMode(true);
     if (!isPartner) {
-      clearFinderOverride();
-      discardFinderSnapshot();
+      clearYouTransientState();
     }
-    slot.month.value = String(month);
-    syncMonthInput(slot.month);
-    syncDayInput(slot.day, month);
-    slot.day.value = String(day);
-    find();
+    syncSlotDate(slot, month, day);
+    runFinderUpdate();
   }
 
   window.loadCardInFinder = loadCardInFinder;
@@ -805,11 +914,15 @@
     dom.you.month.addEventListener('change', function () { clearFinderOverride(); discardFinderSnapshot(); normalizeMonthInput(this); syncDayInput(dom.you.day, +this.value); find(); });
     dom.you.day.addEventListener('input', function () { clearFinderOverride(); discardFinderSnapshot(); syncDayInput(this, +dom.you.month.value); find(); });
     dom.you.day.addEventListener('change', function () { clearFinderOverride(); discardFinderSnapshot(); normalizeDayInput(this, +dom.you.month.value); find(); });
+    wireSelectAllOnFocus(dom.you.day);
+    wireSelectAllOnFocus(dom.you.month);
     wireDatePair(dom.you.day, dom.you.month);
     wireScrollStep(dom.you.day, dom.you.month, function () { clearFinderOverride(); discardFinderSnapshot(); find(); });
     if (dom.partner.month && dom.partner.day) {
       dom.partner.month.addEventListener('input', function () { syncDayInput(dom.partner.day, +this.value); find(); });
       dom.partner.month.addEventListener('change', function () { normalizeMonthInput(this); syncDayInput(dom.partner.day, +this.value); find(); });
+      wireSelectAllOnFocus(dom.partner.day);
+      wireSelectAllOnFocus(dom.partner.month);
       wireDatePair(dom.partner.day, dom.partner.month);
       wireScrollStep(dom.partner.day, dom.partner.month, find);
     }
@@ -819,6 +932,7 @@
     }
     if (dom.resetBtn) {
       dom.resetBtn.addEventListener('click', function () {
+        _pendingEnterOrigin = (_finderSnapshot && _finderSnapshot.relOn && _finderSnapshot.sourceSlot) || null;
         clearFinderOverride();
         restoreFinderSnapshot();
         find();

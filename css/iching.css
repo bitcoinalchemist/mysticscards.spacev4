@@ -101,10 +101,10 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       width: 100%; max-width: 460px; margin: 0 auto;
     }
     /* All six cards stay on one line: each shrinks to fit, capped at the
-       full 68px on wider screens. The card art is container-query sized so it
-       scales with the card. */
-    .cards-row .card-line { flex: 1 1 0; min-width: 0; max-width: 68px; }
-    .cards-row .spread-card { width: 100%; height: auto; aspect-ratio: 68 / 95; }
+       same full width as the current quadration cards. The card art is
+       container-query sized so it scales with the card. */
+    .cards-row .card-line { flex: 1 1 0; min-width: 0; max-width: 80px; }
+    .cards-row .spread-card { width: 100%; height: auto; aspect-ratio: 5 / 7; }
     .cast-figs { gap: 1.25rem; align-items: flex-start; justify-content: center; }
 
     /* ── Ace suit-pulls (set aside during the cast, shown above the answer) ── */
@@ -154,10 +154,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
     /* Cast cards — mysticscards style (matches quadration.html) */
     .spread-card {
-      width: 68px; height: 95px; flex-shrink: 0;
+      width: 80px; height: auto; flex-shrink: 0;
       background: var(--card-paper); border: 1px solid #e3d8c4;  /* match the Cards of Life / site.css card border */
-      border-radius: var(--r-md);
+      border-radius: var(--card-radius);  /* 4px — match Cards of Life (was --r-md/12px) */
       position: relative; overflow: hidden; container-type: inline-size;
+      aspect-ratio: 5 / 7;
       cursor: default;
       transition: box-shadow .18s ease;
     }
@@ -179,7 +180,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     .spread-card.ck-host.changing { box-shadow: none; }   /* ring reveals with the face */
     .ck-flip {
       position: absolute; inset: 0; transform-style: preserve-3d;
-      border-radius: var(--r-md);
+      border-radius: var(--card-radius);
     }
     .ck-flip.dealing { animation: ckDeal .72s cubic-bezier(.2,.8,.25,1) backwards; }
     /* No `opacity` in these frames ON PURPOSE: an animated opacity composites the
@@ -196,7 +197,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     .ck-side {
       position: absolute; inset: 0;
       backface-visibility: hidden; -webkit-backface-visibility: hidden;
-      border-radius: var(--r-md); overflow: hidden;
+      border-radius: var(--card-radius); overflow: hidden;
     }
     /* Firefox z-fight fix: `backface-visibility: hidden` alone doesn't
        reliably hide the far face of two coplanar sides in one 3D
