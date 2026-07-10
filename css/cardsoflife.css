@@ -1,0 +1,1240 @@
+.spreads-top {
+  display: flex; flex-direction: column;
+  align-items: center; gap: .6rem; margin-bottom: .5rem;
+  position: relative;
+}
+@media (min-width: 900px) {
+  .spreads-top {
+    width: min(100%, var(--control-rail-w));
+    margin-inline: auto;
+  }
+}
+.spread-layout { display: flex; gap: 1.25rem; align-items: flex-start; justify-content: center; }
+.spread-stack { position: relative; display: block; width: 100%; }
+.spread-wrap { overflow-x: auto; padding: 1.5rem; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; display: flex; justify-content: center; }
+
+.age-controls-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.age-controls { display: flex; align-items: center; gap: .5rem; }
+.age-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  font-size: 1.1rem; color: rgba(255,255,255,.7);
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--ease); cursor: pointer;
+}
+.age-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
+.age-input {
+  width: 60px; height: 32px;
+  border: 1px solid rgba(255,255,255,.12); border-radius: var(--r-sm);
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.9);
+  font-family: var(--sans); font-size: .9rem; font-weight: 500;
+  text-align: center; padding: 0 .4rem;
+  -moz-appearance: textfield;
+}
+.age-input::-webkit-inner-spin-button,
+.age-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.age-input:focus { outline: none; border-color: var(--gold); }
+
+.age-controls-wrap { min-height: 32px; }
+.q-mode-current {
+  /* Detached from the age stepper's centred flow and pinned to the
+     left edge of #annualGrid (the Neptune column) instead of hugging
+     the stepper. Left offset is computed in js/quadrations.js
+     (alignSpreadLabel) since it depends on the live gap between
+     .spreads-top's rail width and the grid's own (scale-dependent)
+     rendered width. */
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: pre-line;
+  text-align: center;
+  line-height: 1.18;
+  font-family: var(--sans); font-size: .62rem; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink);
+}
+
+.q-disp-icon {
+  /* right is overridden in JS (alignSettingsGear) to pin the icon's
+     right edge to #annualGrid's right edge (the Mercury column) —
+     same reasoning as .q-mode-current's left offset. */
+  position: absolute; right: 0; top: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.22); background: transparent;
+  color: rgba(255,255,255,.6); font-size: .95rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+.q-disp-icon:hover { color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.4); }
+.q-disp-icon[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
+
+.q-settings-panel {
+  position: absolute; z-index: 200;
+  width: min(300px, 92vw);
+  background: var(--surface); border: 1px solid var(--rule-strong);
+  border-radius: 10px; padding: .35rem .85rem; box-shadow: var(--sh-lg);
+  opacity: 0; visibility: hidden;
+  transform: translateY(-6px) scale(.98); transform-origin: top right;
+  transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
+  pointer-events: none;
+}
+.q-settings-panel.open {
+  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
+  transition: opacity .18s ease, transform .18s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .q-settings-panel { transition: none; }
+}
+.q-setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem; padding: .6rem 0;
+}
+.q-setting-row + .q-setting-row { border-top: 1px solid var(--border); }
+.q-setting-label { font-size: .8rem; color: var(--secondary); }
+.q-setting-row--size { flex-direction: column; align-items: stretch; gap: .4rem; }
+.q-setting-row--size .q-setting-label {
+  font-size: .64rem; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--gold-ink);
+}
+
+.q-switch {
+  position: relative; flex-shrink: 0; width: 34px; height: 20px;
+  padding: 0; border-radius: 999px;
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.22);
+  cursor: pointer; transition: background var(--ease), border-color var(--ease);
+}
+.q-switch-knob {
+  position: absolute; top: 1px; left: 1px; width: 16px; height: 16px;
+  border-radius: 50%; background: #fff; transition: transform var(--ease);
+}
+.q-switch.on { background: var(--gold); border-color: var(--gold); }
+.q-switch.on .q-switch-knob { transform: translateX(14px); }
+
+.q-size-row { display: flex; align-items: center; gap: .4rem; }
+.q-size-ico { font-family: var(--serif); color: rgba(255,255,255,.4); line-height: 1; user-select: none; }
+.q-size-ico--sm { font-size: .6rem; }
+.q-size-ico--lg { font-size: 1.05rem; }
+.q-size-val {
+  font-family: var(--sans); font-size: .68rem; font-weight: 600;
+  color: rgba(255,255,255,.45); min-width: 2.6em; text-align: left;
+}
+.q-size-slider {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; min-width: 0; height: 32px; background: transparent; cursor: pointer;
+}
+.q-size-slider::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 999px; background: rgba(255,255,255,.18);
+}
+.q-size-slider::-moz-range-track {
+  height: 3px; border-radius: 999px; background: rgba(255,255,255,.18);
+}
+.q-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 15px; height: 15px; margin-top: -6px; border-radius: 50%;
+  background: var(--gold); border: 2px solid var(--accent);
+  transition: transform var(--ease);
+}
+.q-size-slider::-moz-range-thumb {
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--gold); border: 2px solid var(--accent);
+  transition: transform var(--ease);
+}
+.q-size-slider::-webkit-slider-thumb:hover,
+.q-size-slider::-moz-range-thumb:hover { transform: scale(1.15); }
+
+#annualGrid { max-width: calc(560px * var(--quad-scale, 1)); }
+@media (max-width: 700px) {
+  .spread-layout { flex-direction: column; align-items: center; }
+  .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .spread-layout .spread-wrap { width: 100%; justify-content: center; }
+  .spreads-top { gap: .5rem; }
+}
+
+.spread-card {
+  cursor: pointer;
+  transition: box-shadow var(--ease), transform var(--ease), border-color var(--ease);
+  min-width: 0; min-height: 0;
+}
+.spread-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); border-color: var(--rule-strong); }
+
+.spread-card.finder-pick {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 0 0 6px rgba(205,168,95,.22),
+    0 0 16px 3px rgba(205,168,95,.55),
+    0 8px 22px rgba(181,134,74,.42);
+  z-index: 4;
+  animation: finderGlow 2.6s ease-in-out infinite;
+}
+.spread-card.finder-pick::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(65deg, transparent 34%, rgba(255,252,242,.4) 47%, rgba(255,255,255,.85) 50%, rgba(255,252,242,.4) 53%, transparent 66%);
+  transform: translateX(130%);
+  animation: finderShine 5.5s linear infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+.spread-card.finder-pick:hover {
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 0 0 7px rgba(205,168,95,.28),
+    0 0 20px 4px rgba(205,168,95,.68),
+    0 8px 22px rgba(181,134,74,.46);
+}
+
+@keyframes finderGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 5px rgba(205,168,95,.15),
+      0 0 13px 2px rgba(205,168,95,.40),
+      0 8px 22px rgba(181,134,74,.40);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 8px rgba(205,168,95,.30),
+      0 0 22px 5px rgba(205,168,95,.72),
+      0 9px 24px rgba(181,134,74,.46);
+  }
+}
+
+@keyframes finderShine {
+  0%   { transform: translateX(130%); }
+  16%  { transform: translateX(-130%); }
+  100% { transform: translateX(-130%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spread-card.finder-pick { animation: none; }
+  .spread-card.finder-pick::after { animation: none; opacity: 0; }
+}
+
+.spread-card.finder-pick-partner {
+  border-color: #b7add6;
+  box-shadow: 0 0 0 2px #b7add6, 0 0 12px 2px rgba(183,173,214,.5);
+  z-index: 3;
+}
+.spread-card.finder-pick-partner:hover { box-shadow: 0 0 0 2px #b7add6, 0 0 16px 3px rgba(183,173,214,.65); }
+.spread-card.finder-pick.finder-pick-partner {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 5px #b7add6, 0 0 18px 3px rgba(199,154,84,.7);
+}
+
+.ls-lifespread .spread-card.ls-pick:not(.finder-pick) {
+  z-index: 3;
+  animation: lsIdleGlow 2.9s ease-in-out calc(var(--ls-i, 0) * .16s) infinite;
+}
+.ls-lifespread .spread-card.ls-pick:not(.finder-pick)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(65deg, transparent 36%, rgba(240,224,190,.24) 47%, rgba(255,246,224,.52) 50%, rgba(240,224,190,.24) 53%, transparent 64%);
+  transform: translateX(130%);
+  animation: finderShine 6.5s linear infinite;
+  animation-delay: calc(var(--ls-i, 0) * .4s);
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes lsIdleGlow {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(205,168,95,.24), 0 0 10px 1px rgba(205,168,95,.22), 0 7px 15px rgba(0,0,0,.24); }
+  50%      { box-shadow: 0 0 0 3px rgba(205,168,95,.38), 0 0 17px 3px rgba(205,168,95,.40), 0 8px 17px rgba(0,0,0,.26); }
+}
+
+#annualGrid .sl-seat { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-lifespread .spread-card.ls-pick:not(.finder-pick) {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(205,168,95,.30), 0 0 9px 1px rgba(205,168,95,.22), 0 7px 13px rgba(0,0,0,.26);
+  }
+  .ls-lifespread .spread-card.ls-pick:not(.finder-pick)::after { animation: none; opacity: 0; }
+}
+
+.finder-persons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  align-items: start;
+  justify-content: center;
+  gap: clamp(.5rem, 3vw, 1rem);
+}
+.finder-person {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+}
+.finder-inputs {
+  display: flex; align-items: center;
+  min-width: 0;
+  gap: .45rem;
+}
+.finder-datepair {
+  display: grid;
+  grid-template-columns: 3.2rem auto 3.2rem;
+  align-items: stretch;
+  gap: 0;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  padding: .32rem .42rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)),
+    rgba(17,12,33,.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px rgba(0,0,0,.16);
+  transition: border-color var(--ease), box-shadow var(--ease), background var(--ease);
+}
+.finder-datepair:focus-within {
+  border-color: rgba(221,187,120,.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px rgba(221,187,120,.18), 0 10px 28px rgba(0,0,0,.18);
+}
+.finder-select-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  width: 3.2rem;
+}
+.finder-datepair-slash {
+  align-self: center;
+  padding: .08rem .12rem 0;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1;
+  color: rgba(221,187,120,.72);
+}
+.finder-select {
+  background: transparent; border: 0;
+  border-radius: 10px; color: var(--text);
+  font-family: var(--sans); font-size: 1.02rem; font-weight: 600;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: .42rem .65rem .48rem;
+  transition: background-color var(--ease), color var(--ease);
+}
+.finder-select:focus { outline: none; }
+.finder-select:hover { background-color: rgba(255,255,255,.05); }
+.finder-day-input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  text-align: center;
+  padding-inline: .35rem;
+}
+.finder-day-input::-webkit-inner-spin-button,
+.finder-day-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.finder-day-input::placeholder {
+  color: rgba(154,144,184,.72);
+  font-weight: 500;
+}
+
+.finder-rel-toggle {
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1;
+}
+.finder-date-reset {
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.22);
+  background: transparent;
+  color: rgba(255,255,255,.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.finder-date-reset:hover,
+.finder-date-reset.on {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(199,154,84,.08);
+}
+.finder-date-reset[hidden] {
+  display: none;
+}
+.finder-rel-toggle:hover { border-color: var(--gold); color: var(--gold); }
+.finder-rel-toggle.on { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.08); }
+
+.finder-results {
+  display: flex;
+  justify-content: center; align-items: flex-start; gap: clamp(.75rem, 4vw, 1.5rem);
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  position: relative;
+}
+.finder-results.triptych {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, max-content));
+}
+.finder-result {
+  display: none;
+  flex-direction: column; align-items: center; gap: .55rem;
+  inline-size: clamp(6.25rem, 26vw, 8.75rem);
+  min-inline-size: 0;
+}
+.finder-result.has-card { display: flex; }
+.finder-result .spread-card {
+  width: clamp(5.75rem, 24vw, 7.5rem); aspect-ratio: 5 / 7;
+  cursor: default;
+}
+.finder-result .finder-joker-card {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-family: var(--serif); font-size: 1.3rem;
+}
+.finder-result .spread-card:hover { box-shadow: none; transform: none; }
+.finder-result-name {
+  font-family: var(--serif); font-size: clamp(1rem, 3.6vw, 1.25rem); color: var(--text);
+  text-align: center; line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.finder-result-sub {
+  font-family: var(--mono); font-size: clamp(.56rem, 2vw, .65rem); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold-ink);
+  text-align: center;
+}
+.finder-result-composite .spread-card {
+  box-shadow: 0 0 0 1.5px var(--gold), 0 0 14px 2px rgba(199,154,84,.35);
+}
+.finder-result-composite .finder-result-name { color: var(--gold-ink); }
+
+.finder-results.triptych .finder-result:not(.finder-result-composite) .spread-card {
+  width: clamp(4.6rem, 20vw, 5.625rem);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+.finder-results.triptych .finder-result:not(.finder-result-composite) .finder-result-name {
+  font-size: clamp(.85rem, 3vw, 1rem);
+}
+.finder-results.triptych .finder-result:not(.finder-result-composite) .finder-result-sub {
+  font-size: clamp(.5rem, 1.8vw, .58rem);
+}
+
+.finder-person[data-role="partner"] { display: none; }
+.finder.rel-on .finder-person[data-role="partner"] { display: flex; }
+
+/* ── Finder result tabs (ported from v3 ns-picker pattern 2026-07-10)
+   Wrapper #fPanels holds the chip picker + a body with
+   `data-panel-active`. Rules further down toggle each panel's
+   visibility from that attribute; the chip picker itself is a shared
+   uppercase-caps gold-outline pill row. */
+.finder-panels {
+  margin: 1.75rem auto 0;
+  max-width: var(--control-rail-w, 720px);
+  padding: 0 var(--space-3, 1rem);
+}
+.finder-panels[hidden] { display: none; }
+.ns-picker {
+  display: flex; gap: .5rem; flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.1rem;
+}
+.ns-chip {
+  background: transparent; color: var(--secondary);
+  border: 1px solid rgba(199,154,84,.28); border-radius: 999px;
+  padding: .35rem .95rem;
+  font-family: var(--sans); font-size: .68rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background var(--ease);
+}
+.ns-chip:hover { color: var(--text); border-color: rgba(199,154,84,.55); }
+.ns-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ns-chip.is-active { color: var(--bg); background: var(--gold); border-color: var(--gold); }
+.ns-chip[aria-disabled="true"],
+.ns-chip.is-disabled {
+  opacity: .35; cursor: not-allowed;
+}
+/* The four panel divs each hide behind the active-tab attribute.
+   Individual panels can still opt out by adding `.is-empty` to signal
+   the placeholder text should show instead of the real body. */
+.ns-panel { display: none; }
+.finder-panels-body[data-panel-active="about"]      #fAbout       { display: block; }
+.finder-panels-body[data-panel-active="olney"]      #fOlney       { display: block; }
+.finder-panels-body[data-panel-active="lifescript"] #fLifeScript  { display: block; }
+.finder-panels-body[data-panel-active="intime"]     #fInTime      { display: block; }
+.ns-panel-empty {
+  display: none;
+  text-align: center;
+  padding: 1.6rem 1rem;
+  font-family: var(--serif); font-style: italic; color: var(--muted);
+}
+.ns-panel.is-empty > *:not(.ns-panel-empty) { display: none; }
+.ns-panel.is-empty .ns-panel-empty { display: block; }
+
+/* ── Finder About panel (ported from v3 reading data 2026-07-10) ───
+   Renders the picked card's subtitle, vow, keywords, personality,
+   strengths (Light) and challenges (Shadow). Shown only in solo mode
+   under the result card; hidden in triptych mode. Joker adds
+   .is-joker → head-only render. */
+.finder-about { color: var(--text); }
+.finder-about-inner {
+  display: flex; flex-direction: column;
+  gap: var(--space-4, 1rem);
+}
+.finder-about-head {
+  text-align: center;
+  padding: var(--space-3, 1rem) 0 var(--space-2, .75rem);
+  border-bottom: 1px solid var(--rule);
+}
+.finder-about-subtitle {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(.95rem, 3vw, 1.15rem);
+  color: var(--gold-ink); letter-spacing: .02em;
+}
+.finder-about-subtitle:empty { display: none; }
+.finder-about-vow {
+  margin: .4rem 0 0;
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(.85rem, 2.6vw, 1rem);
+  color: var(--secondary); line-height: 1.45;
+}
+.finder-about-vow:empty { display: none; }
+.finder-about-kws {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: .4rem .5rem;
+}
+.finder-about-kws:empty { display: none; }
+.finder-kw {
+  display: inline-block;
+  padding: .25rem .65rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-family: var(--sans); font-size: .7rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted);
+  background: rgba(255,255,255,.02);
+}
+.finder-about-personality {
+  font-family: var(--serif); font-size: clamp(.95rem, 2.6vw, 1.02rem);
+  line-height: 1.65; color: var(--text);
+}
+.finder-about-personality p { margin: 0 0 .9em; }
+.finder-about-personality p:last-child { margin-bottom: 0; }
+.finder-about-personality:empty { display: none; }
+.finder-about-lightshadow {
+  display: grid; gap: var(--space-4, 1rem);
+  grid-template-columns: 1fr 1fr;
+}
+.finder-about-lightshadow > div { min-inline-size: 0; }
+.finder-about-h {
+  margin: 0 0 .5rem;
+  font-family: var(--serif); font-size: .95rem; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.finder-about-lightshadow ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: .5rem;
+  font-family: var(--sans); font-size: .9rem; line-height: 1.5;
+  color: var(--secondary);
+}
+.finder-about-lightshadow li {
+  position: relative;
+  padding-left: 1rem;
+}
+.finder-about-lightshadow li::before {
+  content: "\2022"; position: absolute; left: 0; top: 0;
+  color: var(--gold);
+}
+.finder-about-shadow li::before { color: var(--rule-strong); }
+.finder-about.is-joker .finder-about-kws,
+.finder-about.is-joker .finder-about-personality,
+.finder-about.is-joker .finder-about-lightshadow { display: none; }
+@media (max-width: 640px) {
+  .finder-about-lightshadow { grid-template-columns: 1fr; }
+}
+
+/* ── Finder Olney panel (ported from v3 css/cardsoflife.css 2026-07-10)
+   The Richmond 1893 "Mystic Test Book" reading. Two pages on desktop
+   (delineation left, engraved plate right); stacks on mobile. Font
+   substitutions: v3 uses Roboto Slab + Rye; v4 falls back to the site
+   serif (Lora) so no extra webfont hit for this first pass. */
+.finder-olney { color: var(--secondary); }
+.olney-panel { padding: .25rem 0 .2rem; }
+.olney-sun { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-bottom: .55rem; }
+.olney-sun .spread-card { width: 100%; }
+.olney-grid { display: flex; flex-direction: column; gap: .3rem; max-width: 560px; margin: 0 auto; }
+.olney-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; align-items: center; }
+.olney-row .spread-card { width: 100%; }
+.olney-focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.olney-note { text-align: center; color: var(--muted); font-style: italic; font-size: .9rem; padding: 1.4rem .5rem; }
+.olney-delin { max-width: 620px; margin: 0 auto; }
+.olney-spread { max-width: 500px; margin: 1.4rem auto 0; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+
+.olney-bookhead {
+  text-align: center; border-bottom: 6px double var(--rule-strong);
+  padding-bottom: .8rem; margin-bottom: .9rem;
+}
+.olney-booktitle {
+  font-family: var(--serif); font-weight: 500;
+  font-size: .8rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.olney-headrow {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  gap: .5rem; margin-top: .55rem;
+}
+.olney-cardface { width: 4rem; margin: 0; grid-column: 1; justify-self: start; }
+.olney-vals { grid-column: 2; margin: 0; display: grid; gap: .14rem; justify-items: center; }
+.olney-vals > div { display: flex; justify-content: center; gap: .5rem; align-items: baseline; }
+.olney-vals dt {
+  font-family: var(--serif); font-size: .55rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.olney-vals dt::after { content: ','; }
+.olney-vals dd { margin: 0; font-family: var(--mono); font-size: .72rem; color: var(--gold-ink); }
+.olney-vals dd::after { content: '.'; color: var(--muted); }
+
+/* Desktop: Richmond's two facing pages — delineation left, engraved
+   plate right, split by a centre gutter. Mobile stays stacked. */
+@media (min-width: 760px) {
+  .olney-panel {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: stretch;
+  }
+  .olney-delin  { max-width: none; margin: 0; padding-right: 1.3rem; border-right: 1px solid var(--border); }
+  .olney-spread { max-width: none; margin: 0; border-top: none; padding-top: 0; padding-left: 1.3rem; }
+  .olney-platehead { margin-bottom: .14rem; }
+  .olney-platehead .olney-head { margin-bottom: 0; }
+}
+
+.olney-pl {
+  font-family: var(--serif); font-size: .9rem; color: var(--secondary);
+  line-height: 1.7; margin: 0 0 .9rem; text-align: center;
+}
+.olney-pl b {
+  font-family: var(--sans); font-size: .62rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold-ink); display: block; margin-bottom: .25rem;
+}
+.olney-pl b::after { content: '.'; }
+@media (max-width: 560px) {
+  .olney-row, .olney-head, .olney-sun { gap: .16rem; }
+}
+
+/* ── Grand Spread as Richmond's engraved plate ──────────────────────
+   Transparent background so the plate melts into the starfield. Cards
+   render in light gold engraving on the dark ground. */
+.olney-plate {
+  --plate-ink:  var(--gold-ink);
+  --plate-rule: var(--muted);
+  --plate-gold: var(--gold);
+  background: transparent;
+  color: var(--plate-ink);
+  padding: 1.1rem clamp(.55rem, 2vw, 1.2rem) 1.2rem;
+}
+.olney-mast { display: flex; align-items: flex-end; justify-content: center; gap: .3rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.olney-mast-t {
+  font-family: var(--serif); font-weight: 600; font-style: italic;
+  font-size: clamp(.95rem, 3vw, 1.5rem); line-height: 1; color: var(--plate-ink);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  padding-bottom: .25rem; white-space: nowrap;
+}
+.olney-sunburst { flex: 0 0 auto; width: clamp(64px, 18vw, 96px); height: auto; }
+.olney-head {
+  display: grid; grid-template-columns: repeat(7, 1fr); align-items: start;
+  gap: .3rem; margin-bottom: 1rem;
+}
+.olney-hside { padding-top: .3rem; }
+.olney-hside.left  { grid-column: 1 / span 2; text-align: right; }
+.olney-head .olney-sun { grid-column: 3 / span 3; }
+.olney-hside.right { grid-column: 6 / span 2; text-align: left; }
+.olney-hlabel {
+  font-family: var(--serif); font-weight: 700;
+  font-size: clamp(.5rem, 1.7vw, .7rem); letter-spacing: .08em;
+  text-transform: uppercase; line-height: 1.3; color: var(--plate-ink);
+}
+.olney-horn { font-size: .6rem; color: var(--plate-rule); margin: .15rem 0; letter-spacing: .2em; }
+.olney-hfp {
+  font-family: var(--serif); font-weight: 700;
+  font-size: clamp(.62rem, 2vw, .9rem); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--plate-ink);
+}
+.olney-plate .olney-sun { margin-bottom: 0; }
+.olney-plate .olney-grid { max-width: none; gap: .14rem; }
+.olney-plate .olney-row  { gap: .14rem; }
+.olney-plate .olney-head { gap: .14rem; }
+.olney-plate .olney-focus  { outline-color: var(--plate-gold); }
+
+/* Book-style cards: drop the corner rank indices, trim the parchment
+   margin so pips fill more of the card. Grown court figure with pips
+   pinned toward the corners; matches v3's engraved-plate look. */
+.olney-plate .spread-card .card-corner,
+.olney-cardface .card-corner { display: none; }
+.olney-plate .card-pips,  .olney-cardface .card-pips { top: 9%; bottom: 9%; left: 8%; right: 8%; }
+.olney-plate .pip,        .olney-cardface .pip { font-size: 22cqw; }
+.olney-plate .pip.ace,    .olney-cardface .pip.ace { font-size: 52cqw; }
+.olney-plate .court-art,  .olney-cardface .court-art { inset: 0; width: 100%; height: 100%; transform: scale(1.08); }
+.olney-plate .spread-card > span:first-of-type,
+.olney-cardface > span:first-of-type { left: 23% !important; top: 15.5% !important; }
+.olney-plate .spread-card > span:last-of-type,
+.olney-cardface > span:last-of-type  { left: 77% !important; top: 84.5% !important; }
+.olney-spreadname {
+  margin-top: .7rem; text-align: center;
+  font-family: var(--serif); font-weight: 500;
+  font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--plate-rule);
+}
+
+/* ── Finder Life Script panel (2026-07-10) ─────────────────────────
+   Seven ruling cards for the picked card, one per planet
+   (Neptune → Mercury), each with a Sage-voice planetary connection
+   paragraph underneath. */
+.finder-lifescript { color: var(--secondary); }
+.ls-header { text-align: center; margin-bottom: 1rem; }
+.ls-title {
+  margin: 0; font-family: var(--serif); font-weight: 500;
+  font-size: 1.05rem; letter-spacing: .06em;
+  color: var(--gold-ink);
+}
+.ls-lede {
+  margin: .35rem 0 0;
+  font-family: var(--serif); font-style: italic;
+  font-size: .85rem; color: var(--muted);
+}
+.ls-row {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: .4rem; justify-items: center; align-items: end;
+  margin: 0 auto 1.3rem; max-width: 620px;
+}
+.ls-col {
+  display: flex; flex-direction: column; align-items: center; gap: .25rem;
+  min-inline-size: 0; width: 100%;
+}
+.ls-planet-glyph {
+  font-size: 1rem; color: var(--gold-ink); line-height: 1;
+}
+.ls-planet-name {
+  font-family: var(--sans); font-size: .58rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted);
+}
+.ls-card { width: 100%; }
+.ls-card .card-corner { display: none; }
+.ls-card .card-pips { top: 9%; bottom: 9%; left: 8%; right: 8%; }
+.ls-connections {
+  display: flex; flex-direction: column; gap: 1rem;
+  max-width: 620px; margin: 0 auto;
+}
+.ls-conn { border-top: 1px solid var(--border); padding-top: .8rem; }
+.ls-conn:first-child { border-top: none; padding-top: 0; }
+.ls-conn-head {
+  display: flex; align-items: baseline; gap: .55rem;
+  margin-bottom: .4rem;
+  color: var(--gold-ink);
+}
+.ls-conn-glyph { font-size: .95rem; }
+.ls-conn-planet {
+  font-family: var(--sans); font-size: .68rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.ls-conn-card {
+  font-family: var(--serif); font-size: .85rem;
+  color: var(--secondary); margin-left: auto;
+}
+.ls-conn-sym { margin-left: .1rem; }
+.hearts .ls-conn-sym, .diamonds .ls-conn-sym { color: var(--red); }
+.ls-conn-text {
+  margin: 0;
+  font-family: var(--serif); font-size: .95rem; line-height: 1.6;
+  color: var(--secondary);
+}
+.ls-joker-note {
+  max-width: 560px; margin: 0 auto;
+  font-family: var(--serif); font-size: 1rem; line-height: 1.7;
+  color: var(--secondary); text-align: center;
+}
+@media (max-width: 560px) {
+  .ls-row { gap: .18rem; }
+  .ls-planet-name { font-size: .52rem; }
+}
+
+/* ── Finder In Time panel (2026-07-10) ─────────────────────────────
+   Six personal cards: Birth / 13-Year / 7-Year / Yearly / 52-Day /
+   Daily, computed from the picked card's solar value and the current
+   age from the Quadrations stepper. Deferred v3 features (date-nav
+   bar + period-reading popups + lazy-loaded reading data) can slot
+   in later without changing this row's layout. */
+.finder-intime { color: var(--secondary); }
+.it-header { text-align: center; margin-bottom: 1rem; }
+.it-title {
+  margin: 0; font-family: var(--serif); font-weight: 500;
+  font-size: 1.05rem; letter-spacing: .06em;
+  color: var(--gold-ink);
+}
+.it-lede {
+  margin: .35rem 0 0;
+  font-family: var(--serif); font-style: italic;
+  font-size: .85rem; color: var(--muted);
+}
+.it-lede em { color: var(--secondary); font-style: normal; }
+.it-row {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .55rem; justify-items: center; align-items: start;
+  margin: 0 auto; max-width: 620px;
+}
+.it-col {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  min-inline-size: 0; width: 100%;
+}
+.it-planet-glyph {
+  font-size: 1rem; color: var(--gold-ink); line-height: 1;
+}
+.it-planet-glyph-empty { opacity: .3; font-size: .5rem; }
+.it-label {
+  font-family: var(--sans); font-size: .62rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold-ink);
+  text-align: center;
+}
+.it-card { width: 100%; }
+.it-card .card-corner { display: none; }
+.it-card .card-pips { top: 9%; bottom: 9%; left: 8%; right: 8%; }
+.it-planet-name {
+  font-family: var(--serif); font-style: italic;
+  font-size: .72rem; color: var(--muted);
+  text-align: center;
+}
+.it-sub {
+  font-family: var(--mono); font-size: .58rem;
+  color: var(--secondary); letter-spacing: .04em;
+  text-align: center;
+}
+@media (max-width: 560px) {
+  .it-row { gap: .22rem; }
+  .it-label { font-size: .55rem; }
+  .it-planet-name { font-size: .62rem; }
+  .it-sub { font-size: .52rem; }
+}
+
+/* ── Finder tool trays (Saved Birthdays / Calendar / Solar Values) ──
+   2026-07-09 first functional pass — placement and visual design are
+   deliberately plain for now (see v4/dev/CHANGELOG.txt); the priority
+   was getting all three pickers working end to end. */
+.finder-tools {
+  display: flex; align-items: center; justify-content: center;
+  gap: .5rem; margin-top: 1.25rem; flex-wrap: wrap;
+}
+.finder-tool-btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: transparent; border: 1px solid rgba(255,255,255,.16);
+  border-radius: 999px; padding: .4rem .9rem;
+  font-family: var(--sans); font-size: .72rem; font-weight: 500; letter-spacing: .03em;
+  color: var(--secondary); cursor: pointer;
+  transition: border-color var(--ease), color var(--ease), background var(--ease);
+}
+.finder-tool-btn:hover { border-color: var(--gold); color: var(--gold); }
+.finder-tool-btn.is-active { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.1); }
+.finder-tool-btn--icon { position: relative; padding: .45rem; }
+.finder-tool-btn--icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.finder-tool-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 15px; height: 15px; padding: 0 3px;
+  border-radius: 999px; background: var(--gold); color: var(--accent);
+  font-size: .55rem; font-weight: 700; line-height: 15px; text-align: center;
+  display: none;
+}
+.finder-tool-badge.visible { display: block; }
+
+.finder-tray-wrap {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows .35s ease;
+  width: min(100%, var(--control-rail-w));
+  margin-inline: auto;
+}
+#bdayTrayWrap {
+  width: min(100%, calc(var(--control-rail-w) * .7));
+}
+.finder-tray-wrap.open { grid-template-rows: 1fr; margin-top: .85rem; }
+.finder-tray-min { overflow: hidden; min-height: 0; }
+.finder-tray {
+  padding: .2rem 0 0;
+}
+@media (prefers-reduced-motion: reduce) { .finder-tray-wrap { transition: none; } }
+
+.bday-inline-head {
+  display: flex; align-items: center; justify-content: center;
+  gap: .45rem; margin-bottom: .75rem;
+}
+.bday-inline-title {
+  font-family: var(--serif); font-size: 1rem; color: var(--text);
+}
+.bday-inline-badge {
+  position: static;
+  display: none;
+}
+.bday-inline-badge.visible { display: inline-block; }
+.tray-inline-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: .75rem;
+}
+.tray-inline-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.pick-target { display: flex; gap: .4rem; justify-content: center; margin-bottom: .85rem; }
+.pick-target[hidden] { display: none; }
+.pick-target-btn {
+  border: 1px solid rgba(255,255,255,.16); background: transparent; color: var(--secondary);
+  border-radius: 999px; padding: .25rem .8rem; font-family: var(--sans); font-size: .68rem;
+  font-weight: 600; letter-spacing: .04em; cursor: pointer; transition: all var(--ease);
+}
+.pick-target-btn.is-active { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.1); }
+
+/* Calendar — 13 cols (day label + 12 months), compact date chips */
+.cal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cal-grid {
+  width: 100%;
+}
+.cal-desktop-grid {
+  display: grid; grid-template-columns: 2rem repeat(12, minmax(2.5rem, 1fr));
+  gap: 2px; min-width: 620px;
+}
+.cal-col-header {
+  font-family: var(--sans); font-size: .6rem; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--gold-ink); text-align: center; padding: .25rem 0;
+}
+.cal-row-label {
+  font-family: var(--mono); font-size: .62rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-day {
+  border: 0; background: transparent; border-radius: var(--r-sm); padding: .15rem;
+  cursor: pointer; transition: background var(--ease), transform var(--ease);
+}
+.cal-day:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
+.cal-day.cal-today { box-shadow: inset 0 0 0 1.5px var(--gold); }
+.cal-chip {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 1.4rem; border-radius: 4px; background: var(--card-paper); color: var(--card-dark);
+}
+.cal-chip.hearts, .cal-chip.diamonds { color: var(--red); }
+.cal-chip.joker { background: var(--accent); color: var(--gold); }
+.cal-token { font-family: var(--sans); font-size: .6rem; font-weight: 700; }
+.cal-token-joker { font-size: .45rem; letter-spacing: .05em; }
+
+/* Solar Values — calculator + deck browse */
+.sv-calc-inputs {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: .5rem;
+  margin-bottom: .6rem;
+}
+.sv-calc-main {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-width: 0;
+}
+.sv-field { display: flex; flex-direction: column; gap: .2rem; align-items: center; }
+.sv-field-lbl { font-size: .58rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sv-field input {
+  width: 4.2rem; text-align: center; background: rgba(255,255,255,.06); color: var(--text);
+  border: 1px solid rgba(255,255,255,.16); border-radius: var(--r-sm); padding: .4rem; font-family: var(--sans);
+}
+.sv-field input:focus { outline: none; border-color: var(--gold); }
+.sv-slash { color: var(--muted); align-self: flex-end; padding-bottom: .5rem; }
+.sv-base-btn {
+  grid-column: 3;
+  justify-self: end;
+  align-self: end;
+  height: 32px;
+  padding: 0 .75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: transparent;
+  color: var(--secondary);
+  font-family: var(--sans);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.sv-base-btn:hover { border-color: var(--gold); color: var(--gold); }
+.sv-base-btn[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: #221300;
+  background: linear-gradient(180deg, rgba(221,187,120,.96), rgba(199,154,84,.92));
+  box-shadow: 0 0 0 1px rgba(88,56,13,.15), 0 4px 14px rgba(0,0,0,.2);
+}
+.sv-formula { text-align: center; font-size: .78rem; color: var(--secondary); margin-bottom: .85rem; }
+.sv-formula strong, .sv-result-card { color: var(--gold-ink); }
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .6rem .45rem;
+  align-items: center;
+}
+.browse-head {
+  font-family: var(--sans);
+  font-size: .56rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold-ink);
+}
+.browse-head--hearts,
+.browse-head--diamonds { color: #d18282; }
+.browse-head--joker { margin-bottom: .2rem; }
+.browse-cell {
+  position: relative; border: 0; background: transparent; padding: 0; cursor: pointer;
+  border-radius: var(--r-sm); transition: transform var(--ease);
+  width: 56%;
+  justify-self: center;
+}
+.browse-cell:hover { transform: translateY(-2px); }
+.browse-cell.sv-found .cal-chip { box-shadow: 0 0 0 2px var(--gold), 0 0 10px 2px rgba(199,154,84,.5); }
+.browse-cell .cal-chip.joker {
+  background: var(--card-paper);
+  color: var(--gold-ink);
+}
+.browse-cell .cal-token-joker {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.browse-gap { min-height: 1.4rem; }
+.browse-joker-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-top: .25rem;
+}
+.browse-joker-wrap {
+  width: min(100%, 3.7rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.browse-sv {
+  position: absolute; top: -6px; left: 50%; transform: translateX(-50%); z-index: 1;
+  min-width: 1.55rem; padding: .05rem .28rem; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(221,187,120,.98), rgba(199,154,84,.96));
+  box-shadow: 0 2px 10px rgba(0,0,0,.28), 0 0 0 1px rgba(88,56,13,.26);
+  color: #201505; font-size: .54rem; font-weight: 800; letter-spacing: .02em;
+  text-align: center; line-height: 1.1;
+  text-shadow: 0 1px 0 rgba(255,247,223,.35);
+}
+
+.bday-toolbar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.bday-io { display: flex; gap: .4rem; }
+
+.birth-add-panel { display: none; margin-bottom: 1rem; padding: .85rem; border: 1px solid var(--border); border-radius: var(--r-md); background: rgba(255,255,255,.03); }
+.birth-add-panel.open { display: block; }
+.birth-add-row { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+.ba-field {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); border-radius: var(--r-sm);
+  color: var(--text); padding: .45rem .5rem; font-family: var(--sans); font-size: .85rem;
+}
+.ba-field:focus { outline: none; border-color: var(--gold); }
+.ba-num { width: 3.4rem; text-align: center; }
+.ba-year { width: 4.4rem; text-align: center; }
+.ba-name { flex: 1; min-width: 8rem; }
+.birth-add-error { color: #e98a8a; font-size: .74rem; margin-top: .5rem; min-height: 1em; }
+
+.bday-list { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .85rem; }
+.birth-empty { text-align: center; color: var(--muted); font-size: .85rem; padding: 1.5rem 0; }
+.birth-item {
+  display: flex; align-items: center; gap: .7rem; padding: .5rem .6rem;
+  border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer;
+  transition: border-color var(--ease), background var(--ease);
+}
+.birth-item:hover { border-color: var(--gold); background: rgba(199,154,84,.06); }
+.bi-chip {
+  flex-shrink: 0; width: 2.1rem; height: 2.1rem; border-radius: var(--r-sm);
+  background: var(--card-paper); color: var(--card-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-weight: 600; font-size: .8rem;
+}
+.bi-chip.red { color: var(--red); }
+.bi-chip-joker { background: var(--accent); color: var(--gold); font-size: 1.1rem; }
+.birth-item-body { flex: 1; min-width: 0; }
+.birth-name { font-family: var(--sans); font-size: .88rem; color: var(--text); }
+.birth-date { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+.birth-del {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 0;
+  background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer;
+  transition: color var(--ease), background var(--ease);
+}
+.birth-del:hover { color: #e98a8a; background: rgba(233,138,138,.12); }
+.bday-note { font-size: .68rem; color: var(--muted); text-align: center; }
+
+@media (max-width: 700px) {
+  .cal-scroll {
+    overflow-x: clip;
+  }
+  .cal-desktop-grid {
+    grid-template-columns: 1.22rem repeat(12, minmax(0, 1fr));
+    gap: 1px;
+    min-width: 0;
+  }
+  .cal-col-header {
+    font-size: .5rem;
+    letter-spacing: .03em;
+    padding: .15rem 0;
+  }
+  .cal-row-label {
+    font-size: .5rem;
+  }
+  .cal-day {
+    padding: .05rem;
+    border-radius: 3px;
+  }
+  .cal-chip {
+    min-height: .98rem;
+    border-radius: 3px;
+  }
+  .cal-token {
+    font-size: .48rem;
+  }
+  .cal-token-joker {
+    font-size: .37rem;
+    letter-spacing: .03em;
+  }
+  .sv-calc-inputs {
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .sv-calc-main {
+    grid-column: 2;
+  }
+  .browse-grid {
+    gap: .42rem .3rem;
+  }
+  .browse-head {
+    font-size: .45rem;
+    letter-spacing: .04em;
+  }
+  .browse-gap {
+    min-height: .98rem;
+  }
+  .browse-sv {
+    min-width: 1.28rem;
+    font-size: .46rem;
+    top: -5px;
+  }
+}
+
+@media (max-width: 460px) {
+  .finder-persons {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .finder.rel-on .finder-persons {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .finder-inputs {
+    width: 100%;
+  }
+  .finder-datepair {
+    min-width: 0;
+    width: min(100%, 12rem);
+    padding: .28rem .35rem;
+    border-radius: 14px;
+  }
+  .finder-datepair-slash {
+    padding-top: .08rem;
+    font-size: .9rem;
+  }
+  .finder-select {
+    font-size: .94rem;
+    padding: .38rem 1.45rem .42rem .52rem;
+  }
+  .finder-rel-toggle {
+    margin-top: .2rem;
+  }
+  .finder-results {
+    flex-direction: column;
+    align-items: center;
+  }
+  .finder-results.triptych {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .sv-calc-inputs {
+    grid-template-columns: 1fr auto 1fr;
+    gap: .35rem;
+  }
+  .sv-calc-main {
+    grid-column: 2;
+    flex-wrap: nowrap;
+    gap: .35rem;
+  }
+  .cal-desktop-grid {
+    grid-template-columns: 1.08rem repeat(12, minmax(0, 1fr));
+  }
+  .cal-col-header {
+    font-size: .44rem;
+    padding: .1rem 0;
+  }
+  .cal-row-label {
+    font-size: .44rem;
+  }
+  .cal-chip {
+    min-height: .88rem;
+  }
+  .cal-token {
+    font-size: .43rem;
+  }
+  .cal-token-joker {
+    font-size: .32rem;
+  }
+  .browse-grid {
+    gap: .34rem .2rem;
+  }
+  .browse-head {
+    font-size: .4rem;
+    letter-spacing: .02em;
+  }
+  .browse-gap {
+    min-height: .88rem;
+  }
+  .browse-sv {
+    min-width: 1.12rem;
+    font-size: .4rem;
+    padding: .04rem .18rem;
+  }
+  .browse-cell {
+    width: 54%;
+  }
+  .sv-base-btn {
+    grid-column: 3;
+    justify-self: end;
+    height: 30px;
+    padding: 0 .55rem;
+    font-size: .58rem;
+  }
+}
