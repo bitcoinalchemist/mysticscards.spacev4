@@ -75,10 +75,10 @@
             `<div><dt>Spirit Value</dt><dd>${R.spirit}</dd></div>` +
             `<div><dt>Astral Number</dt><dd>${R.astral}</dd></div>` +
           '</dl>' +
-        '</div>' +
+      '</div>' +
       '</div>';
       for (const pl of OLNEY_PLANETS) {
-        if (R.planets[pl]) html += `<p class="olney-pl"><b>${pl}</b>${R.planets[pl]}</p>`;
+        if (R.planets[pl]) html += `<p class="olney-pl"><b>${pl} -</b> ${R.planets[pl]}</p>`;
       }
       html += '</div>';
     }

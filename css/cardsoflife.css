@@ -780,12 +780,26 @@
   line-height: 1.7; margin: 0 0 .9rem; text-align: center;
 }
 .olney-pl b {
-  font-family: var(--sans); font-size: .62rem; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--gold-ink); display: block; margin-bottom: .25rem;
+  font-family: var(--sans); font-size: .56rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold-ink); display: inline; margin-bottom: 0;
 }
-.olney-pl b::after { content: '.'; }
 @media (max-width: 560px) {
   .olney-row, .olney-head, .olney-sun { gap: .16rem; }
+  .olney-head { margin-bottom: .55rem; }
+  .olney-hlabel {
+    font-size: .56rem;
+    line-height: 1.34;
+    letter-spacing: .07em;
+  }
+  .olney-horn {
+    font-size: .46rem;
+    margin: .1rem 0;
+    letter-spacing: .12em;
+  }
+  .olney-hfp {
+    font-size: .68rem;
+    letter-spacing: .11em;
+  }
 }
 
 /* ── Grand Spread as Richmond's engraved plate ──────────────────────
@@ -802,29 +816,45 @@
 .olney-mast { display: flex; align-items: flex-end; justify-content: center; gap: .3rem; flex-wrap: wrap; margin-bottom: .9rem; }
 .olney-mast-t {
   font-family: var(--serif); font-weight: 600; font-style: italic;
-  font-size: clamp(.95rem, 3vw, 1.5rem); line-height: 1; color: var(--plate-ink);
+  font-size: clamp(.82rem, 2.5vw, 1.22rem); line-height: 1; color: var(--plate-ink);
   text-shadow: 0 1px 4px rgba(0,0,0,.5);
   padding-bottom: .25rem; white-space: nowrap;
 }
 .olney-sunburst { flex: 0 0 auto; width: clamp(64px, 18vw, 96px); height: auto; }
 .olney-head {
   display: grid; grid-template-columns: repeat(7, 1fr); align-items: start;
-  gap: .3rem; margin-bottom: 1rem;
+  gap: .3rem; margin-bottom: .16rem;
 }
-.olney-hside { padding-top: .3rem; }
+.olney-hside { padding-top: .08rem; }
 .olney-hside.left  { grid-column: 1 / span 2; text-align: right; }
 .olney-head .olney-sun { grid-column: 3 / span 3; }
 .olney-hside.right { grid-column: 6 / span 2; text-align: left; }
 .olney-hlabel {
   font-family: var(--serif); font-weight: 700;
-  font-size: clamp(.5rem, 1.7vw, .7rem); letter-spacing: .08em;
+  font-size: clamp(.5rem, 1.45vw, .62rem); letter-spacing: .06em;
   text-transform: uppercase; line-height: 1.3; color: var(--plate-ink);
 }
-.olney-horn { font-size: .6rem; color: var(--plate-rule); margin: .15rem 0; letter-spacing: .2em; }
+.olney-horn { font-size: .38rem; color: var(--plate-rule); margin: .06rem 0; letter-spacing: .1em; }
 .olney-hfp {
   font-family: var(--serif); font-weight: 700;
-  font-size: clamp(.62rem, 2vw, .9rem); letter-spacing: .14em;
+  font-size: clamp(.56rem, 1.7vw, .74rem); letter-spacing: .1em;
   text-transform: uppercase; color: var(--plate-ink);
+}
+@media (min-width: 761px) {
+  .olney-hlabel {
+    font-size: .44rem;
+    line-height: 1.22;
+    letter-spacing: .05em;
+  }
+  .olney-horn {
+    font-size: .3rem;
+    margin: .03rem 0;
+    letter-spacing: .08em;
+  }
+  .olney-hfp {
+    font-size: .56rem;
+    letter-spacing: .08em;
+  }
 }
 .olney-plate .olney-sun { margin-bottom: 0; }
 .olney-plate .olney-grid { max-width: none; gap: .14rem; }
@@ -1565,9 +1595,11 @@
 
 .browse-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: .6rem .45rem;
+  grid-template-columns: repeat(4, max-content);
+  column-gap: .12rem;
+  row-gap: .24rem;
   align-items: center;
+  justify-content: center;
 }
 .browse-head {
   font-family: var(--sans);
@@ -1582,10 +1614,22 @@
 .browse-head--diamonds { color: #d18282; }
 .browse-head--joker { margin-bottom: .2rem; }
 .browse-cell {
-  position: relative; border: 0; background: transparent; padding: 0; cursor: pointer;
-  border-radius: var(--r-sm); transition: transform var(--ease);
-  width: 56%;
+  border: 0;
+  background: transparent;
+  padding: .08rem .1rem;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: transform var(--ease);
+  width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
   justify-self: center;
+}
+.browse-cell .cal-chip {
+  min-width: 3.45rem;
+  min-height: 1.5rem;
+  padding: 0 .48rem;
 }
 .browse-cell:hover { transform: translateY(-2px); }
 .browse-cell.sv-found .cal-chip {
@@ -1608,19 +1652,30 @@
   margin-top: .25rem;
 }
 .browse-joker-wrap {
-  width: min(100%, 3.7rem);
+  width: min(100%, 18rem);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+.browse-base12-note {
+  margin: .4rem 0 0;
+  max-width: 18rem;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: .63rem;
+  line-height: 1.35;
+  text-align: left;
+}
 .browse-sv {
-  position: absolute; top: -6px; left: 50%; transform: translateX(-50%); z-index: 1;
-  min-width: 1.55rem; padding: .05rem .28rem; border-radius: 999px;
-  background: linear-gradient(180deg, rgba(221,187,120,.98), rgba(199,154,84,.96));
-  box-shadow: 0 2px 10px rgba(0,0,0,.28), 0 0 0 1px rgba(88,56,13,.26);
-  color: #201505; font-size: .54rem; font-weight: 800; letter-spacing: .02em;
-  text-align: center; line-height: 1.1;
-  text-shadow: 0 1px 0 rgba(255,247,223,.35);
+  min-width: 1.3rem;
+  color: var(--gold-ink);
+  font-family: var(--mono);
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-align: right;
+  line-height: 1;
+  opacity: .96;
 }
 
 .bday-toolbar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
@@ -1667,6 +1722,11 @@
 .bday-note { font-size: .68rem; color: var(--muted); text-align: center; }
 
 @media (max-width: 700px) {
+  #deckTrayWrap .finder-tray {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: .12rem;
+  }
   .cal-scroll {
     overflow-x: clip;
   }
@@ -1705,7 +1765,10 @@
     grid-column: 2;
   }
   .browse-grid {
-    gap: .42rem .3rem;
+    width: max-content;
+    min-width: 100%;
+    column-gap: .08rem;
+    row-gap: .18rem;
   }
   .browse-head {
     font-size: .45rem;
@@ -1714,10 +1777,23 @@
   .browse-gap {
     min-height: .98rem;
   }
+  .browse-cell {
+    gap: .22rem;
+    padding: .05rem .06rem;
+  }
+  .browse-cell .cal-chip {
+    min-width: 2.7rem;
+    min-height: 1.18rem;
+    padding: 0 .28rem;
+  }
   .browse-sv {
-    min-width: 1.28rem;
+    min-width: .92rem;
     font-size: .46rem;
-    top: -5px;
+  }
+  .browse-base12-note {
+    max-width: 14rem;
+    font-size: .54rem;
+    line-height: 1.3;
   }
 }
 
@@ -1806,7 +1882,8 @@
     font-size: .32rem;
   }
   .browse-grid {
-    gap: .34rem .2rem;
+    column-gap: .04rem;
+    row-gap: .14rem;
   }
   .browse-head {
     font-size: .4rem;
@@ -1815,13 +1892,22 @@
   .browse-gap {
     min-height: .88rem;
   }
-  .browse-sv {
-    min-width: 1.12rem;
-    font-size: .4rem;
-    padding: .04rem .18rem;
-  }
   .browse-cell {
-    width: 54%;
+    gap: .16rem;
+    padding: .04rem;
+  }
+  .browse-cell .cal-chip {
+    min-width: 2.2rem;
+    min-height: 1.04rem;
+    padding: 0 .18rem;
+  }
+  .browse-sv {
+    min-width: .78rem;
+    font-size: .4rem;
+  }
+  .browse-base12-note {
+    max-width: 12rem;
+    font-size: .48rem;
   }
   .sv-base-btn {
     height: 30px;

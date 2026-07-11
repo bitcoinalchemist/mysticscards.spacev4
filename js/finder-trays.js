@@ -100,6 +100,9 @@
     html += '<div class="browse-joker-row"><div class="browse-joker-wrap">';
     html += '<div class="browse-head browse-head--joker">joker</div>';
     html += cell(52);
+    if (_svBase === 12) {
+      html += '<p class="browse-base12-note">Kings are master numbers; 44 is the Master of Structure in numerology.</p>';
+    }
     html += '</div></div>';
     grid.innerHTML = html;
   }
@@ -200,8 +203,9 @@
     Object.keys(TRAYS).forEach(k => { if (k !== except) closeTray(k); });
   }
 
-  function wireSvField(input, max, onAfterInput) {
+  function wireSvField(input, max, onAfterInput, options) {
     if (!input) return;
+    options = options || {};
     input.addEventListener('focus', function () {
       requestAnimationFrame(() => {
         try { input.select(); } catch (e) {}
@@ -214,8 +218,28 @@
         onAfterInput();
         return;
       }
+      if (options.allowLeadingZero && input.value === '0') {
+        onAfterInput();
+        return;
+      }
       if (n < 1) input.value = '1';
       else if (n > max) input.value = String(max);
+      onAfterInput();
+    });
+    input.addEventListener('blur', function () {
+      if (!input.value) {
+        onAfterInput();
+        return;
+      }
+      const n = parseInt(input.value, 10);
+      if (!Number.isInteger(n)) {
+        input.value = '';
+        onAfterInput();
+        return;
+      }
+      if (n < 1) input.value = '1';
+      else if (n > max) input.value = String(max);
+      else if (options.allowLeadingZero) input.value = String(n);
       onAfterInput();
     });
   }
@@ -268,7 +292,7 @@
         if (Number.isInteger(d) && d > maxDay) svDay.value = String(maxDay);
       }
       svCalcUpdate();
-    });
+    }, { allowLeadingZero: true });
     wireSvField(svDay, 31, svCalcUpdate);
     const baseBtn = document.getElementById('svBaseBtn');
     if (baseBtn) baseBtn.addEventListener('click', () => applySolarBase(_svBase === 12 ? 10 : 12));
