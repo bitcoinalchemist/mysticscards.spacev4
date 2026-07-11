@@ -167,15 +167,8 @@
     return slot.result ? slot.result.querySelector('.spread-card') : null;
   }
 
-  function solarBaseConst() {
-    if (window.CardsStore && typeof window.CardsStore.getSolarBase === 'function') {
-      return window.CardsStore.getSolarBase() === 12 ? 47 : 55;
-    }
-    return 55;
-  }
-
   function solarValue(month, day) {
-    return solarBaseConst() - (2 * month + day);
+    return 55 - (2 * month + day);
   }
 
   function findCardFromSv(sv) {
@@ -188,7 +181,7 @@
 
   function firstDateForSv(sv) {
     for (let m = 1; m <= 12; m++) {
-      const d = solarBaseConst() - (2 * m) - sv;
+      const d = 55 - (2 * m) - sv;
       if (d >= 1 && d <= DAYS_IN_MONTH[m]) return { month: m, day: d };
     }
     return null;

@@ -68,7 +68,6 @@
     if (R.planets) {
       html += '<div class="olney-delin">';
       html += '<div class="olney-bookhead">' +
-        '<div class="olney-booktitle">The Mystic Test Book</div>' +
         '<div class="olney-headrow">' +
           (card ? `<div class="olney-cardface spread-card ${card.suit}">${spreadCardPips(card)}</div>` : '') +
           '<dl class="olney-vals">' +

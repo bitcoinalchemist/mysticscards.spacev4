@@ -59,6 +59,7 @@
   let viewDate = localMidnight(new Date());
   let _lastCard = null;
   let _activeLabel = IT_DEFAULT_FOCUS;
+  let _activeCards = [];
 
   function isViewingToday() {
     return viewDate === localMidnight(new Date());
@@ -78,6 +79,39 @@
   function setViewDate(ms) {
     viewDate = localMidnight(new Date(ms));
     renderInTime(_lastCard);
+  }
+  function setActiveFocus(label, options) {
+    options = options || {};
+    _activeLabel = label || IT_DEFAULT_FOCUS;
+    if (options.syncToStart) {
+      const target = (_activeCards || []).find(function (pc) { return pc.slug === _activeLabel; });
+      if (target && typeof target.startMs === 'number') {
+        setViewDate(target.startMs);
+        return;
+      }
+    }
+    renderInTime(_lastCard);
+  }
+  function shiftActiveHorizon(dir) {
+    if (!dir) return;
+    const active = (_activeCards || []).find(function (pc) { return pc.slug === _activeLabel; });
+    if (!active) return;
+    const startMs = typeof active.startMs === 'number' ? active.startMs : viewDate;
+    if (_activeLabel === 'daily') {
+      setViewDate(startMs + (dir * 86400000));
+      return;
+    }
+    if (_activeLabel === '52-day') {
+      setViewDate(startMs + (dir * 52 * 86400000));
+      return;
+    }
+    if (_activeLabel === 'yearly' || _activeLabel === '7-year' || _activeLabel === '13-year') {
+      const years = _activeLabel === 'yearly' ? 1 : (_activeLabel === '7-year' ? 7 : 13);
+      const d = new Date(startMs);
+      d.setFullYear(d.getFullYear() + (dir * years));
+      d.setHours(0, 0, 0, 0);
+      setViewDate(d.getTime());
+    }
   }
   function shiftViewDays(n) {
     const d = new Date(viewDate);
@@ -122,8 +156,14 @@
     root.addEventListener('click', function (ev) {
       const focusBtn = ev.target.closest('[data-it-focus]');
       if (focusBtn) {
-        _activeLabel = focusBtn.getAttribute('data-it-focus') || IT_DEFAULT_FOCUS;
-        renderInTime(_lastCard);
+        setActiveFocus(focusBtn.getAttribute('data-it-focus') || IT_DEFAULT_FOCUS, { syncToStart: true });
+        return;
+      }
+      const cycleBtn = ev.target.closest('[data-it-cycle]');
+      if (cycleBtn) {
+        const dir = parseInt(cycleBtn.getAttribute('data-it-cycle') || '0', 10);
+        if (!dir) return;
+        shiftActiveHorizon(dir);
         return;
       }
       const navBtn = ev.target.closest('.it-date-nav');
@@ -213,16 +253,20 @@
   }
 
   function fallbackReadingHTML(card, label) {
-    const key = readingKey(card);
-    const reading = key && typeof CARD_READINGS !== 'undefined' ? CARD_READINGS[key] : null;
-    const body = reading && reading.personality
-      ? reading.personality.split(/\n\n+/).map(p => `<p>${p}</p>`).join('')
-      : '<p>This card has no saved In Time text for this horizon yet.</p>';
+    const body = fallbackReadingBodyHTML(card);
     return `<div class="it-reading-head">
       <div class="it-reading-kicker">${label}</div>
       <h4 class="it-reading-title">${card ? card.name : 'Card reading'}</h4>
     </div>
     <div class="it-reading-copy">${body}</div>`;
+  }
+
+  function fallbackReadingBodyHTML(card) {
+    const key = readingKey(card);
+    const reading = key && typeof CARD_READINGS !== 'undefined' ? CARD_READINGS[key] : null;
+    return reading && reading.personality
+      ? reading.personality.split(/\n\n+/).map(p => `<p>${p}</p>`).join('')
+      : '<p>This card has no saved In Time text for this horizon yet.</p>';
   }
 
   function inTimeReadingHTML(pc) {
@@ -232,13 +276,18 @@
     const key = readingKey(c);
     const entry = src && key ? src[key] : null;
     const text = entry && entry.planets && pc.planet ? entry.planets[pc.planet] : '';
-    if (!text) return fallbackReadingHTML(c, pc.label);
-    return `<div class="it-reading-head">
+    const headStart = `<div class="it-reading-head">
+      <button type="button" class="it-reading-shift" data-it-cycle="-1" aria-label="Previous ${pc.label} card" title="Previous ${pc.label} card">‹</button>
+      <div class="it-reading-head-copy">
       <div class="it-reading-kicker">${pc.label}</div>
       <h4 class="it-reading-title">${c.name}</h4>
       <div class="it-reading-meta">${pc.planet} · ${pc.sub}</div>
+      </div>
+      <button type="button" class="it-reading-shift" data-it-cycle="1" aria-label="Next ${pc.label} card" title="Next ${pc.label} card">›</button>
     </div>
-    <div class="it-reading-copy"><p>${text}</p></div>`;
+    `;
+    if (!text) return headStart + `<div class="it-reading-copy">${fallbackReadingBodyHTML(c)}</div>`;
+    return headStart + `<div class="it-reading-copy"><p>${text}</p></div>`;
   }
 
   function panelHTML(card) {
@@ -295,26 +344,32 @@
 
     const tStart = Math.floor(age / 13) * 13, tEnd = tStart + 12;
     const cStart = Math.floor(age / 7)  * 7,  cEnd = cStart + 6;
+    const tStartMs = localMidnight(new Date(birthYear + tStart, date.m - 1, date.d));
+    const cStartMs = localMidnight(new Date(birthYear + cStart, date.m - 1, date.d));
+    const yStartMs = localMidnight(new Date(viewLbYear, date.m - 1, date.d));
+    const fStartMs = localMidnight(new Date(lastBdayUTC + (fPos * 52 * 86400000)));
+    const dStartMs = viewDate;
 
     const cards = [
-      { idx: tIdx,     label: '13-Year', planet: SPREAD_PLANETS[tPos],    sub: 'age ' + tStart + '–' + tEnd },
-      { idx: cIdx,     label: '7-Year',  planet: SPREAD_PLANETS[cPos],    sub: 'age ' + cStart + '–' + cEnd },
-      { idx: yIdx,     label: 'Yearly',  planet: SPREAD_PLANETS[yPos],    sub: 'age ' + age },
-      { idx: fIdx,     label: '52-Day',  planet: SPREAD_PLANETS[fPos],    sub: 'period ' + (fPos + 1) + '/7' },
-      { idx: dIdx,     label: 'Daily',   planet: SPREAD_PLANETS[dPos],    sub: WD_LONG[todayWD] }
+      { idx: tIdx,     label: '13-Year', planet: SPREAD_PLANETS[tPos],    sub: 'age ' + tStart + '–' + tEnd, slug: '13-year', startMs: tStartMs },
+      { idx: cIdx,     label: '7-Year',  planet: SPREAD_PLANETS[cPos],    sub: 'age ' + cStart + '–' + cEnd, slug: '7-year',  startMs: cStartMs },
+      { idx: yIdx,     label: 'Yearly',  planet: SPREAD_PLANETS[yPos],    sub: 'age ' + age,                  slug: 'yearly',  startMs: yStartMs },
+      { idx: fIdx,     label: '52-Day',  planet: SPREAD_PLANETS[fPos],    sub: 'period ' + (fPos + 1) + '/7', slug: '52-day', startMs: fStartMs },
+      { idx: dIdx,     label: 'Daily',   planet: SPREAD_PLANETS[dPos],    sub: WD_LONG[todayWD],              slug: 'daily',   startMs: dStartMs }
     ];
 
-    const availableLabels = cards.map(pc => pc.label.toLowerCase());
+    _activeCards = cards;
+    const availableLabels = cards.map(function (pc) { return pc.slug; });
     if (!availableLabels.includes(_activeLabel)) _activeLabel = IT_DEFAULT_FOCUS;
-    const active = cards.find(pc => pc.label.toLowerCase() === _activeLabel) || cards[cards.length - 1];
+    const active = cards.find(function (pc) { return pc.slug === _activeLabel; }) || cards[cards.length - 1];
 
     const rowHTML = cards.map(pc => {
       const c = CARDS[pc.idx];
       const face = c ? spreadCardPips(c) : '';
       const glyph = pc.planet ? `<span class="it-planet-glyph" title="${pc.planet}">${SPREAD_PLANET_SYM[pc.planet]}</span>` : '<span class="it-planet-glyph it-planet-glyph-empty" aria-hidden="true">&#9679;</span>';
       const planetLine = pc.planet ? `<div class="it-planet-name" title="${pc.planet}">${pc.planet}</div>` : '';
-      const slug = pc.label.toLowerCase();
-      return `<div class="it-col" data-label="${pc.label.toLowerCase()}">
+      const slug = pc.slug;
+      return `<div class="it-col" data-label="${slug}">
         ${glyph}
         <div class="it-label">${pc.label}</div>
         <button type="button" class="spread-card it-card ${c ? c.suit : ''}${slug === _activeLabel ? ' is-active' : ''}" data-it-focus="${slug}" title="${c ? c.name : ''}" aria-pressed="${slug === _activeLabel ? 'true' : 'false'}">${face}</button>
@@ -343,12 +398,13 @@
     root.classList.remove('is-empty');
     _lastCard = card || null;
     if (!card || card.suit === 'joker') {
+      _activeCards = [];
       root.classList.add('is-empty');
       inner.innerHTML = '';
       return false;
     }
     const html = panelHTML(card);
-    if (!html) { root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
+    if (!html) { _activeCards = []; root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     inner.innerHTML = html;
     return true;
   }
