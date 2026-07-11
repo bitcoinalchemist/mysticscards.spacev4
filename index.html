@@ -39,6 +39,9 @@
 <script src="js/yearcarddata.js?v=20260711a"></script>
 <script src="js/sevenyearcarddata.js?v=20260711a"></script>
 <script src="js/thirteenyearcarddata.js?v=20260711a"></script>
+<script src="js/tzcoords.js?v=20260711a"></script>
+<script src="js/solar-time.js?v=20260711b"></script>
+<script src="js/sun-gate.js?v=20260711b"></script>
 <script src="js/in-time.js?v=20260710d"></script>
 <script src="js/birthdays.js?v=20260710d"></script>
 <script src="js/finder-trays.js?v=20260710d"></script>
@@ -267,6 +270,24 @@
                    reading data files on first open. -->
               <div class="finder-intime ns-panel" id="fInTime" role="tabpanel" aria-labelledby="chipInTime">
                 <div class="it-inner"></div>
+                <div class="it-solar" id="fSolar">
+                  <button type="button" class="it-solar-toggle" id="solToggle" aria-expanded="false" aria-controls="solBody">
+                    <span class="it-solar-ico" aria-hidden="true">☉</span> Solar time
+                  </button>
+                  <div class="it-solar-body" id="solBody" hidden>
+                    <p class="it-solar-intro">Births near midnight can belong to the previous or next day by the sun. Enter the birth time and place to find the true solar-day card.</p>
+                    <div class="it-solar-fields">
+                      <label class="it-solar-field"><span>Birth time</span>
+                        <input type="time" id="solTime" step="60" aria-label="Birth time" />
+                      </label>
+                      <label class="it-solar-field"><span>Birthplace</span>
+                        <input type="text" id="solPlace" list="solZoneList" placeholder="city or zone" autocomplete="off" aria-label="Birthplace" />
+                        <datalist id="solZoneList"></datalist>
+                      </label>
+                    </div>
+                    <div class="it-solar-out" id="solOut"></div>
+                  </div>
+                </div>
                 <div class="ns-panel-empty">In Time isn't available for this card.</div>
               </div>
 

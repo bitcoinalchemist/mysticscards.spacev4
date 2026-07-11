@@ -1147,6 +1147,108 @@
   .it-reading-copy { font-size: .92rem; line-height: 1.64; }
 }
 
+/* ── Solar Time sub-panel (2026-07-11) — a toggle inside the Time
+   section that corrects the birth card by the sun for near-midnight
+   births. Logic in js/solar-time.js (lazy-loads js/astronomy.js). */
+.it-solar {
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.it-solar-toggle {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-family: var(--sans); font-size: .72rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold-ink);
+  background: transparent; border: 1px solid var(--rule-strong);
+  border-radius: 999px; padding: .4rem .9rem; cursor: pointer;
+  transition: border-color var(--ease), color var(--ease), background var(--ease);
+}
+.it-solar-toggle:hover { border-color: var(--gold); color: var(--gold); }
+.it-solar.open .it-solar-toggle {
+  border-color: var(--gold); color: var(--gold);
+  background: rgba(199, 154, 84, .08);
+}
+.it-solar-ico { font-size: .95rem; line-height: 1; }
+.it-solar-body {
+  margin: 1rem auto 0; max-width: 460px;
+  text-align: center;
+}
+.it-solar-intro {
+  font-family: var(--serif); font-style: italic;
+  font-size: .92rem; line-height: 1.6; color: var(--muted);
+  margin: 0 0 .9rem;
+}
+.it-solar-fields {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem;
+}
+.it-solar-field {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .28rem;
+  font-family: var(--sans); font-size: .6rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold-ink);
+}
+.it-solar-field input {
+  font-family: var(--sans); font-size: .95rem; letter-spacing: normal;
+  text-transform: none; color: var(--text);
+  background: var(--band); border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm); padding: .4rem .55rem; min-width: 9.5rem;
+}
+.it-solar-field input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.it-solar-out { margin-top: 1.1rem; }
+.sol-hint {
+  font-family: var(--serif); font-style: italic;
+  font-size: .9rem; color: var(--muted); margin: 0;
+}
+.sol-verdict {
+  font-family: var(--serif); font-size: 1rem; line-height: 1.6;
+  color: var(--secondary); margin: 0 auto .9rem; max-width: 420px;
+}
+.sol-verdict strong { color: var(--gold-ink); font-weight: 600; }
+.sol-cards {
+  display: flex; justify-content: center; align-items: flex-start; gap: 1.2rem;
+}
+.sol-card { display: flex; flex-direction: column; align-items: center; gap: .45rem; }
+.sol-card .spread-card { width: 88px; }
+.sol-card.dimmed { opacity: .5; }
+.sol-card-label {
+  font-family: var(--sans); font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold-ink);
+}
+.sol-card-name { font-family: var(--serif); font-size: 1rem; color: var(--text); }
+
+/* Personality Sun hexagram (js/sun-gate.js) — tropical + two sidereal
+   gates under the solar cards. Figures use --yang for the yang lines. */
+.sun-gate {
+  margin-top: 1.4rem; padding-top: 1.1rem;
+  border-top: 1px solid var(--rule);
+}
+.sun-gate-head {
+  font-family: var(--sans); font-size: .58rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold-ink);
+  margin-bottom: .9rem;
+}
+.sun-gate-row {
+  display: flex; justify-content: center; align-items: flex-start;
+  flex-wrap: wrap; gap: 1.4rem;
+}
+.sun-gate-tile {
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  --yang: var(--gold-ink);
+  min-width: 7rem;
+}
+.sun-gate-z {
+  font-family: var(--sans); font-size: .55rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.sun-gate-fig { line-height: 0; }
+.sun-gate-id {
+  font-family: var(--serif); font-size: 1.05rem; color: var(--gold-ink);
+}
+.sun-gate-name {
+  font-family: var(--serif); font-size: .86rem; color: var(--secondary);
+  text-align: center; max-width: 8.5rem; line-height: 1.3;
+}
+
 /* ── In Time date-scroll nav (2026-07-10, ported from v3's
    .pcards-date-bar/.pdate-*) — ‹ › year/month/day steppers, a
    clickable date label (opens the hidden native date input), and a
