@@ -71,13 +71,7 @@ var CASTFIELD_SUIT_SVG = {
     EDGE_DIM: 0.22,
     DISTURB_PUSH: 45,
     DISTURB_DUR: 0.7,
-    DISTURB_COOLDOWN: 2.5,
-    FRAME_MIN_MS: 1000 / 30,
-    FRAME_IDLE_MS: 1000 / 12,
-    IDLE_AFTER_MS: 2200,
-    FILTER_BRIGHT_STEPS: 8,
-    FILTER_SAT_STEPS: 5,
-    IDLE_SWAP_MULT: 2
+    DISTURB_COOLDOWN: 2.5
   };
 
   var SUITS = [
@@ -175,14 +169,11 @@ var CASTFIELD_SUIT_SVG = {
 
     var el = document.createElement('div');
     el.className = 'mini';
-    var fx = document.createElement('div');
-    fx.className = 'mini-fx';
     var flip = document.createElement('div');
     flip.className = 'flip';
     var front = buildFront(card), back = buildBack();
     flip.appendChild(front); flip.appendChild(back);
-    fx.appendChild(flip);
-    el.appendChild(fx);
+    el.appendChild(flip);
     field.appendChild(el);
 
     var frac = i / COUNT;
@@ -230,25 +221,9 @@ var CASTFIELD_SUIT_SVG = {
       dir: pick(s_i, 'dir', Math.random() < 0.5 ? -1 : 1),
       flipPhase: pick(s_i, 'flipPhase', Math.random()),
       flipX: pick(s_i, 'flipX', Math.random() < 0.22),
-      scale: pick(s_i, 'scale', 0.72 + Math.random() * 0.72),
-      filterKey: ''
+      scale: pick(s_i, 'scale', 0.72 + Math.random() * 0.72)
     });
   }
-
-  function setMiniVars(o) {
-    o.el.style.setProperty('--cast-bob', o.bob.toFixed(1) + 'px');
-    o.el.style.setProperty('--cast-bob-dur', (4.2 + Math.abs(o.bobPhase % Math.PI)).toFixed(2) + 's');
-    o.el.style.setProperty('--cast-bob-delay', (-o.bobPhase * 1.7).toFixed(2) + 's');
-    o.el.style.setProperty('--cast-tilt-z', o.tiltZ.toFixed(1) + 'deg');
-    o.el.style.setProperty('--cast-flip-y-base', (o.restBase + o.ySpinPhase).toFixed(1) + 'deg');
-    o.el.style.setProperty('--cast-flip-y-span', Math.max(18, Math.abs(o.ySpinRate) * 18).toFixed(1) + 'deg');
-    o.el.style.setProperty('--cast-flip-y-dur', (360 / Math.max(3, Math.abs(o.ySpinRate))).toFixed(2) + 's');
-    o.el.style.setProperty('--cast-flip-x-base', o.xSpinPhase.toFixed(1) + 'deg');
-    o.el.style.setProperty('--cast-flip-x-span', Math.max(10, Math.abs(o.xSpinRate) * 16).toFixed(1) + 'deg');
-    o.el.style.setProperty('--cast-flip-x-dur', (360 / Math.max(2, Math.abs(o.xSpinRate))).toFixed(2) + 's');
-    o.el.style.setProperty('--cast-flip-delay', (-(o.flipPhase || 0) * 8).toFixed(2) + 's');
-  }
-  minis.forEach(setMiniVars);
 
   var visibleKeys = {};
   for (var mv = 0; mv < minis.length; mv++) {
@@ -353,7 +328,7 @@ var CASTFIELD_SUIT_SVG = {
     var breathe = 1 + Math.sin(t * 0.23 + o.breathe) * TUNE.BREATHE;
     var r = o.r * breathe;
     var x = Math.cos(o.a) * r + o.mx;
-    var y = Math.sin(o.a) * r * o.flat + o.my;
+    var y = Math.sin(o.a) * r * o.flat + Math.sin(t * 1.4 + o.bobPhase) * o.bob + o.my;
     var z = Math.sin(o.a + o.yaw) * o.rz;
     if (o.swooper && o.glow > 0.01) z += o.glow * TUNE.SWOOP_Z * sUnit;
     var depth = (Math.sin(o.a + o.yaw) * o.rz + o.rz) / (2 * o.rz);
@@ -364,7 +339,10 @@ var CASTFIELD_SUIT_SVG = {
     var dim = reduce ? o.dimT : o.dim;
     z -= (1 - dim) * TUNE.BAND_RECEDE;
 
+    var yRot = o.restBase + o.ySpinPhase + t * o.ySpinRate;
+    var xRot = o.xSpinPhase + t * o.xSpinRate;
     var cos = 1;
+    o.flip.style.transform = 'rotateY(' + yRot.toFixed(1) + 'deg) rotateX(' + xRot.toFixed(1) + 'deg)';
 
     var vx = -Math.sin(o.a) * r * o.w;
     var vy = Math.cos(o.a) * r * o.flat * o.w;
@@ -372,7 +350,7 @@ var CASTFIELD_SUIT_SVG = {
     var bankY = clampBank(vx * TUNE.BANK_VEL + o.mx * TUNE.BANK_MAG);
     var bankX = clampBank(-(vy * TUNE.BANK_VEL + o.my * TUNE.BANK_MAG));
 
-    var rotZ = o.spinPhase + t * o.spinRate;
+    var rotZ = o.spinPhase + t * o.spinRate + Math.sin(t * 0.6 + o.bobPhase) * o.tiltZ;
     var scale = o.scale * (1 + (o.swooper ? o.glow * 0.22 : o.glow * 0.06))
               * (1 - TUNE.DEPTH_SCALE / 2 + depth * TUNE.DEPTH_SCALE);
     o.el.style.transform =
@@ -383,47 +361,25 @@ var CASTFIELD_SUIT_SVG = {
     o.el.style.opacity = ((0.14 + depth * 0.22 + o.glow * 0.06) * dim).toFixed(3);
 
     var edge = 1 - TUNE.EDGE_DIM * (1 - Math.abs(cos));
-    var bright = (0.7 + depth * 0.38 + o.glow * 0.25) * edge;
-    var sat = 0.9 + depth * TUNE.DEPTH_SAT;
-    var brightQ = Math.round(bright * TUNE.FILTER_BRIGHT_STEPS) / TUNE.FILTER_BRIGHT_STEPS;
-    var satQ = Math.round(sat * TUNE.FILTER_SAT_STEPS) / TUNE.FILTER_SAT_STEPS;
-    var filterKey = brightQ.toFixed(2) + '/' + satQ.toFixed(2);
-    if (filterKey !== o.filterKey) {
-      o.filterKey = filterKey;
-      o.el.style.filter = 'brightness(' + brightQ.toFixed(2) + ') saturate(' + satQ.toFixed(2) + ')';
-    }
+    o.el.style.filter = 'brightness(' + ((0.7 + depth * 0.38 + o.glow * 0.25) * edge).toFixed(2) +
+      ') saturate(' + (0.9 + depth * TUNE.DEPTH_SAT).toFixed(2) + ')';
+    o.el.style.zIndex = String(100 + Math.round(z));
   }
 
   if (reduce) { minis.forEach(function (o) { paint(o, 0); }); return; }
 
   var pointer = { x: 0, y: 0, on: false };
   var ripples = [];
-  var lastActiveAt = performance.now();
-  var idleState = false;
-  function markActive(ts) {
-    lastActiveAt = ts || performance.now();
-    if (idleState) {
-      idleState = false;
-      field.classList.remove('is-idle');
-    }
-  }
-  function setIdle(on) {
-    if (idleState === on) return;
-    idleState = on;
-    field.classList.toggle('is-idle', on);
-  }
   function toField(cx, cy) {
     return { x: cx - window.innerWidth * 0.5, y: cy - window.innerHeight * 0.47 };
   }
   window.addEventListener('pointermove', function (e) {
     var p = toField(e.clientX, e.clientY);
     pointer.x = p.x; pointer.y = p.y; pointer.on = true;
-    markActive();
   }, { passive: true });
   window.addEventListener('pointerdown', function (e) {
     var p = toField(e.clientX, e.clientY);
     pointer.x = p.x; pointer.y = p.y; pointer.on = true;
-    markActive();
     if (e.pointerType !== 'mouse') {
       ripples.push({ x: p.x, y: p.y, t0: performance.now() / 1000 });
       if (ripples.length > 4) ripples.shift();
@@ -436,30 +392,19 @@ var CASTFIELD_SUIT_SVG = {
   window.addEventListener('blur', function () { pointer.on = false; });
 
   window.CASTING_PULSE = function () {
-    markActive();
     ripples.push({ x: 0, y: 0, t0: performance.now() / 1000, mult: TUNE.CAST_PULSE });
     if (ripples.length > 4) ripples.shift();
   };
 
-  var last = null, raf, parX = 0, parY = 0, lastSwap = 0, frameCarry = 0;
+  var last = null, raf, parX = 0, parY = 0, lastSwap = 0;
   function frame(ts) {
     if (!document.body.classList.contains('bg-enabled')) {
       raf = null;
       return;
     }
     if (last === null) last = ts;
-    var hasRipples = ripples.length > 0;
-    var idleNow = !pointer.on && !hasRipples && (ts - lastActiveAt >= TUNE.IDLE_AFTER_MS);
-    setIdle(idleNow);
-    var frameMin = idleNow ? TUNE.FRAME_IDLE_MS : TUNE.FRAME_MIN_MS;
-    frameCarry += ts - last;
+    var dt = Math.min(0.05, (ts - last) / 1000);
     last = ts;
-    if (frameCarry < frameMin) {
-      raf = requestAnimationFrame(frame);
-      return;
-    }
-    var dt = Math.min(0.05, frameCarry / 1000);
-    frameCarry = 0;
     var t = ts / 1000;
 
     for (var k = ripples.length - 1; k >= 0; k--)
@@ -472,8 +417,7 @@ var CASTFIELD_SUIT_SVG = {
     field.style.transform = 'rotateX(' + parX.toFixed(2) + 'deg) rotateY(' + parY.toFixed(2) + 'deg)';
     for (var i = 0; i < minis.length; i++) step(minis[i], dt, t);
 
-    var swapInterval = idleNow ? TUNE.SWAP_INTERVAL * TUNE.IDLE_SWAP_MULT : TUNE.SWAP_INTERVAL;
-    if (reserve.length && t - lastSwap >= swapInterval) {
+    if (reserve.length && t - lastSwap >= TUNE.SWAP_INTERVAL) {
       lastSwap = t;
       var mi = (Math.random() * minis.length) | 0;
       var m = minis[mi];
@@ -498,12 +442,11 @@ var CASTFIELD_SUIT_SVG = {
     }
     if (!reduce && !raf) {
       last = null;
-      frameCarry = 0;
       raf = requestAnimationFrame(frame);
     }
   });
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { if (raf) cancelAnimationFrame(raf); raf = null; }
-    else if (document.body.classList.contains('bg-enabled') && !raf) { last = null; frameCarry = 0; raf = requestAnimationFrame(frame); }
+    else if (document.body.classList.contains('bg-enabled') && !raf) { last = null; raf = requestAnimationFrame(frame); }
   });
 })();

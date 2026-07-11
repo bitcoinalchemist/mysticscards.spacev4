@@ -1446,7 +1446,9 @@
   justify-self: center;
 }
 .browse-cell:hover { transform: translateY(-2px); }
-.browse-cell.sv-found .cal-chip { box-shadow: 0 0 0 2px var(--gold), 0 0 10px 2px rgba(199,154,84,.5); }
+.browse-cell.sv-found .cal-chip {
+  box-shadow: 0 0 0 2px var(--gold), 0 0 10px 2px rgba(199,154,84,.5);
+}
 .browse-cell .cal-chip.joker {
   background: var(--card-paper);
   color: var(--gold-ink);
