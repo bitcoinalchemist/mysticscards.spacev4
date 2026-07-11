@@ -143,9 +143,17 @@
   // Flip the visible panel + the active-chip state. Public so
   // openCompareCard-style external callers can jump straight to a
   // panel (currently just wired from the chip picker itself).
-  function setFinderPanel(name) {
+  function setFinderPanelCollapsed(collapsed) {
+    if (!dom || !dom.panels.wrap || !dom.panels.body) return;
+    dom.panels.wrap.classList.toggle('is-collapsed', !!collapsed);
+    dom.panels.body.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+  }
+
+  function setFinderPanel(name, options) {
     if (!dom || !dom.panels.body) return;
+    options = options || {};
     dom.panels.body.dataset.panelActive = name;
+    setFinderPanelCollapsed(!!options.collapsed ? true : false);
     if (!dom.panels.picker) return;
     dom.panels.picker.querySelectorAll('.ns-chip').forEach(function (b) {
       const on = b.dataset.panel === name;
@@ -159,8 +167,15 @@
     return slot.result ? slot.result.querySelector('.spread-card') : null;
   }
 
+  function solarBaseConst() {
+    if (window.CardsStore && typeof window.CardsStore.getSolarBase === 'function') {
+      return window.CardsStore.getSolarBase() === 12 ? 47 : 55;
+    }
+    return 55;
+  }
+
   function solarValue(month, day) {
-    return 55 - (2 * month + day);
+    return solarBaseConst() - (2 * month + day);
   }
 
   function findCardFromSv(sv) {
@@ -173,7 +188,7 @@
 
   function firstDateForSv(sv) {
     for (let m = 1; m <= 12; m++) {
-      const d = 55 - (2 * m) - sv;
+      const d = solarBaseConst() - (2 * m) - sv;
       if (d >= 1 && d <= DAYS_IN_MONTH[m]) return { month: m, day: d };
     }
     return null;
@@ -830,8 +845,11 @@
         const active = dom.panels.body && dom.panels.body.dataset.panelActive;
         if (isRelationship) {
           if (dom.panels.body) dom.panels.body.dataset.panelActive = 'about';
+          setFinderPanelCollapsed(false);
         } else if (!active || flags[active] === false) {
           setFinderPanel('about');
+        } else {
+          setFinderPanelCollapsed(false);
         }
       }
     }
@@ -950,7 +968,13 @@
       dom.panels.picker.addEventListener('click', function (e) {
         const btn = e.target.closest('.ns-chip[data-panel]');
         if (!btn || btn.classList.contains('is-disabled')) return;
-        setFinderPanel(btn.dataset.panel);
+        const active = dom.panels.body && dom.panels.body.dataset.panelActive;
+        const collapsed = !!(dom.panels.wrap && dom.panels.wrap.classList.contains('is-collapsed'));
+        if (btn.dataset.panel === active) {
+          setFinderPanel(btn.dataset.panel, { collapsed: !collapsed });
+          return;
+        }
+        setFinderPanel(btn.dataset.panel, { collapsed: false });
       });
     }
   });

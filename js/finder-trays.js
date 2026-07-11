@@ -47,6 +47,8 @@
     btn.textContent = _svBase === 12 ? 'base12' : 'base10';
     btn.setAttribute('aria-pressed', _svBase === 12 ? 'true' : 'false');
     btn.setAttribute('title', _svBase === 12 ? 'Solar Values in base 12' : 'Solar Values in base 10');
+    const baseConst = document.getElementById('svBaseConst');
+    if (baseConst) baseConst.textContent = _svBase === 12 ? '47' : '55';
   }
 
   function applySolarBase(base) {
@@ -114,21 +116,18 @@
   function svCalcUpdate() {
     const d = parseInt(document.getElementById('svDay').value, 10);
     const m = parseInt(document.getElementById('svMonth').value, 10);
-    const fEl = document.getElementById('svFormula');
+    const fEl = document.getElementById('svFormulaResult');
+    if (!fEl) return;
     const valid = Number.isInteger(m) && Number.isInteger(d) && m >= 1 && m <= 12 && d >= 1 && d <= 31;
     if (!valid) {
-      const fiftyFive = fmtBase(55);
-      const two = fmtBase(2);
-      fEl.innerHTML = `Solar Value &nbsp;=&nbsp; <strong>${fiftyFive}</strong> &nbsp;&minus;&nbsp; (${two} &times; month &nbsp;+&nbsp; day)`;
+      fEl.innerHTML = '';
       svHighlight(null);
       return;
     }
     const sv = window.solarValue(m, d);
     const idx = sv === 0 ? 52 : sv - 1;
     const name = idx === 52 ? 'The Joker' : `${SPREAD_CARDS[idx].rank} of ${SPREAD_CARDS[idx].suit}`;
-    const fiftyFive = fmtBase(55);
-    const two = fmtBase(2);
-    fEl.innerHTML = `Solar Value &nbsp;=&nbsp; ${fiftyFive} &minus; (${two} &times; ${fmtBase(m)} + ${fmtBase(d)}) &nbsp;=&nbsp; <strong>${fmtBase(sv)}</strong> &nbsp;&rarr;&nbsp; <span class="sv-result-card">${name}</span>`;
+    fEl.innerHTML = `&nbsp;=&nbsp; <strong>${fmtBase(sv)}</strong> &nbsp;&rarr;&nbsp; <span class="sv-result-card">${name}</span>`;
     svHighlight(idx);
   }
 
@@ -148,7 +147,7 @@
 
   function firstDateForSvLocal(sv) {
     for (let m = 1; m <= 12; m++) {
-      const d = 55 - (2 * m) - sv;
+      const d = (_svBase === 12 ? 47 : 55) - (2 * m) - sv;
       if (d >= 1 && d <= window.DAYS_IN_MONTH[m]) return { month: m, day: d };
     }
     return null;
@@ -200,6 +199,26 @@
   function closeOtherTrays(except) {
     Object.keys(TRAYS).forEach(k => { if (k !== except) closeTray(k); });
   }
+
+  function wireSvField(input, max, onAfterInput) {
+    if (!input) return;
+    input.addEventListener('focus', function () {
+      requestAnimationFrame(() => {
+        try { input.select(); } catch (e) {}
+      });
+    });
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\D+/g, '').slice(0, 2);
+      const n = parseInt(input.value, 10);
+      if (!input.value || !Number.isInteger(n)) {
+        onAfterInput();
+        return;
+      }
+      if (n < 1) input.value = '1';
+      else if (n > max) input.value = String(max);
+      onAfterInput();
+    });
+  }
   function openTray(key) {
     closeOtherTrays(key);
     if (key === 'bday') {
@@ -239,10 +258,18 @@
       const b = document.getElementById(pair[0]);
       if (b) b.addEventListener('click', () => toggleTray(pair[1]));
     });
-    ['svDay', 'svMonth'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', svCalcUpdate);
+    const svDay = document.getElementById('svDay');
+    const svMonth = document.getElementById('svMonth');
+    wireSvField(svMonth, 12, function () {
+      if (svDay) {
+        const m = parseInt(svMonth.value, 10);
+        const maxDay = Number.isInteger(m) && window.DAYS_IN_MONTH && window.DAYS_IN_MONTH[m] ? window.DAYS_IN_MONTH[m] : 31;
+        const d = parseInt(svDay.value, 10);
+        if (Number.isInteger(d) && d > maxDay) svDay.value = String(maxDay);
+      }
+      svCalcUpdate();
     });
+    wireSvField(svDay, 31, svCalcUpdate);
     const baseBtn = document.getElementById('svBaseBtn');
     if (baseBtn) baseBtn.addEventListener('click', () => applySolarBase(_svBase === 12 ? 10 : 12));
     const browseGrid = document.getElementById('browseGrid');

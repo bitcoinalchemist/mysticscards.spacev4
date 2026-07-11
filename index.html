@@ -177,8 +177,10 @@
           <div class="finder-tray-wrap" id="deckTrayWrap">
             <div class="finder-tray-min">
               <div class="finder-tray">
-                <div class="tray-inline-head">
+                <div class="tray-inline-head tray-inline-head--solar">
                   <span class="tray-inline-title">Solar Values</span>
+                  <button type="button" class="sv-base-btn" id="svBaseBtn"
+                          aria-pressed="false" aria-label="Toggle Solar Values base" title="Solar Values base">base10</button>
                 </div>
                 <div class="pick-target" id="deckTarget" hidden>
                   <button type="button" class="pick-target-btn is-active" id="deckTargetSelf" data-target="self">You</button>
@@ -187,14 +189,16 @@
                 <div class="sv-calc">
                   <div class="sv-calc-inputs">
                     <div class="sv-calc-main">
-                      <label class="sv-field"><span class="sv-field-lbl">Day</span><input type="number" id="svDay" min="1" max="31" step="1" inputmode="numeric" placeholder="DD" aria-label="Day of month"></label>
-                      <span class="sv-slash" aria-hidden="true">/</span>
-                      <label class="sv-field"><span class="sv-field-lbl">Month</span><input type="number" id="svMonth" min="1" max="12" step="1" inputmode="numeric" placeholder="MM" aria-label="Month"></label>
+                      <div class="sv-formula" id="svFormula" aria-live="polite">
+                        <span class="sv-formula-text">Solar Value = <span id="svBaseConst">55</span> - (</span>
+                        <label class="sv-field"><span class="vh">Day</span><input type="text" id="svDay" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="DD" aria-label="Day of month"></label>
+                        <span class="sv-formula-text">) + 2×(</span>
+                        <label class="sv-field"><span class="vh">Month</span><input type="text" id="svMonth" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="MM" aria-label="Month"></label>
+                        <span class="sv-formula-text">)</span>
+                        <span class="sv-formula-result" id="svFormulaResult"></span>
+                      </div>
                     </div>
-                    <button type="button" class="sv-base-btn" id="svBaseBtn"
-                            aria-pressed="false" aria-label="Toggle Solar Values base" title="Solar Values base">base10</button>
                   </div>
-                  <p class="sv-formula" id="svFormula" aria-live="polite">Solar Value &nbsp;=&nbsp; <strong>55</strong> &nbsp;&minus;&nbsp; (2 &times; month &nbsp;+&nbsp; day)</p>
                 </div>
                 <div class="browse-grid" id="browseGrid"></div>
               </div>

@@ -65,9 +65,8 @@
   }
   function formatViewDate(ms) {
     const d = new Date(ms);
-    const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
     const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
-    return `${wd}, ${d.getDate()} ${mo} ${d.getFullYear()}`;
+    return `${d.getDate()} ${mo} ${d.getFullYear()}`;
   }
   function isoFromMs(ms) {
     const d = new Date(ms);
