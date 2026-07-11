@@ -46,6 +46,7 @@
   let _selectedPartner = null;
   let _finderOverride = null;
   let _finderSnapshot = null;
+  let _finderBirthLabel = '';
   let _transitionSource = null;
   // When a snapshot is restored (reset button), this remembers which side
   // the overridden card came from so the solo→triptych entrance sends that
@@ -873,14 +874,17 @@
   // js/finder-trays.js (Calendar). target 'partner' fills the partner slot
   // (opening it via toggleRel() first if relationship mode is off);
   // anything else fills "you".
-  function loadDateInFinder(month, day, target) {
+  function loadDateInFinder(month, day, target, options) {
     if (!dom) dom = cacheDom();
     if (!dom) return;
+    options = options || {};
     const isPartner = target === 'partner';
     const slot = isPartner ? dom.partner : dom.you;
     if (!slot.month || !slot.day) return;
     if (isPartner && !getFinderUiState().relOn) setRelationshipMode(true);
     if (!isPartner) {
+      _finderBirthLabel = options.name ? String(options.name).trim() : '';
+      window.finderBirthLabel = _finderBirthLabel;
       clearYouTransientState();
     }
     syncSlotDate(slot, month, day);
@@ -890,6 +894,7 @@
   window.loadCardInFinder = loadCardInFinder;
   window.refreshFinderGridHighlights = refreshFinderGridHighlights;
   window.loadDateInFinder = loadDateInFinder;
+  window.finderBirthLabel = _finderBirthLabel;
   // Small read-only helpers the new finder-adjacent modules (birthdays,
   // calendar, solar-value calculator) need but that otherwise live only in
   // this file's closure.

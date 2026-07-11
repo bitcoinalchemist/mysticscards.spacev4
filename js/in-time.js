@@ -41,6 +41,14 @@
   'use strict';
 
   const WD_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const IT_DEFAULT_FOCUS = 'daily';
+  const IT_READING_SOURCES = {
+    '13-year': typeof window !== 'undefined' ? window.THIRTEEN_YEAR_CARDS : null,
+    '7-year': typeof window !== 'undefined' ? window.SEVEN_YEAR_CARDS : null,
+    yearly: typeof window !== 'undefined' ? window.YEAR_CARDS : null,
+    '52-day': typeof window !== 'undefined' ? window.PERIOD_CARDS : null,
+    daily: typeof window !== 'undefined' ? window.DAILY_CARDS : null
+  };
 
   // ── Date-scroll state ────────────────────────────────────────────
   // viewDate is a local-midnight epoch (ms). renderInTime always shows
@@ -50,6 +58,7 @@
   // themselves) can trigger a re-render.
   let viewDate = localMidnight(new Date());
   let _lastCard = null;
+  let _activeLabel = IT_DEFAULT_FOCUS;
 
   function isViewingToday() {
     return viewDate === localMidnight(new Date());
@@ -112,6 +121,12 @@
     const root = document.getElementById('fInTime');
     if (!root) return;
     root.addEventListener('click', function (ev) {
+      const focusBtn = ev.target.closest('[data-it-focus]');
+      if (focusBtn) {
+        _activeLabel = focusBtn.getAttribute('data-it-focus') || IT_DEFAULT_FOCUS;
+        renderInTime(_lastCard);
+        return;
+      }
       const navBtn = ev.target.closest('.it-date-nav');
       if (navBtn) {
         const dy = parseInt(navBtn.dataset.shiftYear  || '0', 10);
@@ -184,6 +199,49 @@
     <p class="it-empty-note">Add a <b>DD/MM</b>, load a saved birthday, or pick a calendar date to see the age-based In Time cards for this selection.</p>`;
   }
 
+  function inTimeLede(asOf, age) {
+    const label = typeof window !== 'undefined' && typeof window.finderBirthLabel === 'string'
+      ? window.finderBirthLabel.trim()
+      : '';
+    const prefix = label
+      ? `${label.replace(/'/g, '\u2019')}\u2019s cards as of`
+      : 'The cards as of';
+    return `${prefix} <em>${asOf}</em>, age ${age}.`;
+  }
+
+  function readingKey(card) {
+    return card ? `${card.rank}_${card.suit}` : '';
+  }
+
+  function fallbackReadingHTML(card, label) {
+    const key = readingKey(card);
+    const reading = key && typeof CARD_READINGS !== 'undefined' ? CARD_READINGS[key] : null;
+    const body = reading && reading.personality
+      ? reading.personality.split(/\n\n+/).map(p => `<p>${p}</p>`).join('')
+      : '<p>This card has no saved In Time text for this horizon yet.</p>';
+    return `<div class="it-reading-head">
+      <div class="it-reading-kicker">${label}</div>
+      <h4 class="it-reading-title">${card ? card.name : 'Card reading'}</h4>
+    </div>
+    <div class="it-reading-copy">${body}</div>`;
+  }
+
+  function inTimeReadingHTML(pc) {
+    const c = CARDS[pc.idx];
+    if (!c) return '';
+    const src = IT_READING_SOURCES[pc.label.toLowerCase()] || null;
+    const key = readingKey(c);
+    const entry = src && key ? src[key] : null;
+    const text = entry && entry.planets && pc.planet ? entry.planets[pc.planet] : '';
+    if (!text) return fallbackReadingHTML(c, pc.label);
+    return `<div class="it-reading-head">
+      <div class="it-reading-kicker">${pc.label}</div>
+      <h4 class="it-reading-title">${c.name}</h4>
+      <div class="it-reading-meta">${pc.planet} · ${pc.sub}</div>
+    </div>
+    <div class="it-reading-copy"><p>${text}</p></div>`;
+  }
+
   function panelHTML(card) {
     const date = readFinderDate();
     if (!date) return missingDateHTML();
@@ -247,15 +305,20 @@
       { idx: dIdx,     label: 'Daily',   planet: SPREAD_PLANETS[dPos],    sub: WD_LONG[todayWD] }
     ];
 
+    const availableLabels = cards.map(pc => pc.label.toLowerCase());
+    if (!availableLabels.includes(_activeLabel)) _activeLabel = IT_DEFAULT_FOCUS;
+    const active = cards.find(pc => pc.label.toLowerCase() === _activeLabel) || cards[cards.length - 1];
+
     const rowHTML = cards.map(pc => {
       const c = CARDS[pc.idx];
       const face = c ? spreadCardPips(c) : '';
       const glyph = pc.planet ? `<span class="it-planet-glyph" title="${pc.planet}">${SPREAD_PLANET_SYM[pc.planet]}</span>` : '<span class="it-planet-glyph it-planet-glyph-empty" aria-hidden="true">&#9679;</span>';
       const planetLine = pc.planet ? `<div class="it-planet-name" title="${pc.planet}">${pc.planet}</div>` : '';
+      const slug = pc.label.toLowerCase();
       return `<div class="it-col" data-label="${pc.label.toLowerCase()}">
         ${glyph}
         <div class="it-label">${pc.label}</div>
-        <div class="spread-card it-card ${c ? c.suit : ''}" title="${c ? c.name : ''}">${face}</div>
+        <button type="button" class="spread-card it-card ${c ? c.suit : ''}${slug === _activeLabel ? ' is-active' : ''}" data-it-focus="${slug}" title="${c ? c.name : ''}" aria-pressed="${slug === _activeLabel ? 'true' : 'false'}">${face}</button>
         ${planetLine}
         <div class="it-sub">${pc.sub}</div>
       </div>`;
@@ -267,9 +330,10 @@
     const asOf = asOfDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     return `<div class="it-header">
       <h3 class="it-title">In Time</h3>
-      <p class="it-lede">The cards you're ruled by as of <em>${asOf}</em>, age ${age}.</p>
+      <p class="it-lede">${inTimeLede(asOf, age)}</p>
     </div>
     <div class="it-row">${rowHTML}</div>
+    <div class="it-reading">${inTimeReadingHTML(active)}</div>
     ${dateNavHTML()}`;
   }
 

@@ -58,7 +58,7 @@
       setAge(ageFromBirthYear(entry.year, entry.month, entry.day));
     }
     if (typeof window.loadDateInFinder !== 'function') return;
-    window.loadDateInFinder(entry.month, entry.day, target);
+    window.loadDateInFinder(entry.month, entry.day, target, { name: entry.name });
     if (typeof window.closeFinderTray === 'function') window.closeFinderTray('bday');
   }
 
