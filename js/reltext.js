@@ -1,5 +1,5 @@
 // reltext.js — relationship bond text keyed by composite result card.
-// Ported from v3 on 2026-07-10.
+// Added 2026-07-10.
 
 window.REL_TEXT = {
   'A_hearts': {

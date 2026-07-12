@@ -5,8 +5,8 @@
                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const DAYS_IN_MONTH = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-  // Populate CARDS[i].dates (ported from v3's buildDates in finder.js) —
-  // v4's CARDS array shipped with every entry's `dates` field as a stray
+  // Populate CARDS[i].dates (mirrors the old buildDates helper) —
+  // the CARDS array shipped with every entry's `dates` field as a stray
   // literal '', so nothing downstream (About header, Life Script) ever
   // had a birth-date list to show. Every real calendar date maps to
   // exactly one card via the solar-value formula, so walk the whole
@@ -464,10 +464,10 @@
     }
   }
 
-  // About panel — the ported v3 reading. Content populated whenever a
+  // About panel — the card reading. Content populated whenever a
   // card is picked (solo or triptych); panel visibility is controlled
-  // by the tab wrapper #fPanels. The Joker now has a full reading entry
-  // (CARD_READINGS['✦_joker'], restored from v3) so it renders kws /
+  // by the tab wrapper #fPanels. The Joker has a full reading entry
+  // (CARD_READINGS['✦_joker']) so it renders kws /
   // personality / strengths+challenges same as any other card.
   //
   // Returns true if the panel has renderable content, false if it

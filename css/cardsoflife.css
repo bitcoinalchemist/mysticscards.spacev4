@@ -496,7 +496,7 @@
 .finder-person[data-role="partner"] { display: none; }
 .finder.rel-on .finder-person[data-role="partner"] { display: flex; }
 
-/* ── Finder result tabs (ported from v3 ns-picker pattern 2026-07-10)
+/* ── Finder result tabs (chip picker pattern, added 2026-07-10) ─────
    Wrapper #fPanels holds the chip picker + a body with
    `data-panel-active`. Rules further down toggle each panel's
    visibility from that attribute; the chip picker itself is a shared
@@ -617,7 +617,7 @@
 .ns-panel.is-empty > *:not(.ns-panel-empty) { display: none; }
 .ns-panel.is-empty .ns-panel-empty { display: block; }
 
-/* ── Finder About panel (ported from v3 reading data 2026-07-10) ───
+/* ── Finder About panel (added 2026-07-10) ──────────────────────────
    Renders the picked card's keywords, personality, strengths (Light)
    and challenges (Shadow). Shown only in solo mode under the result
    card; hidden in triptych mode. Joker leaves the panel empty. */
@@ -724,11 +724,11 @@
   .finder-about-lightshadow { grid-template-columns: 1fr; }
 }
 
-/* ── Finder Olney panel (ported from v3 css/cardsoflife.css 2026-07-10)
+/* ── Finder Olney panel (added 2026-07-10) ──────────────────────────
    The Richmond 1893 "Mystic Test Book" reading. Two pages on desktop
-   (delineation left, engraved plate right); stacks on mobile. Font
-   substitutions: v3 uses Roboto Slab + Rye; v4 falls back to the site
-   serif (Lora) so no extra webfont hit for this first pass. */
+   (delineation left, engraved plate right); stacks on mobile. Uses the
+   site serif (Lora) rather than a dedicated webfont for this reading,
+   so there's no extra font-loading hit for this panel. */
 .finder-olney { color: var(--secondary); }
 .olney-panel { padding: .25rem 0 .2rem; }
 .olney-sun { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-bottom: .55rem; }
@@ -870,7 +870,7 @@
 
 /* Book-style cards: drop the corner rank indices, trim the parchment
    margin so pips fill more of the card. Grown court figure with pips
-   pinned toward the corners; matches v3's engraved-plate look. */
+   pinned toward the corners, matching an engraved-plate look. */
 .olney-plate .spread-card .card-corner,
 .olney-cardface .card-corner { display: none; }
 .olney-plate .card-pips,  .olney-cardface .card-pips { top: 9%; bottom: 9%; left: 8%; right: 8%; }
@@ -1048,24 +1048,13 @@
 /* ── Finder In Time panel (2026-07-10) ─────────────────────────────
    Five personal cards: 13-Year / 7-Year / Yearly / 52-Day / Daily,
    computed from the picked card's solar value and the age at
-   the date-nav bar's viewDate (see .it-date-bar below — ported from
-   v3 2026-07-10). The period-reading popup (click a card to open its
+   the date-nav bar's viewDate (see .it-date-bar below, added
+   2026-07-10). The period-reading popup (click a card to open its
    full reading, with its own prev/next through the timeline) is still
    deferred — needs the compare-card popup chrome + lazy-loaded
-   reading data, neither of which exist in v4 yet. */
+   reading data, neither of which exist yet. */
 .finder-intime { color: var(--secondary); }
 .it-header { text-align: center; margin-bottom: 1rem; }
-.it-title {
-  margin: 0; font-family: var(--serif); font-weight: 500;
-  font-size: 1.05rem; letter-spacing: .06em;
-  color: var(--gold-ink);
-}
-.it-lede {
-  margin: .35rem 0 0;
-  font-family: var(--serif); font-style: italic;
-  font-size: .85rem; color: var(--muted);
-}
-.it-lede em { color: var(--secondary); font-style: normal; }
 .it-row {
   --it-card-w: calc(560px * var(--quad-scale, 1) / 7);
   display: grid;
@@ -1133,7 +1122,9 @@
   margin: 1.35rem auto 0;
   text-align: center;
   padding: 0 0 1rem;
-  border-bottom: 1px solid var(--rule);
+  height: 17.5rem;
+  display: flex;
+  flex-direction: column;
 }
 .it-reading-head {
   display: flex;
@@ -1192,6 +1183,11 @@
   color: var(--muted);
 }
 .it-reading-copy {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 11rem;
+  overflow-y: auto;
+  padding-right: .35rem;
   font-family: var(--serif);
   font-size: .98rem;
   line-height: 1.72;
@@ -1212,6 +1208,7 @@
   .it-reading {
     margin-top: 1rem;
     padding-bottom: .85rem;
+    height: 16rem;
   }
   .it-reading-head { gap: .5rem; }
   .it-reading-shift {
@@ -1220,7 +1217,7 @@
     font-size: .95rem;
   }
   .it-reading-title { font-size: 1rem; }
-  .it-reading-copy { font-size: .92rem; line-height: 1.64; }
+  .it-reading-copy { font-size: .92rem; line-height: 1.64; max-height: 10.2rem; }
 }
 
 /* ── Solar Time sub-panel (2026-07-11) — a toggle inside the Time
@@ -1325,39 +1322,99 @@
   text-align: center; max-width: 8.5rem; line-height: 1.3;
 }
 
-/* ── In Time date-scroll nav (2026-07-10, ported from v3's
-   .pcards-date-bar/.pdate-*) — ‹ › year/month/day steppers, a
+/* ── In Time date-scroll nav (2026-07-10) — ‹ › year/month/day steppers, a
    clickable date label (opens the hidden native date input), and a
    "Today" reset that only shows once you've scrolled away from today. */
 .it-date-bar {
-  display: flex; align-items: center; justify-content: center;
-  flex-wrap: nowrap; gap: .35rem;
+  display: grid;
+  grid-template-columns: minmax(7.4rem, 9rem) minmax(8.8rem, 10.4rem) minmax(7.4rem, 9rem);
+  align-items: stretch;
+  justify-content: center;
+  gap: .34rem;
   margin-top: 1.5rem;
-  max-width: 100%;
+  max-width: min(100%, 30rem);
+  width: 100%;
+  margin-inline: auto;
+  padding: .24rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(39,30,68,.92), rgba(24,19,45,.96));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+.it-date-cluster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1px;
+  padding: 1px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.06);
+  overflow: hidden;
 }
 .it-date-nav {
-  width: var(--ctl-round-size); height: var(--ctl-round-size); padding: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 50%; line-height: 1;
-  font-family: var(--serif); font-size: var(--ctl-round-font);
-  color: var(--secondary); cursor: pointer;
-  transition: all var(--ease);
+  min-width: 0;
+  min-height: 38px;
+  padding: .2rem .24rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20,16,36,.95);
+  border: 0;
+  border-radius: 0;
+  line-height: 1;
+  font-family: var(--sans);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease), transform var(--ease);
 }
-.it-date-nav:hover { background: var(--border); color: var(--text); }
-/* Month-step buttons use ‹‹ / ›› (two chevrons) — tighten letter-spacing
-   so the pair fits comfortably inside the 30px circle. */
-.it-date-nav[data-shift-month] { letter-spacing: -.18em; padding-right: .18em; }
+.it-date-nav:hover {
+  background: rgba(58,46,96,.95);
+  color: var(--text);
+  transform: translateY(-1px);
+ }
+.it-date-nav-mark {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1rem;
+}
+.it-date-nav[data-shift-month] .it-date-nav-mark {
+  letter-spacing: -.18em;
+  padding-right: .18em;
+}
 .it-date-label {
-  font-family: var(--serif); font-size: var(--ctl-date-font);
-  padding: var(--ctl-date-pad-y) var(--ctl-date-pad-x); min-width: var(--ctl-date-minw); text-align: center;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-sm); line-height: 1.3;
-  color: var(--text); cursor: pointer;
-  transition: background var(--ease), border-color var(--ease);
-  flex: 0 1 auto;
+  font-family: var(--serif);
+  font-size: .84rem;
+  padding: .36rem .5rem;
+  min-width: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .08rem;
+  background: rgba(20,16,36,.92);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  line-height: 1.2;
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--ease), border-color var(--ease), color var(--ease);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
 }
-.it-date-label:hover { background: var(--surface-alt); border-color: var(--rule-strong); }
+.it-date-label:hover { background: rgba(58,46,96,.92); border-color: rgba(255,255,255,.16); color: #fff; }
+.it-date-age {
+  display: block;
+  font-family: var(--sans);
+  font-size: .54rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.it-date-value {
+  display: block;
+}
 .it-date-input {
   position: absolute; opacity: 0; pointer-events: none;
   width: 0; height: 0; padding: 0; margin: 0; border: 0;
@@ -1374,16 +1431,28 @@
 .it-date-today:hover { text-decoration: underline; }
 @media (max-width: 420px) {
   .it-date-bar {
-    gap: .24rem;
+    grid-template-columns: minmax(0, 1fr) minmax(5rem, 5.9rem) minmax(0, 1fr);
+    gap: .16rem;
+    padding: .14rem;
   }
-  .it-date-bar {
-    align-items: stretch;
-  }
-  .it-date-label {
+  .it-date-cluster {
+    border-radius: 10px;
     min-width: 0;
-    max-width: none;
+  }
+  .it-date-nav {
+    min-height: 32px;
+    padding: .08rem .04rem;
+  }
+  .it-date-nav-mark { font-size: .82rem; }
+  .it-date-label {
+    padding: .24rem .22rem;
+    font-size: .7rem;
     line-height: 1.2;
-    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .it-date-age {
+    font-size: .46rem;
+    letter-spacing: .1em;
   }
   .it-date-today {
     margin-top: .6rem;
@@ -1394,7 +1463,7 @@
 
 /* ── Finder tool trays (Saved Birthdays / Calendar / Solar Values) ──
    2026-07-09 first functional pass — placement and visual design are
-   deliberately plain for now (see v4/dev/CHANGELOG.txt); the priority
+   deliberately plain for now (see dev/CHANGELOG.txt); the priority
    was getting all three pickers working end to end. */
 .finder-tools {
   display: flex; align-items: center; justify-content: center;
@@ -1930,7 +1999,7 @@
   }
 }
 
-/* ── Card Elements (2026-07-11, ported from v3) — four suits always
+/* ── Card Elements (added 2026-07-11) — four suits always
    shown at the foot of the page; selecting a suit reveals the A–K ranks
    + the planets rows and fills a reading panel. Modern | Olney voice
    toggle. Mirrors the I Ching trigram row. Logic: js/elements.js. */

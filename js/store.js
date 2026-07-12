@@ -39,10 +39,10 @@
     setVoice: function (v) { _set(K_VOICE, v === 'olney' ? 'olney' : 'modern'); },
 
     // ── Saved birthdays ──────────────────────────────────────────
-    // JSON array of {id, name, day, month, year}. Same key as v3's store
-    // (cardsoflife_births) so a saved list carries over if this page and
-    // the root site are ever served from the same origin. Corrupt JSON
-    // resolves to an empty list rather than throwing.
+    // JSON array of {id, name, day, month, year}, keyed cardsoflife_births
+    // so a saved list carries over if this page and the root site are
+    // ever served from the same origin. Corrupt JSON resolves to an
+    // empty list rather than throwing.
     loadBirths: function () {
       try { return JSON.parse(_get(K_BIRTHS)) || []; } catch (e) { return []; }
     },

@@ -1,11 +1,11 @@
 // iching-trigrams.js — the 8-trigram reference row at the foot of
-// v3/iching.html: eight 3-line figures (Fu Xi binary 0-7), with a
+// iching.html: eight 3-line figures (Fu Xi binary 0-7), with a
 // detail popup that shows the English/pinyin/hanzi names + attributes
 // + full paragraph text when a cell is clicked.
 //
-// v3 reconstruction step 4 — third physical extraction from
-// v3/js/iching.js. Data (window.TRIGRAMS_DATA) moved into
-// ichingdata.js; this file is pure logic + wiring.
+// Extracted from an earlier iching.js monolith as its own physical
+// module. Data (window.TRIGRAMS_DATA) moved into ichingdata.js; this
+// file is pure logic + wiring.
 //
 // Loaded as a classic script AFTER iching-hexagrams.js (needs
 // trigramSVG) and AFTER ichingdata.js (needs window.TRIGRAMS_DATA).

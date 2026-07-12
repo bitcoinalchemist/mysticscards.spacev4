@@ -3,8 +3,8 @@
 // vs Olney·1893 voice toggle, and the trigram-style expander that fills the
 // suit/number/planet reading panels below the rows.
 //
-// v3 reconstruction step 4 — first ES-module extraction from
-// v3/js/cardsoflife.js (see dev/Roadmaps/v3-reconstruction-plan.md).
+// First ES-module extraction from the page's original cardsoflife.js
+// monolith.
 //
 // Contains two coordinated controllers that used to live in two IIFEs at
 // different points in cardsoflife.js:
@@ -37,7 +37,7 @@
 //   window.closePlanetPanel()       — close the planet panel
 //   window.rerenderPlanet()         — re-render the open planet (voice swap)
 //
-// Storage: goes through window.CardsStore (v3/js/store.js). Previously two
+// Storage: goes through window.CardsStore (js/store.js). Previously two
 // direct localStorage calls at the tail of cardsoflife.js escaped step 3
 // (getItem at old line 2895, setItem at 3034) — routed here instead.
 

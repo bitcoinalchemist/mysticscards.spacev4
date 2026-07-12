@@ -24,8 +24,9 @@
   var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   var COURTS = ['J','Q','K'];
 
-  // v3 assumed `escapeHtml` was a classic-script global — it's actually
-  // IIFE-scoped inside iching-hexagrams.js and never reached here.
+  // An earlier version assumed `escapeHtml` was a classic-script global —
+  // it's actually IIFE-scoped inside iching-hexagrams.js and never reached
+  // here.
   // Missing helper crashed movingLinesHTML / renderGoverningLine
   // whenever a cast produced changing lines, which halted the animation
   // and stopped the next cast from starting. Local copy fixes both.
@@ -112,7 +113,7 @@
   }
 
   // ── Reading history ─────────────────────────────────────
-  // Backing storage moved to v3/js/iching-store.js (window.IChingStore).
+  // Backing storage moved to js/iching-store.js (window.IChingStore).
   // Thin aliases keep the many local call sites unchanged for this step.
   function loadHistory() { return IChingStore.loadHistory(); }
   function saveHistory(list) { IChingStore.saveHistory(list); }
@@ -162,10 +163,10 @@
       : '<div class="hist-empty">No saved readings yet.</div>';
 
     // Backup footer — present even when empty (importing on a fresh device
-    // is exactly the empty case). MCBackup covered every saved store site-
-    // wide in v3 (readings, birthdays, prefs, scores, progress); v4 hasn't
-    // shipped it yet, so the Export / Import buttons are hidden when it's
-    // not on window. Restore once MCBackup is ported.
+    // is exactly the empty case). MCBackup previously covered every saved
+    // store site-wide (readings, birthdays, prefs, scores, progress); it
+    // hasn't shipped here yet, so the Export / Import buttons are hidden
+    // when it's not on window. Restore once MCBackup is added.
     var hasBackup = !!window.MCBackup;
     panel.innerHTML = items +
       '<div class="hist-foot">' +
@@ -486,7 +487,7 @@
   }
 
   // Card face rendering — SUIT_CLASS, PIP_LAYOUTS, COURT_PIP_*, and
-  // cardFaceHTML MOVED to v3/js/iching-cards.js (2026-07-07). The
+  // cardFaceHTML MOVED to js/iching-cards.js (2026-07-07). The
   // Oracle IIFE below reads SUIT_CLASS + cardFaceHTML as bare classic-
   // script globals via shared lexical scope.
 
@@ -769,13 +770,14 @@
     sBtn.style.visibility = 'visible';
   })();
 
-  // ── Pure-function surface for the golden test + sweeps ─────────
+  // ── Pure-function surface for future tests ──────────────────────
   // buildDeck / lineType / hexVal / governingLine are the deterministic
-  // engine primitives. Exposing them on window lets dev/v3-tests/
-  // iching-golden.mjs lock their outputs across refactors, and lets
-  // iching-oracle-sweep.mjs exercise them without needing to fake
-  // an entire cast. They stay module-private otherwise — no other file
-  // on the page reads them directly.
+  // engine primitives. Exposing them on window would let a golden test
+  // lock their outputs across refactors, and let a targeted sweep
+  // exercise them without needing to fake an entire cast, if/when that
+  // harness gets built (see CLAUDE.md's Test harness section). They
+  // stay module-private otherwise — no other file on the page reads
+  // them directly.
   window.buildDeck     = buildDeck;
   window.lineType      = lineType;
   window.hexVal        = hexVal;
@@ -784,6 +786,6 @@
 })();
 
 // The 8-trigram reference row (bottom of the page) MOVED to
-// v3/js/iching-trigrams.js (2026-07-07). Its TRIGRAMS data moved to
+// js/iching-trigrams.js (2026-07-07). Its TRIGRAMS data moved to
 // ichingdata.js as window.TRIGRAMS_DATA.
 

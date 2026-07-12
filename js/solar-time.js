@@ -1,7 +1,7 @@
 // solar-time.js — Solar-day birth-card correction for the In Time section.
 //
-// Ported 2026-07-11 from the v2 "Super" astrology.html "Solar Day"
-// feature. Given a birth date + clock time + birthplace, it uses the
+// Added 2026-07-11, adapting the earlier "Super" astrology.html "Solar
+// Day" feature. Given a birth date + clock time + birthplace, it uses the
 // Astronomy Engine to find the Sun's lower transits (solar midnights) at
 // the birth longitude; the solar day is named by the LOCAL DATE AT SOLAR
 // NOON, and THAT date gives the birth card. A birth close to midnight can

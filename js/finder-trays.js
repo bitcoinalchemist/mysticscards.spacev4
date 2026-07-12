@@ -1,14 +1,14 @@
-// finder-trays.js — the Finder's inline picker trays for v4. Saved
+// finder-trays.js — the Finder's inline picker trays. Saved
 // Birthdays, Calendar, and Solar Values all unfold under the Finder, with
 // one tray open at a time.
 //
-// v4 first pass (2026-07-09), then inline Saved Birthdays / flatter tray
+// First pass (2026-07-09), then inline Saved Birthdays / flatter tray
 // polish:
 //   - Calendar picks a specific date and honours the You/Partner target
 //     from js/birthdays.js (window.bdayTarget).
 //   - Solar Values shows the live formula + a full 52-card + Joker browse
 //     grid, and now honours the shared You/Partner target too.
-//   - The deck grid is a plain 7-wide wrap (rank+suit chips), not v3's
+//   - The deck grid is a plain 7-wide wrap (rank+suit chips), not a
 //     planetary crown-row layout — visual polish to reconsider later,
 //     not required to be usable now.
 //

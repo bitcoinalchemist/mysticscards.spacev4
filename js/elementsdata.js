@@ -1,9 +1,9 @@
 // elementsdata.js — data for the Card Elements section (js/elements.js).
 // NUMEROLOGY (13 ranks) + SUIT_MEANINGS (4 suits), each with the modern
 // Sage reading and Olney H. Richmond's 1893 words attached as .olney for
-// the Modern | Olney voice toggle. Extracted verbatim from the v3
-// cardsdata.js 2026-07-11. Pure data; sets window.NUMEROLOGY +
-// window.SUIT_MEANINGS. Loaded before js/elements.js.
+// the Modern | Olney voice toggle. Split out of cardsdata.js 2026-07-11.
+// Pure data; sets window.NUMEROLOGY + window.SUIT_MEANINGS. Loaded before
+// js/elements.js.
 
 const NUMEROLOGY = {
   'A': { n:1, label:'Ace', keywords:['Desire','Self','Beginning','Initiative'],

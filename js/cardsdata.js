@@ -137,7 +137,7 @@ const COURT_PIP_POS = {};
 function spreadCardPips(c) {
   const { rank, sym } = c;
   if (c.suit === 'joker') {
-    // Original "Quinta Essentia" art (ported verbatim from v3). The classic
+    // Original "Quinta Essentia" art. The classic
     // Joker corners are drawn live like a court index: a Jack-style "J"
     // (same serif + position as J/Q/K) with "oker" descending vertically,
     // mirrored bottom-right.
@@ -172,7 +172,7 @@ function spreadCardPips(c) {
     ).join('') + '</div>';
 }
 
-// ── About / Reading data (ported from v3 cardsdata.js) ─────────────
+// ── About / Reading data ─────────────────────────────────────────────
 // 52 card readings — one entry per Ace..King × Hearts/Clubs/Diamonds/
 // Spades — plus the Joker (pushed below, keyed '✦_joker'). Locked Sage
 // voice. Subtitle/vow for every card, including the Joker, live in the
@@ -505,8 +505,8 @@ const CARDS = [
     challenges:['The weight of this card is real and requires sustained, honest inner work throughout life','Reluctance to bend even to constructive guidance; autonomy is a double-edged gift','The path includes serious physical, psychological, and life challenges that cannot be bypassed or rushed'] },
 ];
 
-// Joker — outside the 52-card system (ported verbatim from v3 finder.js,
-// which pushed this at runtime; kept here so cardsdata.js is the single
+// Joker — outside the 52-card system (kept here, rather than pushed at
+// runtime from finder.js, so cardsdata.js is the single
 // source of truth for reading data). Keyed '✦_joker' via the CARD_READINGS
 // build below, matching SUBTITLES / VOWS' '✦_joker' key.
 CARDS.push({
@@ -625,7 +625,7 @@ const VOWS = {
 };
 window.VOWS = VOWS;
 
-// ── Life Script connection helpers (ported from v3 2026-07-10) ────
+// ── Life Script connection helpers (added 2026-07-10) ──────────────
 // Sage-voice gloss for each planetary connection (one card sitting
 // in another's Life Script). Same locked register as REL_TEXT.
 const PLANET_CONN_TEXT = {

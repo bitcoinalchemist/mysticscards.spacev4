@@ -3,8 +3,8 @@
 // As of 2026-07-11 this no longer carries its own copy of the pip
 // layouts / court positioning. It now DELEGATES to cardsdata.js's
 // `spreadCardPips` so the I Ching faces are byte-identical to the Cards
-// of Life page and can never drift again. (The old fork was an earlier
-// port from v3/js/iching.js and had gone stale — e.g. it enlarged the
+// of Life page and can never drift again. (The old fork was an earlier,
+// separately-maintained copy that had gone stale — e.g. it enlarged the
 // pip on every ace instead of only the Ace of Spades.) cardsdata.js is
 // loaded before this file, so `spreadCardPips` + `pipMark` are available
 // as classic-script globals. The card face internals (corners, pips,

@@ -531,7 +531,7 @@ body.starry .site-footer { background: transparent; border-top-color: transparen
 }
 
 /* ── Shared hexagram popup chrome ────────────────────────────────
-   Ported from v3 css/site.css (2026-07-10). Used by iching.html
+   Added 2026-07-10. Used by iching.html
    (hex reference popup) and seedoracle.html (per-hexagram judgment).
    Each page can still layer its own `.hx-fig-svg` colour overrides. */
 .hx-overlay {

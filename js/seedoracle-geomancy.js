@@ -3,13 +3,13 @@
 // row; classical dot-pair for the detail popup), and the reference row
 // itself with its click-to-open detail popup.
 //
-// v3 reconstruction — extracted from seedoracle.js on 2026-07-08. The
+// Extracted from seedoracle.js on 2026-07-08. The
 // IIFE was already fully self-contained at the tail of the file, so
 // this is a clean lift: no signature changes, no aliasing needed. Its
 // public API on window (GEO_FIGURES + GEO_FIG_SVG) and its callback to
 // the journey IIFE (window._soGeoReady) are unchanged.
 //
-// Load order: after js/seedoracle.js in v3/seedoracle.html — the
+// Load order: after js/seedoracle.js in seedoracle.html — the
 // journey IIFE registers window._soGeoReady before this file runs, and
 // GEO_FIGURES/GEO_FIG_SVG are only read inside the journey's
 // renderEntropy() (a post-boot event handler), so being LATER is fine.

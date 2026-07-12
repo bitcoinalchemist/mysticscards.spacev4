@@ -16,7 +16,7 @@
 // is now the only length this page casts. state.len stays as a variable
 // so cs / hexCount / castFree still read cleanly.)
 //
-// Reads from window (loaded in this order in v3/seedoracle.html):
+// Reads from window (loaded in this order in seedoracle.html):
 //   window.BIP39_WORDS    — bip39-words.js  (2048-word list)
 //   window.BTC            — bip84.js       (address derivation)
 //   window.ICHING_JUDGMENTS — ichingjudgments.js
@@ -27,7 +27,7 @@
 (function () {
   'use strict';
   // Bitcoin math (BIP39, SHA-256, PBKDF2 seed) lives in
-  // v3/js/seedoracle-bitcoin.js — window.SeedOracleBitcoin. Aliased
+  // js/seedoracle-bitcoin.js — window.SeedOracleBitcoin. Aliased
   // here so the many call sites downstream read unchanged.
   var _btc = window.SeedOracleBitcoin || {};
   var WL = _btc.WL || (window.BIP39_WORDS || []);
@@ -44,7 +44,7 @@
   function deriveSeed(mnemonic) { _btc.deriveSeed(mnemonic, document.getElementById('soSeed')); }
 
   // Hexagram SVG renderers + suit mapping live in
-  // v3/js/seedoracle-hexagrams.js — window.SeedOracleHex. Aliased
+  // js/seedoracle-hexagrams.js — window.SeedOracleHex. Aliased
   // here so hexagramSVG / slotHexSVG / suitOf / suitPip / VAL_TO_KW
   // / SUITS / SUIT_ORDER etc. read unchanged from every call site.
   var _hex = window.SeedOracleHex || {};
@@ -59,8 +59,8 @@
   var JD = window.ICHING_JUDGMENTS || {};   // direct Zhou Yi judgment translations, by King Wen
 
 
-  // ── SHA-256 + BIP39 + deriveSeed MOVED to v3/js/seedoracle-bitcoin.js
-  // and hexagram SVG + suit mapping MOVED to v3/js/seedoracle-hexagrams.js
+  // ── SHA-256 + BIP39 + deriveSeed MOVED to js/seedoracle-bitcoin.js
+  // and hexagram SVG + suit mapping MOVED to js/seedoracle-hexagrams.js
   // (2026-07-08). Both aliased above so every call site in this file
   // reads unchanged.
 
@@ -111,7 +111,7 @@
     { id:'underhood', label:'Under the hood', lvl:4 },
     { id:'learn',     label:'By hand',        lvl:4 }
   ];
-  // Chapter unlock tier (0..4). Persistence lives in v3/js/seedoracle-store.js;
+  // Chapter unlock tier (0..4). Persistence lives in js/seedoracle-store.js;
   // this file never touches localStorage directly (search for `localStorage` —
   // it should have zero hits after all the extractions land).
   var _unlock = window.SeedStore ? window.SeedStore.getUnlock() : 0;

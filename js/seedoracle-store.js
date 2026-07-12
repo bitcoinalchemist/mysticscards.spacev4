@@ -2,11 +2,11 @@
 // localStorage. Currently holds only the unlock level (0-4), which
 // gates which chapters the reader can open.
 //
-// Same seam pattern as v3/js/store.js (Cards of Life) and
-// v3/js/iching-store.js (I Ching). Everything else in the Seed Oracle
-// reconstruction reads/writes through window.SeedStore.
+// Same seam pattern as js/store.js (Cards of Life) and
+// js/iching-store.js (I Ching). Everything else in the Seed Oracle
+// reads/writes through window.SeedStore.
 //
-// Load order: v3/seedoracle.html must include this BEFORE
+// Load order: seedoracle.html must include this BEFORE
 // js/seedoracle.js (which calls window.SeedStore.getUnlock() at boot).
 
 (function () {

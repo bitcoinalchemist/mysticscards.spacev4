@@ -1,9 +1,9 @@
 /*
- * sw.js — offline support for mysticscards.space (v4 slice)
+ * sw.js — offline support for mysticscards.space
  * Network-first for same-origin; cache-first for Google Fonts.
- * PRECACHE lists every deployed file in the v4 bundle.
+ * PRECACHE lists every deployed file.
  */
-const CACHE = 'mysticscards-v4-7';
+const CACHE = 'mysticscards-9';
 const PRECACHE = [
   './',
   'index.html',

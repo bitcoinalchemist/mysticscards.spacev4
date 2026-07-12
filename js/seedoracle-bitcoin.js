@@ -3,11 +3,11 @@
 // BIP39 word ↔ bit conversion + validation, and PBKDF2-HMAC-SHA512 seed
 // derivation via Web Crypto.
 //
-// v3 reconstruction seam pattern: pure math + one narrow Web Crypto
+// Seam pattern: pure math + one narrow Web Crypto
 // call, zero DOM state except the target element for deriveSeed's async
 // write. Everything else in seedoracle.js reads through window.SeedOracleBitcoin.
 //
-// Load order in v3/seedoracle.html: AFTER js/bip39-words.js (needs
+// Load order in seedoracle.html: AFTER js/bip39-words.js (needs
 // window.BIP39_WORDS) and BEFORE js/seedoracle.js (which reads
 // window.SeedOracleBitcoin at IIFE entry).
 //

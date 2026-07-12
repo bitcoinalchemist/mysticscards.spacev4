@@ -1,7 +1,7 @@
 // sun-gate.js — the "personality Sun" hexagram (Human Design gate) shown
 // under the Solar Time output in the In Time section.
 //
-// Ported 2026-07-11 from the v2 astrology page's Gates section. The Sun's
+// Added 2026-07-11, adapting the earlier astrology page's Gates section. The Sun's
 // geocentric ecliptic longitude at the birth instant maps onto the Human
 // Design rave mandala (64 gates × 5.625°, anchored at Gate 41 = 302°) to
 // give a gate + line; the gate IS an I Ching hexagram. We show it in three

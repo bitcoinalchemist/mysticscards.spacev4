@@ -428,7 +428,7 @@
     /* ── Geomancy (the sixteen figures) — reference row at the foot of the
        page, mirroring the I Ching trigram row. Logic: js/seedoracle-geomancy.js.
        Figures are drawn as dot-glyphs (solid dot = single point, hollow ring =
-       double point) — no image files. Ported from v3 2026-07-12. */
+       double point) — no image files. Added 2026-07-12. */
     .so-geo-block { max-width: var(--max-w); margin: 0 auto; padding: .4rem 0 0; }
     .so-geo-row {
       display: flex; flex-wrap: nowrap; justify-content: center; align-items: center;

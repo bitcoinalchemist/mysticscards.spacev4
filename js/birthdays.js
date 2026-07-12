@@ -1,12 +1,11 @@
-// birthdays.js — the saved-birthdays tray for v4 (list + manual add
+// birthdays.js — the saved-birthdays tray (list + manual add
 // form + export/import), rendered inline under the Finder alongside the
 // other picker trays. Also owns the shared "You / Partner" pick target
 // that this tray and js/finder-trays.js's Calendar both read
 // from, so a chosen date/entry knows which Finder slot to fill.
 //
-// v4 first pass (2026-07-09) — ported from the v3 reconstruction's
-// js/birthdays.js, trimmed to v4's simpler Finder (no age-driven year
-// prefill, no "For" toggle inside the deck browse — see
+// First pass (2026-07-09) — a deliberately simple Finder tray (no
+// age-driven year prefill, no "For" toggle inside the deck browse — see
 // js/finder-trays.js's header comment for why). Placement, visual design,
 // and the In Time-panel's contextual add/list buttons are deferred until
 // that lane opens; this is the functional first cut asked for in chat.

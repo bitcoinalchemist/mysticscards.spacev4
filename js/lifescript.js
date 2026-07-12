@@ -1,5 +1,5 @@
-// lifescript.js — the Finder Life Script panel (2026-07-10, ported
-// from v3's renderLifeScriptInto in cardsdata.js; dates + displacement
+// lifescript.js — the Finder Life Script panel (2026-07-10, extracted
+// from cardsdata.js's renderLifeScriptInto; dates + displacement
 // chips added 2026-07-10).
 //
 // Reads LIFE_SCRIPTS + SPREAD_PLANETS + SPREAD_PLANET_SYM + spreadCardPips

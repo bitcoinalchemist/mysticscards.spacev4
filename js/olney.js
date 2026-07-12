@@ -1,11 +1,11 @@
-// olney.js — the Richmond 1893 "Olney" reading, ported from v3 as an
+// olney.js — the Richmond 1893 "Olney" reading, rendered as an
 // inline panel below the Finder About block. Reads window.RICHMOND
-// (v4/js/richmonddata.js) and renders into #fOlney when the Finder's
+// (js/richmonddata.js) and renders into #fOlney when the Finder's
 // primary "You" card is picked in solo mode.
 //
-// v3 shipped this as a book-style popup with prev/next nav + swipe /
-// keyboard handlers; v4's initial pass drops that chrome and shows the
-// same content inline under About. The popup/overlay + nav can be
+// An earlier design shipped this as a book-style popup with prev/next
+// nav + swipe/keyboard handlers; this pass drops that chrome and shows
+// the same content inline under About. The popup/overlay + nav can be
 // added later if wanted; the data + renderer are the load-bearing
 // pieces and both are here already.
 //
@@ -25,7 +25,7 @@
   const OLNEY_PLANETS = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
 
   // Engraved sunburst masthead for the Grand Spread plate — identical
-  // for every card, so the ray-fan is computed once. Mirrors v3.
+  // for every card, so the ray-fan is computed once.
   const OLNEY_RAYS = (function () {
     const cx = 100, cy = 120, n = 46; let s = '';
     for (let i = 0; i <= n; i++) {

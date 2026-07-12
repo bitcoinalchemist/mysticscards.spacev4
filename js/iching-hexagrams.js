@@ -3,9 +3,9 @@
 // and trigrams, and the hexagram-detail popup that opens when a cell
 // is clicked (or when the cast result calls window.openHexPopup).
 //
-// v3 reconstruction step 4 — second physical extraction from
-// v3/js/iching.js. Loaded as a classic script BEFORE js/iching.js in
-// iching.html.
+// Extracted from an earlier iching.js monolith as its own physical
+// module. Loaded as a classic script BEFORE js/iching-cards.js and
+// js/iching-oracle.js in iching.html.
 //
 // Two categories of declarations here:
 //

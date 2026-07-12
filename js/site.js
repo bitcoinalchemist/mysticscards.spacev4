@@ -77,7 +77,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBgToggle);
   else initBgToggle();
 
-  // Offline support + PWA install for the standalone v4 slice.
+  // Offline support + PWA install.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('sw.js').catch(function () { /* no-op */ });
