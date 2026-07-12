@@ -217,23 +217,27 @@
             <div class="finder-result" id="fpResult" aria-live="polite"></div>
           </div>
 
-          <!-- Finder result panels — one of About / Olney / Life Script /
+          <!-- Finder result panels — one of About / Life Script /
                In Time visible at a time via the chip picker. The whole
                wrapper is hidden in triptych mode and when no card is
                picked. -->
           <div class="finder-panels" id="fPanels" hidden>
             <div class="ns-picker" id="fPanelPicker" role="tablist" aria-label="Card reading section">
               <button type="button" class="ns-chip is-active" id="chipAbout"      data-panel="about"      role="tab" aria-selected="true"  aria-controls="fAbout">About</button>
-              <button type="button" class="ns-chip"           id="chipOlney"      data-panel="olney"      role="tab" aria-selected="false" aria-controls="fOlney">Olney</button>
               <button type="button" class="ns-chip"           id="chipLifeScript" data-panel="lifescript" role="tab" aria-selected="false" aria-controls="fLifeScript">Stats</button>
               <button type="button" class="ns-chip"           id="chipInTime"     data-panel="intime"     role="tab" aria-selected="false" aria-controls="fInTime">Time</button>
             </div>
             <div class="finder-panels-body" id="fPanelBody" data-panel-active="about">
 
-              <!-- About panel — keyword chips, personality prose, and
-                   Light / Shadow. Joker keeps the content area empty. -->
+              <!-- About panel — modern reading plus an inline Olney
+                   toggle in solo mode. Joker keeps the content area
+                   empty. -->
               <div class="finder-about ns-panel" id="fAbout" role="tabpanel" aria-labelledby="chipAbout">
                 <div class="finder-about-inner">
+                  <div class="finder-about-switch" id="fAboutSwitch">
+                    <button type="button" class="el-voice-btn finder-about-voice-btn" id="fAboutVoiceToggle" aria-pressed="false" aria-controls="fAboutOlney" aria-label="About reading voice">modern</button>
+                  </div>
+                  <div class="finder-about-view finder-about-modern is-active" id="fAboutModern">
                   <div class="finder-about-bond" id="fAboutBond"></div>
                   <div class="finder-about-kws" id="fAboutKws"></div>
                   <div class="finder-about-personality" id="fAboutPersonality"></div>
@@ -248,16 +252,12 @@
                       <ul id="fAboutChallenges"></ul>
                     </div>
                   </div>
+                  </div>
+                  <div class="finder-about-view finder-about-olney" id="fAboutOlney">
+                    <div class="olney-inner olney-panel" id="fAboutOlneyInner"></div>
+                    <div class="ns-panel-empty">Richmond has no delineation for this card — pick another to view his 1893 reading.</div>
+                  </div>
                 </div>
-              </div>
-
-              <!-- Olney (Richmond 1893) — book header + planet delineations
-                   + engraved Grand Spread. Hides its inner render when the
-                   pick has no Richmond entry (Joker) and shows a
-                   placeholder note instead. -->
-              <div class="finder-olney ns-panel" id="fOlney" role="tabpanel" aria-labelledby="chipOlney">
-                <div class="olney-inner olney-panel"></div>
-                <div class="ns-panel-empty">Richmond has no delineation for this card — pick another to view his 1893 reading.</div>
               </div>
 
               <!-- Life Script — the picked card's seven ruling cards

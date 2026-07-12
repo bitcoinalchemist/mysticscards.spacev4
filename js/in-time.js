@@ -161,24 +161,37 @@
   }
   function dateNavHTML(age) {
     const ageText = typeof age === 'number' && age >= 0 ? `Age ${age}` : 'Pick a date';
-    return `<div class="it-date-bar">
-      <div class="it-date-cluster it-date-cluster-prev" role="group" aria-label="Go backward by year, month, or day">
-        <button class="it-date-nav" type="button" data-shift-year="-1" data-unit="year" title="−1 year" aria-label="Back one year"><span class="it-date-nav-mark">«</span></button>
-        <button class="it-date-nav" type="button" data-shift-month="-1" data-unit="month" title="−1 month" aria-label="Back one month"><span class="it-date-nav-mark">‹‹</span></button>
-        <button class="it-date-nav" type="button" data-shift-day="-1" data-unit="day" title="Previous day" aria-label="Previous day"><span class="it-date-nav-mark">‹</span></button>
+    return `<div class="it-date-shell">
+      <div class="it-date-head">
+        <div class="it-date-head-side" aria-hidden="true"></div>
+        <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">
+          <span class="it-date-age">${ageText}</span>
+          <span class="it-date-value">${formatViewDate(viewDate)}</span>
+        </button>
+        <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>
       </div>
-      <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">
-        <span class="it-date-age">${ageText}</span>
-        <span class="it-date-value">${formatViewDate(viewDate)}</span>
-      </button>
       <input class="it-date-input" type="date" tabindex="-1" aria-hidden="true" value="${isoFromMs(viewDate)}" />
-      <div class="it-date-cluster it-date-cluster-next" role="group" aria-label="Go forward by day, month, or year">
-        <button class="it-date-nav" type="button" data-shift-day="1" data-unit="day" title="Next day" aria-label="Next day"><span class="it-date-nav-mark">›</span></button>
-        <button class="it-date-nav" type="button" data-shift-month="1" data-unit="month" title="+1 month" aria-label="Forward one month"><span class="it-date-nav-mark">››</span></button>
-        <button class="it-date-nav" type="button" data-shift-year="1" data-unit="year" title="+1 year" aria-label="Forward one year"><span class="it-date-nav-mark">»</span></button>
+      <div class="it-date-bar" role="group" aria-label="Shift the viewed date by year, month, or day">
+        <button class="it-date-nav" type="button" data-shift-year="-1" data-unit="year" title="Back one year" aria-label="Back one year">
+          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Year</span>
+        </button>
+        <button class="it-date-nav" type="button" data-shift-month="-1" data-unit="month" title="Back one month" aria-label="Back one month">
+          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Month</span>
+        </button>
+        <button class="it-date-nav" type="button" data-shift-day="-1" data-unit="day" title="Previous day" aria-label="Previous day">
+          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Day</span>
+        </button>
+        <button class="it-date-nav" type="button" data-shift-day="1" data-unit="day" title="Next day" aria-label="Next day">
+          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Day</span>
+        </button>
+        <button class="it-date-nav" type="button" data-shift-month="1" data-unit="month" title="Forward one month" aria-label="Forward one month">
+          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Month</span>
+        </button>
+        <button class="it-date-nav" type="button" data-shift-year="1" data-unit="year" title="Forward one year" aria-label="Forward one year">
+          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Year</span>
+        </button>
       </div>
-    </div>
-    <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>`;
+    </div>`;
   }
   function wireDateNav() {
     const root = document.getElementById('fInTime');
@@ -398,9 +411,11 @@
       </div>`;
     }).join('');
 
-    return `${dateNavHTML(age)}
-    <div class="it-row">${rowHTML}</div>
-    <div class="it-reading">${inTimeReadingHTML(active)}</div>
+    return `<div class="it-reading">${inTimeReadingHTML(active)}</div>
+    <div class="it-row-wrap">
+      <div class="it-row">${rowHTML}</div>
+    </div>
+    ${dateNavHTML(age)}
     `;
   }
 
@@ -410,7 +425,7 @@
     const inner = root.querySelector('.it-inner') || root;
     root.classList.remove('is-empty');
     _lastCard = card || null;
-    if (!card || card.suit === 'joker') {
+    if (!card || card.suit === 'joker' || !readFinderDate()) {
       _activeCards = [];
       root.classList.add('is-empty');
       inner.innerHTML = '';

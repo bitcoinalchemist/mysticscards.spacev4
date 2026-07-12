@@ -48,6 +48,7 @@
   let _finderSnapshot = null;
   let _finderBirthLabel = '';
   let _transitionSource = null;
+  let _aboutView = 'modern';
   // When a snapshot is restored (reset button), this remembers which side
   // the overridden card came from so the solo→triptych entrance sends that
   // card back to its own slot instead of always replaying the left-card
@@ -125,6 +126,10 @@
       },
       about: {
         root:        document.getElementById('fAbout'),
+        switcher:    document.getElementById('fAboutSwitch'),
+        voiceToggle: document.getElementById('fAboutVoiceToggle'),
+        modern:      document.getElementById('fAboutModern'),
+        olney:       document.getElementById('fAboutOlney'),
         bond:        document.getElementById('fAboutBond'),
         kws:         document.getElementById('fAboutKws'),
         personality: document.getElementById('fAboutPersonality'),
@@ -475,13 +480,16 @@
   function renderAbout(card, rel) {
     const box = dom.about;
     if (!box || !box.root) return false;
-    box.root.classList.remove('is-joker', 'is-empty', 'is-relationship');
+    box.root.classList.remove('is-joker', 'is-empty', 'is-relationship', 'is-olney-empty');
     if (!card) { box.root.classList.add('is-empty'); return false; }
     const key       = `${card.rank}_${card.suit === 'joker' ? 'joker' : card.suit}`;
     const jokerKey  = card.suit === 'joker' ? '✦_joker' : null;
     const reading   = (window.CARD_READINGS || {})[jokerKey || key] || null;
     const vow       = !rel ? cardVow(card) : '';
     const bondEntry = rel && rel.comp ? (window.REL_TEXT || {})[`${rel.comp.rank}_${rel.comp.suit}`] : null;
+    const olneyOk   = !rel && typeof window.renderOlney === 'function'
+      ? window.renderOlney(card, box.olney)
+      : false;
     if (!reading && !bondEntry && card.suit !== 'joker') { box.root.classList.add('is-empty'); return false; }
 
     if (box.bond) {
@@ -496,7 +504,7 @@
     }
 
     const kwsHTML = reading && reading.kws
-      ? reading.kws.map(k => `<span class="finder-kw">${k}</span>`).join('')
+      ? reading.kws.map(k => `<span class="finder-kw"><span class="finder-kw-mark" aria-hidden="true"></span><span class="finder-kw-text">${k}</span></span>`).join('')
       : '';
     if (box.kws) box.kws.innerHTML = kwsHTML;
 
@@ -511,6 +519,20 @@
     if (box.challenges) box.challenges.innerHTML = reading ? listHTML(reading.challenges) : '';
 
     box.root.classList.toggle('is-joker', !reading);
+    box.root.classList.toggle('is-relationship', !!bondEntry);
+    box.root.classList.toggle('is-olney-empty', !olneyOk);
+    if (box.switcher) box.switcher.hidden = !!rel;
+    if (_aboutView === 'olney' && !olneyOk) _aboutView = 'modern';
+    if (box.modern) box.modern.classList.toggle('is-active', _aboutView === 'modern');
+    if (box.olney) box.olney.classList.toggle('is-active', _aboutView === 'olney');
+    if (box.voiceToggle) {
+      const isOlney = _aboutView === 'olney';
+      box.voiceToggle.textContent = isOlney ? 'olney' : 'modern';
+      box.voiceToggle.setAttribute('aria-pressed', isOlney ? 'true' : 'false');
+      box.voiceToggle.disabled = !olneyOk;
+      box.voiceToggle.title = 'About reading voice: ' + (isOlney ? 'Olney' : 'Modern');
+      box.voiceToggle.setAttribute('aria-label', 'About reading voice: ' + (isOlney ? 'Olney' : 'Modern') + (olneyOk ? '. Activate to switch.' : '. Olney unavailable for this card.'));
+    }
     return true;
   }
 
@@ -805,7 +827,7 @@
     updateGridPick(state.partner, true);
     _renderMode = state.targetMode;
     updateResetButton();
-    // Result tabs (About / Olney / Life Script / In Time). The whole
+    // Result tabs (About / Life Script / In Time). The whole
     // wrapper is hidden in triptych mode and when no card is picked.
     // Each panel's own render function decides whether it has content
     // for THIS card; empty panels get `.is-empty` so the placeholder
@@ -819,7 +841,6 @@
       if (showPanels) {
         const flags = {
           about:      renderAbout(isRelationship ? state.comp : state.you, isRelationship ? state : null),
-          olney:      !isRelationship && typeof window.renderOlney      === 'function' ? window.renderOlney(state.you)      : false,
           lifescript: isRelationship
             ? (typeof window.renderRelationshipConnections === 'function' ? window.renderRelationshipConnections(state.you, state.partner) : false)
             : (typeof window.renderLifeScript === 'function' ? window.renderLifeScript(state.you) : false),
@@ -967,6 +988,14 @@
           return;
         }
         setFinderPanel(btn.dataset.panel, { collapsed: false });
+      });
+    }
+    if (dom.about && dom.about.switcher) {
+      dom.about.switcher.addEventListener('click', function (e) {
+        const btn = e.target.closest('#fAboutVoiceToggle');
+        if (!btn || btn.disabled) return;
+        _aboutView = _aboutView === 'modern' ? 'olney' : 'modern';
+        renderAbout(_selectedCard, null);
       });
     }
   });

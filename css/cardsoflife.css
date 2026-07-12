@@ -502,7 +502,7 @@
    visibility from that attribute; the chip picker itself is a shared
    uppercase-caps gold-outline pill row. */
 .finder-panels {
-  margin: 1.75rem auto 0;
+  margin: 1.75rem auto var(--section-gap, 1rem);
   max-width: var(--control-rail-w, 720px);
   padding: 0 var(--space-3, 1rem);
   text-align: center;
@@ -600,13 +600,11 @@
 .finder-panels.is-collapsed .finder-panels-body { display: none; }
 .ns-panel { display: none; }
 .finder-panels-body[data-panel-active="about"]      #fAbout       { display: block; }
-.finder-panels-body[data-panel-active="olney"]      #fOlney       { display: block; }
 .finder-panels-body[data-panel-active="lifescript"] #fLifeScript  { display: block; }
 .finder-panels-body[data-panel-active="intime"]     #fInTime      { display: block; }
 .finder-panels.is-relationship #fAbout,
 .finder-panels.is-relationship #fLifeScript { display: block; }
 .finder-panels.is-relationship #fAbout { margin-bottom: 1.5rem; }
-.finder-panels.is-relationship #fOlney,
 .finder-panels.is-relationship #fInTime { display: none; }
 .ns-panel-empty {
   display: none;
@@ -625,6 +623,23 @@
 .finder-about-inner {
   display: flex; flex-direction: column;
   gap: var(--space-4, 1rem);
+}
+.finder-about-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.finder-about-voice-btn[disabled] {
+  opacity: .45;
+  cursor: default;
+}
+.finder-about-view { display: none; }
+.finder-about-view.is-active { display: block; }
+.finder-about-modern.is-active {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
 }
 .finder-about-bond {
   display: none;
@@ -651,41 +666,64 @@
   color: var(--secondary);
 }
 .finder-about-kws {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: .4rem .5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .45rem .55rem;
+  max-width: 38rem;
+  margin: 0 auto;
 }
 .finder-about-kws:empty { display: none; }
 .finder-kw {
-  display: inline-block;
-  padding: .25rem .65rem;
-  border: 1px solid var(--rule-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .34rem .78rem;
+  border: 1px solid rgba(205,168,95,.18);
   border-radius: 999px;
-  font-family: var(--sans); font-size: .7rem; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--muted);
-  background: rgba(255,255,255,.02);
+  font-family: var(--sans);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  background:
+    radial-gradient(circle at top left, rgba(227,191,112,.14), transparent 58%),
+    rgba(255,255,255,.02);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
+.finder-kw-mark {
+  width: .42rem;
+  height: .42rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(227,191,112,.96), rgba(205,168,95,.88));
+  box-shadow: 0 0 0 1px rgba(205,168,95,.18);
+}
+.finder-kw-text { display: block; }
 .finder-about-personality {
   font-family: var(--serif); font-size: clamp(.95rem, 2.6vw, 1.02rem);
   line-height: 1.65; color: var(--text);
   text-align: center;
 }
-.finder-about-personality p { margin: 0 0 .9em; }
+.finder-about-personality p { margin: 0 0 .8em; }
 .finder-about-personality p:last-child { margin-bottom: 0; }
 .finder-about-personality:empty { display: none; }
 .finder-about-vow {
-  margin: -.15rem auto 0;
+  margin: -.05rem auto 0;
   max-width: 34rem;
   text-align: center;
   font-family: var(--serif);
   font-style: italic;
   font-size: clamp(.88rem, 2.4vw, .98rem);
   line-height: 1.55;
-  color: var(--secondary);
+  color: var(--gold-ink);
 }
 .finder-about-vow:empty { display: none; }
 .finder-about-lightshadow {
   display: grid; gap: var(--space-4, 1rem);
   grid-template-columns: 1fr 1fr;
+  margin-top: .2rem;
 }
 .finder-about-lightshadow > div { min-inline-size: 0; }
 .finder-about-h {
@@ -714,12 +752,16 @@
 .finder-about.is-joker .finder-about-lightshadow { display: none; }
 .finder-about.is-joker .finder-about-bond { display: none; }
 .finder-about.is-relationship .finder-about-inner { display: flex; }
+.finder-about.is-relationship .finder-about-switch { display: none; }
 .finder-about.is-relationship .finder-about-kws { order: 0; }
 .finder-about.is-relationship .finder-about-bond { order: 1; }
 .finder-about.is-relationship .finder-about-personality { display: none; }
 .finder-about.is-relationship .finder-about-vow { display: none; }
 .finder-about.is-relationship .finder-about-lightshadow { display: none; }
 .finder-panels.is-relationship #fLifeScript.is-empty { display: none; }
+.finder-about.is-olney-empty .finder-about-olney.is-active > .olney-inner { display: none; }
+.finder-about.is-olney-empty .finder-about-olney.is-active > .ns-panel-empty { display: block; }
+.finder-about-olney .ns-panel-empty { display: none; }
 @media (max-width: 640px) {
   .finder-about-lightshadow { grid-template-columns: 1fr; }
 }
@@ -729,7 +771,7 @@
    (delineation left, engraved plate right); stacks on mobile. Uses the
    site serif (Lora) rather than a dedicated webfont for this reading,
    so there's no extra font-loading hit for this panel. */
-.finder-olney { color: var(--secondary); }
+.finder-about-olney { color: var(--secondary); }
 .olney-panel { padding: .25rem 0 .2rem; }
 .olney-sun { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-bottom: .55rem; }
 .olney-sun .spread-card { width: 100%; }
@@ -892,11 +934,15 @@
    Seven ruling cards for the picked card, one per planet
    (Neptune → Mercury), plus a compact birth-card stats block. */
 .finder-lifescript { color: var(--secondary); }
-.ls-header { text-align: center; margin-bottom: 1rem; }
+.ls-header { text-align: center; margin: 0 0 .8rem; }
 .ls-title {
-  margin: 0; font-family: var(--serif); font-weight: 500;
-  font-size: 1.05rem; letter-spacing: .06em;
-  color: var(--gold-ink);
+  margin: 0;
+  font-family: var(--sans);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 .ls-lede {
   margin: .35rem 0 0;
@@ -976,7 +1022,21 @@
    block. Reuses the grid's ghost-chip visual language under local
    `.ls-ghost*` names. */
 .ls-ghost-row {
-  display: flex; justify-content: center; gap: .22rem; margin-top: .1rem;
+  display: flex; justify-content: center; gap: .7rem; margin-top: .1rem; flex-wrap: wrap;
+}
+.ls-ghost-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .22rem;
+}
+.ls-ghost-label {
+  font-family: var(--sans);
+  font-size: .54rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .ls-ghost {
   padding: .08rem .3rem;
@@ -992,6 +1052,8 @@
 @media (max-width: 560px) {
   .ls-stat-text { font-size: .62rem; }
   .ls-stat-chip { font-size: .62rem; padding: .16rem .42rem; }
+  .ls-ghost-row { gap: .55rem; }
+  .ls-ghost-label { font-size: .5rem; }
   .ls-ghost { font-size: .5rem; padding: .06rem .24rem; }
 }
 .ls-joker-note {
@@ -1055,6 +1117,9 @@
    reading data, neither of which exist yet. */
 .finder-intime { color: var(--secondary); }
 .it-header { text-align: center; margin-bottom: 1rem; }
+.it-row-wrap {
+  margin-top: 1rem;
+}
 .it-row {
   --it-card-w: calc(560px * var(--quad-scale, 1) / 7);
   display: grid;
@@ -1118,13 +1183,20 @@
   font-weight: 600;
 }
 .it-reading {
+  --it-reading-h: 19.25rem;
+  --it-reading-head-h: 3.85rem;
+  --it-reading-help-h: 2.3rem;
   max-width: 42rem;
-  margin: 1.35rem auto 0;
+  margin: 0 auto;
   text-align: center;
-  padding: 0 0 1rem;
-  height: 17.5rem;
+  padding: 1rem 1rem 1.1rem;
+  height: var(--it-reading-h);
   display: flex;
   flex-direction: column;
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(180deg, rgba(37,29,66,.52), rgba(20,16,37,.64)),
+    rgba(12,10,23,.65);
 }
 .it-reading-head {
   display: flex;
@@ -1132,6 +1204,7 @@
   justify-content: space-between;
   gap: .75rem;
   margin-bottom: .75rem;
+  min-height: var(--it-reading-head-h);
 }
 .it-reading-head-copy {
   display: flex;
@@ -1184,8 +1257,8 @@
 }
 .it-reading-copy {
   flex: 1 1 auto;
+  height: calc(var(--it-reading-h) - var(--it-reading-head-h) - 1.85rem);
   min-height: 0;
-  max-height: 11rem;
   overflow-y: auto;
   padding-right: .35rem;
   font-family: var(--serif);
@@ -1206,9 +1279,11 @@
   .it-planet-name { font-size: .62rem; }
   .it-sub { font-size: .52rem; }
   .it-reading {
-    margin-top: 1rem;
-    padding-bottom: .85rem;
-    height: 16rem;
+    --it-reading-h: 17.4rem;
+    --it-reading-head-h: 3.4rem;
+    --it-reading-help-h: 2.1rem;
+    padding: .9rem .8rem .9rem;
+    height: var(--it-reading-h);
   }
   .it-reading-head { gap: .5rem; }
   .it-reading-shift {
@@ -1217,16 +1292,17 @@
     font-size: .95rem;
   }
   .it-reading-title { font-size: 1rem; }
-  .it-reading-copy { font-size: .92rem; line-height: 1.64; max-height: 10.2rem; }
+  .it-reading-copy { font-size: .92rem; line-height: 1.64; }
 }
 
 /* ── Solar Time sub-panel (2026-07-11) — a toggle inside the Time
    section that corrects the birth card by the sun for near-midnight
    births. Logic in js/solar-time.js (lazy-loads js/astronomy.js). */
 .it-solar {
-  margin-top: 1.4rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--rule);
+  margin-top: 1.5rem;
+  padding: 1rem 1rem 1.15rem;
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(20,16,37,.45), rgba(15,12,29,.68));
   text-align: center;
 }
 .it-solar-toggle {
@@ -1292,8 +1368,7 @@
 /* Personality Sun hexagram (js/sun-gate.js) — tropical + two sidereal
    gates under the solar cards. Figures use --yang for the yang lines. */
 .sun-gate {
-  margin-top: 1.4rem; padding-top: 1.1rem;
-  border-top: 1px solid var(--rule);
+  margin-top: 1.3rem; padding-top: .2rem;
 }
 .sun-gate-head {
   font-family: var(--sans); font-size: .58rem; letter-spacing: .12em;
@@ -1322,46 +1397,43 @@
   text-align: center; max-width: 8.5rem; line-height: 1.3;
 }
 
-/* ── In Time date-scroll nav (2026-07-10) — ‹ › year/month/day steppers, a
-   clickable date label (opens the hidden native date input), and a
-   "Today" reset that only shows once you've scrolled away from today. */
-.it-date-bar {
-  display: grid;
-  grid-template-columns: minmax(7.4rem, 9rem) minmax(8.8rem, 10.4rem) minmax(7.4rem, 9rem);
-  align-items: stretch;
-  justify-content: center;
-  gap: .34rem;
-  margin-top: 1.5rem;
+/* ── In Time date-scroll nav (2026-07-10) — clickable date label
+   (opens the hidden native date input), six step buttons for year /
+   month / day, and a "Today" reset that only shows once you've
+   scrolled away from today. */
+.it-date-shell {
+  margin-top: 1.15rem;
   max-width: min(100%, 30rem);
   width: 100%;
   margin-inline: auto;
-  padding: .24rem;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(39,30,68,.92), rgba(24,19,45,.96));
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
-.it-date-cluster {
+.it-date-head {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 1px;
-  padding: 1px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.06);
-  overflow: hidden;
+  grid-template-columns: 1fr minmax(0, 20rem) 1fr;
+  align-items: center;
+  gap: .45rem;
+}
+.it-date-head-side {
+  min-width: 0;
+}
+.it-date-bar {
+  margin-top: .42rem;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .3rem;
 }
 .it-date-nav {
   min-width: 0;
-  min-height: 38px;
-  padding: .2rem .24rem;
-  display: inline-flex;
+  min-height: 42px;
+  padding: .38rem .2rem .34rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(20,16,36,.95);
+  gap: .08rem;
+  background: rgba(25,20,46,.94);
   border: 0;
-  border-radius: 0;
+  border-radius: 14px;
   line-height: 1;
   font-family: var(--sans);
   color: var(--secondary);
@@ -1372,37 +1444,48 @@
   background: rgba(58,46,96,.95);
   color: var(--text);
   transform: translateY(-1px);
- }
+}
 .it-date-nav-mark {
   display: block;
-  font-family: var(--serif);
-  font-size: 1rem;
+  font-family: var(--sans);
+  font-size: .84rem;
+  font-weight: 700;
+  letter-spacing: .02em;
 }
-.it-date-nav[data-shift-month] .it-date-nav-mark {
-  letter-spacing: -.18em;
-  padding-right: .18em;
+.it-date-nav-unit {
+  display: block;
+  font-family: var(--sans);
+  font-size: .49rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .it-date-label {
   font-family: var(--serif);
   font-size: .84rem;
-  padding: .36rem .5rem;
+  padding: .58rem .7rem;
   min-width: 0;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .08rem;
-  background: rgba(20,16,36,.92);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
+  gap: .14rem;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(39,30,68,.92), rgba(24,19,45,.96));
+  border: 0;
+  border-radius: 18px;
   line-height: 1.2;
   color: var(--text);
   cursor: pointer;
-  transition: background var(--ease), border-color var(--ease), color var(--ease);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+  transition: background var(--ease), color var(--ease), transform var(--ease);
 }
-.it-date-label:hover { background: rgba(58,46,96,.92); border-color: rgba(255,255,255,.16); color: #fff; }
+.it-date-label:hover {
+  background: linear-gradient(180deg, rgba(58,46,96,.96), rgba(33,26,59,.98));
+  color: #fff;
+  transform: translateY(-1px);
+}
 .it-date-age {
   display: block;
   font-family: var(--sans);
@@ -1414,6 +1497,7 @@
 }
 .it-date-value {
   display: block;
+  font-size: 1rem;
 }
 .it-date-input {
   position: absolute; opacity: 0; pointer-events: none;
@@ -1425,40 +1509,57 @@
   font-weight: 600; color: var(--gold);
   background: transparent; border: none; cursor: pointer;
   padding: .25rem .55rem;
-  display: none; width: fit-content; text-align: center; margin: .75rem auto 0;
+  display: block; width: fit-content; text-align: right; margin: 0 0 0 auto;
+  min-height: 1.4rem;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
-.it-date-today.visible { display: block; }
+.it-date-today.visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
 .it-date-today:hover { text-decoration: underline; }
 @media (max-width: 420px) {
-  .it-date-bar {
-    grid-template-columns: minmax(0, 1fr) minmax(5rem, 5.9rem) minmax(0, 1fr);
-    gap: .16rem;
-    padding: .14rem;
+  .it-date-shell {
+    max-width: 100%;
+    margin-top: 1rem;
   }
-  .it-date-cluster {
-    border-radius: 10px;
-    min-width: 0;
+  .it-date-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .5rem;
+  }
+  .it-date-head-side {
+    display: none;
+  }
+  .it-date-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .22rem;
   }
   .it-date-nav {
-    min-height: 32px;
-    padding: .08rem .04rem;
+    min-height: 36px;
+    padding: .32rem .12rem .28rem;
   }
-  .it-date-nav-mark { font-size: .82rem; }
+  .it-date-nav-mark { font-size: .76rem; }
+  .it-date-nav-unit { font-size: .45rem; letter-spacing: .1em; }
   .it-date-label {
-    padding: .24rem .22rem;
-    font-size: .7rem;
+    padding: .46rem .4rem;
+    font-size: .74rem;
     line-height: 1.2;
-    min-width: 0;
   }
   .it-date-age {
     font-size: .46rem;
     letter-spacing: .1em;
   }
+  .it-date-value { font-size: .88rem; }
   .it-date-today {
-    margin-top: .6rem;
+    margin: 0 auto;
     font-size: .58rem;
     letter-spacing: .1em;
+    text-align: center;
   }
+  .it-row-wrap { margin-top: .9rem; }
 }
 
 /* ── Finder tool trays (Saved Birthdays / Calendar / Solar Values) ──

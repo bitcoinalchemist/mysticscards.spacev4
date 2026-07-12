@@ -66,7 +66,10 @@
       const oc = SPREAD_CARDS[oIdx];
       if (!oc) return '';
       const selfCls = oIdx === idx ? ' ls-ghost-self' : '';
-      return `<span class="ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>`;
+      return `<div class="ls-ghost-pair">
+        <div class="ls-ghost-label">${verb}</div>
+        <span class="ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>
+      </div>`;
     }).join('');
     return `<div class="ls-ghost-row">${chips}</div>`;
   }
@@ -154,11 +157,10 @@
 
     const rowHTML = scriptRowHTML(card);
 
-    return `<div class="ls-header">
+    return `${birthStatsHTML(card, script)}
+    <div class="ls-header">
       <h3 class="ls-title">Life Script</h3>
-      <p class="ls-lede">The seven ruling cards of ${card.rank === 'A' ? 'the Ace' : ''}${card.rank !== 'A' ? card.rank : ''} of ${card.suit[0].toUpperCase() + card.suit.slice(1)}, from Mercury to Neptune.</p>
     </div>
-    ${birthStatsHTML(card, script)}
     <div class="ls-row">${rowHTML}</div>`;
   }
 

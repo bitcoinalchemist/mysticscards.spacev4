@@ -1,7 +1,7 @@
 // olney.js — the Richmond 1893 "Olney" reading, rendered as an
-// inline panel below the Finder About block. Reads window.RICHMOND
-// (js/richmonddata.js) and renders into #fOlney when the Finder's
-// primary "You" card is picked in solo mode.
+// inline panel inside the Finder About block. Reads window.RICHMOND
+// (js/richmonddata.js) and renders into the About panel's Olney view
+// when the Finder's primary "You" card is picked in solo mode.
 //
 // An earlier design shipped this as a book-style popup with prev/next
 // nav + swipe/keyboard handlers; this pass drops that chrome and shows
@@ -13,10 +13,9 @@
 // globals. Loaded AFTER cardsdata.js and richmonddata.js.
 //
 // PUBLIC on window:
-//   window.renderOlney(card, isSolo) — called by finder.js's
-//     renderFinderState; hides the panel when card is null, in
-//     triptych mode, or when Richmond has no entry (e.g. Joker or a
-//     card that hasn't been transcribed yet).
+//   window.renderOlney(card, mount) — called by finder.js's
+//     renderFinderState; returns false when Richmond has no entry
+//     (e.g. Joker or a card that hasn't been transcribed yet).
 
 (function () {
   'use strict';
@@ -115,16 +114,17 @@
   }
 
   // Public renderer — called by finder.js's renderFinderState.
-  //   card  — a SPREAD_CARDS-shaped {rank, suit, sym, sv} or null.
+  //   card   — a SPREAD_CARDS-shaped {rank, suit, sym, sv} or null.
+  //   mount  — optional element or element id to render into
   //
-  // Populates `#fOlney` with Richmond's reading if the pick has a
+  // Populates the target with Richmond's reading if the pick has a
   // matching entry. Returns TRUE when there's real content and FALSE
   // otherwise, so the picker can disable the Olney chip for cards
   // Richmond didn't delineate (Joker, or a card not yet transcribed).
-  // Panel visibility is now driven by the tab wrapper, not by
-  // toggling `hidden` here.
-  function renderOlney(card) {
-    const root = document.getElementById('fOlney');
+  function renderOlney(card, mount) {
+    const root = typeof mount === 'string'
+      ? document.getElementById(mount)
+      : (mount || document.getElementById('fAboutOlney'));
     if (!root) return false;
     const inner = root.querySelector('.olney-inner') || root;
     root.classList.remove('is-empty');
