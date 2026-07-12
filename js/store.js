@@ -12,6 +12,7 @@
   var K_SCALE  = 'cardsoflife_quadScale';
   var K_BIRTHS = 'cardsoflife_births';
   var K_SVBASE = 'cardsoflife_svBase';
+  var K_VOICE  = 'cardsoflife_voice';
 
   window.CardsStore = {
     getQuadAlt:  function ()   { return _flag(K_ALT); },
@@ -32,6 +33,10 @@
       return raw === '12' ? 12 : 10;
     },
     setSolarBase: function (v) { _set(K_SVBASE, String(v === 12 ? 12 : 10)); },
+
+    // ── Card Elements reading voice ('modern' | 'olney') ─────────
+    getVoice: function () { return _get(K_VOICE) === 'olney' ? 'olney' : 'modern'; },
+    setVoice: function (v) { _set(K_VOICE, v === 'olney' ? 'olney' : 'modern'); },
 
     // ── Saved birthdays ──────────────────────────────────────────
     // JSON array of {id, name, day, month, year}. Same key as v3's store

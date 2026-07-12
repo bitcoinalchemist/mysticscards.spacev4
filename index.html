@@ -17,7 +17,7 @@
   <meta name="description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/cardsoflife.css" />
+  <link rel="stylesheet" href="css/cardsoflife.css?v=20260712a" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
@@ -29,7 +29,7 @@
 <script src="js/cardsdata.js?v=20260710d"></script>
 <script src="js/reltext.js?v=20260710a"></script>
 <script src="js/richmonddata.js?v=20260710c"></script>
-<script src="js/spread-grid.js"></script>
+<script src="js/spread-grid.js?v=20260712a"></script>
 <script src="js/quadrations.js"></script>
 <script src="js/finder.js?v=20260711c"></script>
 <script src="js/olney.js?v=20260710c"></script>
@@ -45,6 +45,9 @@
 <script src="js/in-time.js?v=20260711a"></script>
 <script src="js/birthdays.js?v=20260710d"></script>
 <script src="js/finder-trays.js?v=20260711a"></script>
+<script src="js/planetdata.js?v=20260711a"></script>
+<script src="js/elementsdata.js?v=20260711a"></script>
+<script src="js/elements.js?v=20260711a"></script>
 
 <main>
   <h1 class="vh">Cards of Life — Cardology</h1>
@@ -357,6 +360,53 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="elements page-section" id="elements" aria-label="The suits, numbers, and planets of the deck">
+    <div class="el-inner">
+      <div class="el-topline">
+        <div class="suit-row" id="suitRow" role="list" aria-label="The four suits"></div>
+        <div class="el-voice" id="elVoice" hidden>
+          <button type="button" class="el-voice-btn" id="elVoiceToggle" aria-pressed="false" aria-label="Toggle reading voice" title="Reading voice">Modern</button>
+        </div>
+      </div>
+      <div class="num-row" id="numRow" role="list" aria-label="The thirteen numbers" hidden></div>
+      <div class="planet-row" id="planetRow" role="list" aria-label="The seven planets and the Crown" hidden></div>
+      <div class="el-detailwrap">
+        <div class="el-detailmin">
+          <div class="el-detail" id="elDetail" aria-live="polite">
+            <button class="el-nav el-prev" type="button" aria-label="Previous">‹</button>
+            <div class="el-card">
+              <div class="el-head">
+                <span class="el-fig" id="elFig" aria-hidden="true"></span>
+                <span class="el-name" id="elName"></span>
+              </div>
+              <div class="el-kws" id="elKws"></div>
+              <div class="el-text" id="elText"></div>
+              <p class="el-keynote" id="elKeynote"></p>
+            </div>
+            <button class="el-nav el-next" type="button" aria-label="Next">›</button>
+          </div>
+        </div>
+      </div>
+      <div class="pl-pop" id="plPop">
+        <div class="pl-detailwrap"><div class="pl-detailmin">
+          <div class="pl-detail" id="plDetail" aria-live="polite">
+            <div class="pl-card">
+              <div class="pl-head">
+                <span class="pl-fig" id="plFig" aria-hidden="true"></span>
+                <span class="pl-name" id="plName"></span>
+              </div>
+              <div class="pl-sub" id="plSub"></div>
+              <div class="pl-kws" id="plKws"></div>
+              <div class="pl-para" id="plPara"></div>
+              <dl class="pl-attrs" id="plAttrs"></dl>
+              <p class="pl-syn" id="plSyn"></p>
+            </div>
+          </div>
+        </div></div>
       </div>
     </div>
   </section>

@@ -3,7 +3,7 @@
  * Network-first for same-origin; cache-first for Google Fonts.
  * PRECACHE lists every deployed file in the v4 bundle.
  */
-const CACHE = 'mysticscards-v4-5';
+const CACHE = 'mysticscards-v4-7';
 const PRECACHE = [
   './',
   'index.html',
@@ -42,6 +42,9 @@ const PRECACHE = [
   'js/in-time.js',
   'js/birthdays.js',
   'js/finder-trays.js',
+  'js/planetdata.js',
+  'js/elementsdata.js',
+  'js/elements.js',
   'js/castfield.js',
   'js/iching-store.js',
   'js/ichingdata.js',
@@ -51,6 +54,7 @@ const PRECACHE = [
   'js/iching-oracle.js',
   'js/iching-trigrams.js',
   'js/seedoracle.js',
+  'js/seedoracle-geomancy.js',
   'js/seedoracle-bitcoin.js',
   'js/seedoracle-hexagrams.js',
   'js/seedoracle-store.js',

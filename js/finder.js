@@ -837,8 +837,7 @@
         // the currently active panel is still valid for this card.
         const active = dom.panels.body && dom.panels.body.dataset.panelActive;
         if (isRelationship) {
-          if (dom.panels.body) dom.panels.body.dataset.panelActive = 'about';
-          setFinderPanelCollapsed(false);
+          setFinderPanel('about', { collapsed: false });
         } else if (!active || flags[active] === false) {
           setFinderPanel('about');
         } else {

@@ -13,6 +13,11 @@ function buildSpreadGrid(gridEl, opts) {
   }
 
   let html = '';
+  html += '<div class="crown-label-row" aria-hidden="true">';
+  html += '<div class="crown-label-spacer"></div>';
+  html += `<div class="spread-col-label crown-col-label" data-crown="2">${SPREAD_PLANET_SYM.Crown}</div>`;
+  html += '<div class="crown-label-spacer"></div>';
+  html += '</div>';
   html += '<div class="crown-row">';
   html += '<div class="crown-side crown-joker" aria-hidden="true"></div>';
   for (let i = 51; i >= 49; i--) html += `<div class="sl-seat" data-pos="${i}"></div>`;
@@ -23,7 +28,7 @@ function buildSpreadGrid(gridEl, opts) {
       html += `<div class="sl-seat" data-pos="${row * 7 + col}"></div>`;
   [6,5,4,3,2,1,0].forEach((col) => {
     const pname = SPREAD_PLANETS[col];
-    html += `<div class="planet-col-label" data-planet="${pname}">${SPREAD_PLANET_SYM[pname]}</div>`;
+    html += `<div class="spread-col-label planet-col-label" data-planet="${pname}">${SPREAD_PLANET_SYM[pname]}</div>`;
   });
   gridEl.innerHTML = html;
 

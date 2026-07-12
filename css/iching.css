@@ -253,11 +253,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       justify-content: center;
       flex-wrap: wrap;
     }
-    /* First section under the page title (Inquiry since the trigram row moved
-       to the page foot 2026-07-06) gets the top breathing room the old first
-       row used to carry as padding. (The old `#trigrams + .page-section`
-       tightened-gap rule is retired — nothing follows #trigrams now.) */
-    main > h1 + .page-section { margin-block-start: 1.6rem; }
     /* Same glyph-zone height as the homepage suit row, so Inquiry sits the
        same distance below the trigrams as the Finder does below the suits. */
     #trigram-row { min-height: 3rem; }

@@ -8,7 +8,7 @@
     /* The page's single .page-content wrapper (all sections live inside one
        <main>, so the shared .page-section + .page-section --section-gap rule
        owns the vertical rhythm). */
-    .so-ctx .page-content { max-width: var(--max-w); padding: 2px 2rem 12px; }
+    .so-ctx .page-content { max-width: var(--max-w); padding: 2px 2rem 0; }
 
     /* Section labels are page-defined on this site (see iching.html). Centred to
        match the other pages; AA-tuned --gold-ink for small text on the dark ground. */
@@ -23,6 +23,10 @@
        exists for success/error text on the dark ground. */
     .so-stack { --yang: var(--card-dark); }
     .so-ctx { --so-ok: #7fd79a; --so-warn: #e79a92; }
+
+    #learn + #geomancy {
+      margin-block-start: clamp(1.2rem, 3vw, 1.8rem);
+    }
 
     /* ══ The journey rail — the shape of the path, lit as it unlocks ══ */
     .so-rail {
@@ -420,5 +424,63 @@
     .hx-name .hx-pin { font-size: 1rem; color: var(--ink-muted); font-style: italic; }
     .hx-body { flex: 1; overflow-y: auto; min-height: 0; padding: 2px 28px 22px; }
     .hx-judgment { font-family: var(--serif); font-size: 1.12rem; line-height: 1.7; color: var(--text); margin: 0; }
+
+    /* ── Geomancy (the sixteen figures) — reference row at the foot of the
+       page, mirroring the I Ching trigram row. Logic: js/seedoracle-geomancy.js.
+       Figures are drawn as dot-glyphs (solid dot = single point, hollow ring =
+       double point) — no image files. Ported from v3 2026-07-12. */
+    .so-geo-block { max-width: var(--max-w); margin: 0 auto; padding: .4rem 0 0; }
+    .so-geo-row {
+      display: flex; flex-wrap: nowrap; justify-content: center; align-items: center;
+      gap: clamp(1px, 1vw, 10px); margin: 0 auto; min-height: 3rem;
+    }
+    .so-geo-cell {
+      cursor: pointer; border-radius: 8px; padding: 7px 4px; outline-offset: 3px;
+      opacity: .75; transition: opacity var(--ease), transform var(--ease);
+      flex: 0 1 auto; min-width: 0;
+    }
+    .so-geo-cell svg { display: block; max-width: 100%; height: auto; }
+    .so-geo-cell:hover, .so-geo-cell:focus-visible { opacity: 1; transform: translateY(-2px); }
+    .so-geo-cell.active { opacity: 1; }
+    .so-geo-pop { max-width: 520px; margin-inline: auto; }
+    .so-geo-detailwrap {
+      display: grid; grid-template-rows: 0fr; margin-top: 0;
+      transition: grid-template-rows .4s var(--ease), margin-top .4s var(--ease);
+    }
+    .so-geo-pop.open .so-geo-detailwrap { grid-template-rows: 1fr; margin-top: 1rem; }
+    .so-geo-detailmin { overflow: hidden; }
+    .so-geo-detail {
+      opacity: 0; transform: translateY(-8px); text-align: center;
+      transition: opacity .35s var(--ease), transform .35s var(--ease);
+    }
+    .so-geo-pop.open .so-geo-detail { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .so-geo-pop, .so-geo-detailwrap, .so-geo-detail { transition: none; }
+      .so-geo-cell:hover, .so-geo-cell:focus-visible { transform: none; }
+    }
+    .so-geo-card { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 1rem 0 0; }
+    .so-geo-fig { flex: 0 0 auto; }
+    .so-geo-name { font-family: var(--serif); font-size: 1.3rem; line-height: 1.1; color: var(--text); }
+    .so-geo-sub {
+      font-family: var(--sans); font-size: .68rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--gold-ink); margin-top: .3rem;
+    }
+    .so-geo-kws { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; margin: .9rem 0 .6rem; }
+    .so-geo-kw {
+      font-size: .67rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+      color: var(--gold-ink); border: 1px solid var(--rule); border-radius: var(--r-sm);
+      padding: .18rem .5rem;
+    }
+    .so-geo-text { color: var(--ink-muted); font-size: .96rem; line-height: 1.7; max-width: 42rem; margin: 0 auto; }
+    .so-geo-text p { margin: 0 0 .7em; }
+    .so-geo-text p:last-child { margin-bottom: 0; }
+    .so-geo-keynote {
+      margin: .7rem 0 1rem; font-family: var(--serif); font-style: italic; color: var(--gold-ink);
+    }
+    @media (max-width: 560px) {
+      .so-geo-card { gap: .8rem; }
+      .so-geo-name { font-size: 1.1rem; }
+      .so-geo-cell { padding: 4px 2px; }
+    }
 
     .hidden { display: none !important; }

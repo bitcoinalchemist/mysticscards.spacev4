@@ -84,50 +84,13 @@
     });
   }
 
-  var FAN = '<img src="assets/footer-fan.svg" alt="" width="48" height="48">';
-  var MAIL_MARK =
-    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>' +
-    '</svg>';
-
-  // Discreet "hidden" hexagram mark on the left of the I Ching footer —
-  // a small I Ching figure linking to the Seed Oracle (unlisted in NAV,
-  // reachable via this glyph). Hex 63 ䷾ Chi Chi — Fire under Water
-  // (After Completion). SVG: 6 rows at y=0/3.6/7.2/10.8/14.4/18, each 2
-  // high. SOLID = full width; BROKEN = two halves. Top row = line 6.
-  var SEED_MARK =
-    '<svg viewBox="0 0 18 20" aria-hidden="true">' +
-      '<g fill="#c79a54">' +
-        '<rect x="0" y="0"    width="7"  height="2" rx="1"/><rect x="11" y="0"    width="7"  height="2" rx="1"/>' +
-        '<rect x="0" y="3.6"  width="18" height="2" rx="1"/>' +
-        '<rect x="0" y="7.2"  width="7"  height="2" rx="1"/><rect x="11" y="7.2"  width="7"  height="2" rx="1"/>' +
-        '<rect x="0" y="10.8" width="18" height="2" rx="1"/>' +
-        '<rect x="0" y="14.4" width="7"  height="2" rx="1"/><rect x="11" y="14.4" width="7"  height="2" rx="1"/>' +
-        '<rect x="0" y="18"   width="18" height="2" rx="1"/>' +
-      '</g>' +
-    '</svg>';
-
   function buildFooter() {
     var inner = document.querySelector('.site-footer .sf-inner');
     if (!inner) return;
     if (inner.children.length || inner.textContent.trim()) return;
 
-    inner.classList.add('sf-rich');
-    // I Ching page carries the small hexagram glyph to the Seed Oracle
-    // on the left of its footer; other pages get a matched spacer so
-    // the fan mark stays truly centred.
-    var leftSlot = (page === 'iching.html')
-      ? '<span class="sf-seeds">' +
-          '<a class="sf-seed" href="seedoracle.html" aria-label="Seed Oracle" title="Seed Oracle">' + SEED_MARK + '</a>' +
-        '</span>'
-      : '<span class="sf-spacer" aria-hidden="true"></span>';
-    var emailSlot =
-      '<a class="sf-email" href="mailto:mysticscards@proton.me" aria-label="Email mysticscards@proton.me" title="mysticscards@proton.me">' + MAIL_MARK + '</a>';
     inner.innerHTML =
-      leftSlot +
-      '<a class="sf-mark" href="index.html" aria-label="mysticscards.space home">' + FAN + '</a>' +
-      emailSlot;
+      '<a class="sf-email" href="mailto:mysticscards@proton.me" aria-label="Email mysticscards@proton.me" title="mysticscards@proton.me">mysticscards@proton.me</a>';
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildFooter);
   else buildFooter();
