@@ -273,10 +273,10 @@ body.starry .site-header.scrolled {
 .sh-logo .suit { color: var(--gold); }
 .sh-hex {
   display: inline-flex; line-height: 0;
-  margin-left: auto; padding: 0 4px; min-height: 44px; align-items: center;
+  margin-left: auto; padding: 0 4px; min-height: 48px; align-items: center;
   opacity: .78; transition: opacity .2s ease;
 }
-.sh-hex svg { width: 15px; height: 17px; display: block; }
+.sh-hex svg { width: 22px; height: 24px; display: block; }
 .sh-hex:hover, .sh-hex:focus-visible { opacity: 1; }
 
 @media (min-width: 900px) {
