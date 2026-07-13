@@ -1,6 +1,6 @@
 // elements.js — the top "Card Elements" section: four suits (always shown),
-// thirteen numbers + seven planets + Crown (revealed on suit-select), Modern
-// vs Olney·1893 voice toggle, and the trigram-style expander that fills the
+// thirteen numbers + seven planets + Crown (revealed on suit-select), shared
+// Modern vs Olney·1893 voice state, and the trigram-style expander that fills the
 // suit/number/planet reading panels below the rows.
 //
 // First ES-module extraction from the page's original cardsoflife.js
@@ -11,8 +11,7 @@
 //   • planet expander (was at line ~549) — the planet glyphs row + the
 //     #plPop reading panel below it. Owns opening/closing planets.
 //   • suit/number expander (was at line ~2869) — the suit + number rows +
-//     the #elDetail reading panel, plus the .el-voice toggle. Owns the
-//     row-reveal state and the voice choice.
+//     the #elDetail reading panel. Owns the row-reveal state.
 // They cross-call by window.* refs (openPlanet ↔ closeElementsDetail, etc.),
 // so keeping them in one module keeps that coordination local while
 // preserving the same window API.
@@ -195,7 +194,7 @@
 
   // Reading-voice state ('modern' | 'olney'), shared with the planet controller
   // via window.elementsVoice and persisted per-browser through CardsStore.
-  // Toggled by the compact .el-voice switch (wired in init → initVoiceToggle).
+  // Controlled from the shared header settings panel.
   var voice = window.CardsStore ? window.CardsStore.getVoice() : 'modern';
   window.elementsVoice = function () { return voice; };
 
@@ -256,9 +255,6 @@
     var e = els();
     e.numRow.hidden = !on;
     if (e.planetRow) e.planetRow.hidden = !on;
-  // The Modern | Olney voice toggle rides with the suits row — hidden in the
-  // suits-only resting state, shown once a suit is picked.
-  var v = document.getElementById('elVoice'); if (v) v.hidden = !on;
   }
 
   function open(m, i) {
@@ -317,34 +313,9 @@
     e.numRow.querySelectorAll('.el-num').forEach(function (b) { b.classList.toggle('lit', b.dataset.rank === rank); });
   };
 
-  // Wire the Modern | Olney toggle: reflect the persisted voice,
-  // and on change persist + re-render whatever detail is open (suit / number via
-  // fill, planet via window.rerenderPlanet).
-  function initVoiceToggle() {
-    var btn = document.getElementById('elVoiceToggle');
-    if (!btn) return;
-    function reflect() {
-      var isOlney = voice === 'olney';
-      btn.setAttribute('aria-pressed', isOlney ? 'true' : 'false');
-      btn.textContent = isOlney ? 'olney' : 'modern';
-      btn.title = 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern');
-      btn.setAttribute('aria-label', 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern') + '. Activate to switch.');
-    }
-    reflect();
-    btn.addEventListener('click', function () {
-      voice = voice === 'modern' ? 'olney' : 'modern';
-      if (window.CardsStore) window.CardsStore.setVoice(voice);
-      reflect();
-      if (mode === 'suit') fill('suit', SUIT_ORDER[idx]);
-      else if (mode === 'num') fill('num', RANK_ORDER[idx]);
-      if (window.rerenderPlanet) window.rerenderPlanet();
-    });
-  }
-
   function init() {
     var e = els(); if (!e.suitRow) return;
     renderRows();
-    initVoiceToggle();
     e.suitRow.addEventListener('click', function (ev) {
       var b = ev.target.closest('.el-suit'); if (!b) return;
       var i = +b.dataset.i;
@@ -374,6 +345,12 @@
       if (tx == null) return;
       var dx = ev.changedTouches[0].clientX - tx; tx = null;
       if (Math.abs(dx) > 45) nav(dx < 0 ? 1 : -1);
+    });
+    window.addEventListener('mc-voice-toggle', function (ev) {
+      voice = ev && ev.detail && ev.detail.voice === 'olney' ? 'olney' : 'modern';
+      if (mode === 'suit') fill('suit', SUIT_ORDER[idx]);
+      else if (mode === 'num') fill('num', RANK_ORDER[idx]);
+      if (window.rerenderPlanet) window.rerenderPlanet();
     });
   }
 

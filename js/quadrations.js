@@ -43,24 +43,8 @@
     el.style.left = Math.round(gridRect.left - topRect.left) + 'px';
   }
 
-  // Mirror of alignSpreadLabel for the settings gear: pins its right edge
-  // to #annualGrid's right edge (the Mercury column — SPREAD_PLANETS[0],
-  // the last seat rendered in each row) instead of the rail's right edge.
-  // .q-settings-panel repositions itself off the gear's live rect already
-  // (see positionPanel in wireQuadSettingsPanel), so it follows for free.
-  function alignSettingsGear() {
-    const el   = document.getElementById('qSettingsBtn');
-    const top  = document.querySelector('.spreads-top');
-    const grid = document.getElementById('annualGrid');
-    if (!el || !top || !grid) return;
-    const gridRect = grid.getBoundingClientRect();
-    const topRect  = top.getBoundingClientRect();
-    el.style.right = Math.round(topRect.right - gridRect.right) + 'px';
-  }
-
   function alignQuadControls() {
     alignSpreadLabel();
-    alignSettingsGear();
   }
 
   function captureCardRects(ctl) {
@@ -118,6 +102,7 @@
     const on = grid.classList.toggle('q-ltr');
     syncSwitchAndLabel('qLtr', on);
     CardsStore.setQuadLtr(on);
+    window.dispatchEvent(new CustomEvent('mc-read-dir-toggle', { detail: { enabled: on } }));
     if (reduce) return;
     animateCardSettle(ctl, first);
   }
@@ -127,6 +112,7 @@
     v = Math.max(QUAD_SCALE_MIN, Math.min(QUAD_SCALE_MAX, Math.round(+v) || 100));
     const grid = document.getElementById('annualGrid');
     if (grid) grid.style.setProperty('--quad-scale', (v / 100).toFixed(2));
+    document.documentElement.style.setProperty('--quad-card-w', ((560 * v / 100) / 7).toFixed(2) + 'px');
     const val = document.getElementById('qSizeVal');
     if (val) val.textContent = v + '%';
     const slider = document.getElementById('qSizeSlider');
@@ -158,40 +144,6 @@
     }
   }
 
-  function wireQuadSettingsPanel() {
-    const btn = document.getElementById('qSettingsBtn');
-    const panel = document.getElementById('qSettingsPanel');
-    if (!btn || !panel) return;
-    document.body.appendChild(panel);
-    function positionPanel() {
-      const r = btn.getBoundingClientRect();
-      const w = panel.offsetWidth || 300;
-      const vw = document.documentElement.clientWidth;
-      let left = r.right - w;
-      left = Math.max(8, Math.min(left, vw - w - 8));
-      panel.style.left = (left + window.scrollX) + 'px';
-      panel.style.top  = (r.bottom + window.scrollY + 6) + 'px';
-    }
-    function openPanel()  { positionPanel(); panel.classList.add('open');    btn.setAttribute('aria-expanded', 'true'); }
-    function closePanel() { panel.classList.remove('open');                  btn.setAttribute('aria-expanded', 'false'); }
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      panel.classList.contains('open') ? closePanel() : openPanel();
-    });
-    document.addEventListener('click', (e) => {
-      if (!panel.classList.contains('open')) return;
-      if (panel.contains(e.target) || btn.contains(e.target)) return;
-      closePanel();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape' || !panel.classList.contains('open')) return;
-      const t = e.target;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      closePanel();
-    });
-    window.addEventListener('resize', () => { if (panel.classList.contains('open')) positionPanel(); });
-  }
-
   function wireDelegatedControls() {
     const alt  = document.getElementById('qAlt');
     if (alt)  alt.addEventListener('click', qToggleAltCourts);
@@ -206,12 +158,10 @@
   window.qSetCardSize      = qSetCardSize;
   window.syncSpreadLabel   = syncSpreadLabel;
   window.alignSpreadLabel  = alignSpreadLabel;
-  window.alignSettingsGear = alignSettingsGear;
   window.alignQuadControls = alignQuadControls;
 
   document.addEventListener('DOMContentLoaded', function () {
     if (!document.getElementById('annualGrid')) return;
-    wireQuadSettingsPanel();
     wireDelegatedControls();
     _initQuadCardSize();
     restoreQuadToggles();

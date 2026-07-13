@@ -3,7 +3,7 @@
  * Network-first for same-origin; cache-first for Google Fonts.
  * PRECACHE lists every deployed file.
  */
-const CACHE = 'mysticscards-9';
+const CACHE = 'mysticscards-12';
 const PRECACHE = [
   './',
   'index.html',

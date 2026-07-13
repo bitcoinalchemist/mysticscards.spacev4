@@ -271,6 +271,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
        .hex-ref-panel as a rounded panel. */
     .hex-ref-wrap {
       --muted: #9a90b8;
+      margin-bottom: 3rem;
       padding: 0 1.25rem;   /* gap from --section-gap; transparent panel needs no vertical pad */
       --yang: rgba(255,255,255,.9);
     }

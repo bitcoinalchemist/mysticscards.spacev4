@@ -2,6 +2,8 @@
   'use strict';
 
   var page = window.location.pathname.split('/').pop() || 'index.html';
+  var BG_KEY = 'mc-castfield-enabled';
+  var VOICE_KEY = 'cardsoflife_voice';
 
   var ICHING_MARK =
     '<svg viewBox="0 0 18 20" aria-hidden="true">' +
@@ -34,10 +36,44 @@
   var headerHtml =
     '<header class="site-header" id="siteHeader">' +
       '<div class="sh-inner">' +
-        '<label class="bg-toggle" for="bgToggle" title="Floating cards">' +
-          '<input type="checkbox" id="bgToggle" class="bg-toggle-input" aria-label="Floating cards">' +
-          '<span class="bg-toggle-track" aria-hidden="true"><span class="bg-toggle-knob"></span></span>' +
-        '</label>' +
+        '<div class="sh-settings">' +
+          '<button type="button" class="sh-settings-btn" id="shSettingsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="shSettingsPanel" aria-label="Site settings" title="Settings">⚙</button>' +
+          '<div class="sh-settings-panel" id="shSettingsPanel">' +
+            '<div class="sh-setting-row">' +
+              '<span class="sh-setting-label">Floating cards</span>' +
+              '<button type="button" class="q-switch" id="bgToggle" role="switch" aria-checked="false" aria-label="Floating cards"><span class="q-switch-knob"></span></button>' +
+            '</div>' +
+            '<div class="sh-setting-row">' +
+              '<span class="sh-setting-label">Reading voice</span>' +
+              '<button type="button" class="sh-voice-btn" id="voiceToggle" aria-pressed="false" aria-label="Reading voice">modern</button>' +
+            '</div>' +
+            '<div class="sh-setting-divider" aria-hidden="true"></div>' +
+            '<div class="sh-setting-group">' +
+              '<div class="sh-setting-head">Quadrations</div>' +
+              '<div class="sh-setting-row">' +
+                '<span class="sh-setting-label">Alternate court cards</span>' +
+                '<button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false" aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>' +
+              '</div>' +
+              '<div class="sh-setting-row">' +
+                '<span class="sh-setting-label">Show displacements</span>' +
+                '<button type="button" class="q-switch" id="qDisp" role="switch" aria-checked="false" aria-label="Show displacements"><span class="q-switch-knob"></span></button>' +
+              '</div>' +
+              '<div class="sh-setting-row">' +
+                '<span class="sh-setting-label">Read left to right</span>' +
+                '<button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false" aria-label="Read left to right"><span class="q-switch-knob"></span></button>' +
+              '</div>' +
+              '<div class="sh-setting-row sh-setting-row--size">' +
+                '<span class="sh-setting-label">Card size</span>' +
+                '<div class="q-size-row" role="group" aria-label="Card size">' +
+                  '<span class="q-size-ico q-size-ico--sm" aria-hidden="true">A</span>' +
+                  '<input type="range" id="qSizeSlider" class="q-size-slider" min="60" max="150" step="5" value="100" aria-label="Card size" title="Card size">' +
+                  '<span class="q-size-ico q-size-ico--lg" aria-hidden="true">A</span>' +
+                  '<span class="q-size-val" id="qSizeVal">100%</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
         '<a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>' +
         rightSlot +
       '</div>' +
@@ -55,23 +91,72 @@
     header.classList.toggle('scrolled', window.scrollY > 10);
   }, { passive: true });
 
-  var BG_KEY = 'mc-castfield-enabled';
   function readBgPref() {
     try { return localStorage.getItem(BG_KEY) === '1'; } catch (e) { return false; }
   }
   function applyBgPref(on) {
     document.body.classList.toggle('bg-enabled', !!on);
     var input = document.getElementById('bgToggle');
-    if (input) input.checked = !!on;
+    if (input) {
+      input.classList.toggle('on', !!on);
+      input.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
     try { localStorage.setItem(BG_KEY, on ? '1' : '0'); } catch (e) {}
     window.dispatchEvent(new CustomEvent('mc-bg-toggle', { detail: { enabled: !!on } }));
   }
+  function readVoicePref() {
+    try { return localStorage.getItem(VOICE_KEY) === 'olney' ? 'olney' : 'modern'; } catch (e) { return 'modern'; }
+  }
+  function applyVoicePref(voice) {
+    var next = voice === 'olney' ? 'olney' : 'modern';
+    var btn = document.getElementById('voiceToggle');
+    if (btn) {
+      var isOlney = next === 'olney';
+      btn.textContent = next;
+      btn.setAttribute('aria-pressed', isOlney ? 'true' : 'false');
+      btn.title = 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern');
+      btn.setAttribute('aria-label', 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern') + '. Activate to switch.');
+    }
+    try { localStorage.setItem(VOICE_KEY, next); } catch (e) {}
+    window.dispatchEvent(new CustomEvent('mc-voice-toggle', { detail: { voice: next } }));
+  }
+  function togglePanel(force) {
+    var btn = document.getElementById('shSettingsBtn');
+    var panel = document.getElementById('shSettingsPanel');
+    if (!btn || !panel) return;
+    var open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
   function initBgToggle() {
     var input = document.getElementById('bgToggle');
+    var voiceBtn = document.getElementById('voiceToggle');
+    var settingsBtn = document.getElementById('shSettingsBtn');
+    var panel = document.getElementById('shSettingsPanel');
     applyBgPref(readBgPref());
-    if (!input) return;
-    input.addEventListener('change', function () {
-      applyBgPref(!!input.checked);
+    applyVoicePref(readVoicePref());
+    if (input) {
+      input.addEventListener('click', function () {
+        applyBgPref(input.getAttribute('aria-checked') !== 'true');
+      });
+    }
+    if (voiceBtn) {
+      voiceBtn.addEventListener('click', function () {
+        applyVoicePref(readVoicePref() === 'olney' ? 'modern' : 'olney');
+      });
+    }
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', function () {
+        togglePanel();
+      });
+    }
+    document.addEventListener('click', function (e) {
+      if (!panel || !panel.classList.contains('open')) return;
+      if (e.target.closest('#shSettingsBtn') || e.target.closest('#shSettingsPanel')) return;
+      togglePanel(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') togglePanel(false);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBgToggle);

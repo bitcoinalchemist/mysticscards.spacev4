@@ -229,14 +229,11 @@
             </div>
             <div class="finder-panels-body" id="fPanelBody" data-panel-active="about">
 
-              <!-- About panel — modern reading plus an inline Olney
-                   toggle in solo mode. Joker keeps the content area
-                   empty. -->
+              <!-- About panel — modern or Olney reading depending on
+                   the shared header setting. Joker keeps the content
+                   area empty. -->
               <div class="finder-about ns-panel" id="fAbout" role="tabpanel" aria-labelledby="chipAbout">
                 <div class="finder-about-inner">
-                  <div class="finder-about-switch" id="fAboutSwitch">
-                    <button type="button" class="el-voice-btn finder-about-voice-btn" id="fAboutVoiceToggle" aria-pressed="false" aria-controls="fAboutOlney" aria-label="About reading voice">modern</button>
-                  </div>
                   <div class="finder-about-view finder-about-modern is-active" id="fAboutModern">
                   <div class="finder-about-bond" id="fAboutBond"></div>
                   <div class="finder-about-kws" id="fAboutKws"></div>
@@ -321,36 +318,6 @@
                 <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
               </div>
             </div>
-            <button type="button" class="q-disp-icon" id="qSettingsBtn"
-                    aria-haspopup="true" aria-expanded="false" aria-controls="qSettingsPanel"
-                    aria-label="Quadrations settings" title="Settings">⚙</button>
-            <div class="q-settings-panel" id="qSettingsPanel">
-              <div class="q-setting-row">
-                <span class="q-setting-label">Alternate court cards</span>
-                <button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false"
-                        aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>
-              </div>
-              <div class="q-setting-row">
-                <span class="q-setting-label">Show displacements</span>
-                <button type="button" class="q-switch" id="qDisp" role="switch" aria-checked="false"
-                        aria-label="Show displacements"><span class="q-switch-knob"></span></button>
-              </div>
-              <div class="q-setting-row">
-                <span class="q-setting-label">Read left to right</span>
-                <button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false"
-                        aria-label="Read left to right"><span class="q-switch-knob"></span></button>
-              </div>
-              <div class="q-setting-row q-setting-row--size">
-                <span class="q-setting-label">Card size</span>
-                <div class="q-size-row" role="group" aria-label="Card size">
-                  <span class="q-size-ico q-size-ico--sm" aria-hidden="true">A</span>
-                  <input type="range" id="qSizeSlider" class="q-size-slider" min="60" max="150" step="5" value="100"
-                         aria-label="Card size" title="Card size">
-                  <span class="q-size-ico q-size-ico--lg" aria-hidden="true">A</span>
-                  <span class="q-size-val" id="qSizeVal">100%</span>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="spread-layout">
             <div class="spread-wrap">
@@ -364,49 +331,58 @@
     </div>
   </section>
 
-  <section class="elements page-section" id="elements" aria-label="The suits, numbers, and planets of the deck">
-    <div class="el-inner">
-      <div class="el-topline">
-        <div class="suit-row" id="suitRow" role="list" aria-label="The four suits"></div>
-        <div class="el-voice" id="elVoice" hidden>
-          <button type="button" class="el-voice-btn" id="elVoiceToggle" aria-pressed="false" aria-label="Toggle reading voice" title="Reading voice">Modern</button>
-        </div>
-      </div>
-      <div class="num-row" id="numRow" role="list" aria-label="The thirteen numbers" hidden></div>
-      <div class="planet-row" id="planetRow" role="list" aria-label="The seven planets and the Crown" hidden></div>
-      <div class="el-detailwrap">
-        <div class="el-detailmin">
-          <div class="el-detail" id="elDetail" aria-live="polite">
-            <button class="el-nav el-prev" type="button" aria-label="Previous">‹</button>
-            <div class="el-card">
-              <div class="el-head">
-                <span class="el-fig" id="elFig" aria-hidden="true"></span>
-                <span class="el-name" id="elName"></span>
-              </div>
-              <div class="el-kws" id="elKws"></div>
-              <div class="el-text" id="elText"></div>
-              <p class="el-keynote" id="elKeynote"></p>
+  <section class="elements page-section section-open" id="elements" aria-label="The suits, numbers, and planets of the deck">
+    <button class="section-toggle" type="button"
+            aria-expanded="true" aria-controls="elementsBody"
+            data-section="elements">
+      <span class="section-label">Elements</span>
+      <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="section-bodywrap">
+      <div class="section-bodymin" id="elementsBody">
+        <div class="section-shell">
+          <div class="el-inner">
+            <div class="el-topline">
+              <div class="suit-row" id="suitRow" role="list" aria-label="The four suits"></div>
             </div>
-            <button class="el-nav el-next" type="button" aria-label="Next">›</button>
+            <div class="num-row" id="numRow" role="list" aria-label="The thirteen numbers" hidden></div>
+            <div class="planet-row" id="planetRow" role="list" aria-label="The seven planets and the Crown" hidden></div>
+            <div class="el-detailwrap">
+              <div class="el-detailmin">
+                <div class="el-detail" id="elDetail" aria-live="polite">
+                  <button class="el-nav el-prev" type="button" aria-label="Previous">‹</button>
+                  <div class="el-card">
+                    <div class="el-head">
+                      <span class="el-fig" id="elFig" aria-hidden="true"></span>
+                      <span class="el-name" id="elName"></span>
+                    </div>
+                    <div class="el-kws" id="elKws"></div>
+                    <div class="el-text" id="elText"></div>
+                    <p class="el-keynote" id="elKeynote"></p>
+                  </div>
+                  <button class="el-nav el-next" type="button" aria-label="Next">›</button>
+                </div>
+              </div>
+            </div>
+            <div class="pl-pop" id="plPop">
+              <div class="pl-detailwrap"><div class="pl-detailmin">
+                <div class="pl-detail" id="plDetail" aria-live="polite">
+                  <div class="pl-card">
+                    <div class="pl-head">
+                      <span class="pl-fig" id="plFig" aria-hidden="true"></span>
+                      <span class="pl-name" id="plName"></span>
+                    </div>
+                    <div class="pl-sub" id="plSub"></div>
+                    <div class="pl-kws" id="plKws"></div>
+                    <div class="pl-para" id="plPara"></div>
+                    <dl class="pl-attrs" id="plAttrs"></dl>
+                    <p class="pl-syn" id="plSyn"></p>
+                  </div>
+                </div>
+              </div></div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="pl-pop" id="plPop">
-        <div class="pl-detailwrap"><div class="pl-detailmin">
-          <div class="pl-detail" id="plDetail" aria-live="polite">
-            <div class="pl-card">
-              <div class="pl-head">
-                <span class="pl-fig" id="plFig" aria-hidden="true"></span>
-                <span class="pl-name" id="plName"></span>
-              </div>
-              <div class="pl-sub" id="plSub"></div>
-              <div class="pl-kws" id="plKws"></div>
-              <div class="pl-para" id="plPara"></div>
-              <dl class="pl-attrs" id="plAttrs"></dl>
-              <p class="pl-syn" id="plSyn"></p>
-            </div>
-          </div>
-        </div></div>
       </div>
     </div>
   </section>

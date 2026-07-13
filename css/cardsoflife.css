@@ -84,95 +84,6 @@
   letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink);
 }
 
-.q-disp-icon {
-  /* right is overridden in JS (alignSettingsGear) to pin the icon's
-     right edge to #annualGrid's right edge (the Mercury column) —
-     same reasoning as .q-mode-current's left offset. */
-  position: absolute; right: 0; top: 0;
-  width: var(--ctl-round-size); height: var(--ctl-round-size); border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.22); background: transparent;
-  color: rgba(255,255,255,.6); font-size: var(--ctl-round-font); line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background var(--ease), color var(--ease), border-color var(--ease);
-}
-.q-disp-icon:hover { color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.4); }
-.q-disp-icon[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
-
-.q-settings-panel {
-  position: absolute; z-index: 200;
-  width: min(300px, 92vw);
-  background: var(--surface); border: 1px solid var(--rule-strong);
-  border-radius: 10px; padding: .35rem .85rem; box-shadow: var(--sh-lg);
-  opacity: 0; visibility: hidden;
-  transform: translateY(-6px) scale(.98); transform-origin: top right;
-  transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
-  pointer-events: none;
-}
-.q-settings-panel.open {
-  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
-  transition: opacity .18s ease, transform .18s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .q-settings-panel { transition: none; }
-}
-.q-setting-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: .75rem; padding: .6rem 0;
-}
-.q-setting-row + .q-setting-row { border-top: 1px solid var(--border); }
-.q-setting-label { font-size: .8rem; color: var(--secondary); }
-.q-setting-row--size { flex-direction: column; align-items: stretch; gap: .4rem; }
-.q-setting-row--size .q-setting-label {
-  font-size: .64rem; font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--gold-ink);
-}
-
-.q-switch {
-  position: relative; flex-shrink: 0; width: 34px; height: 20px;
-  padding: 0; border-radius: 999px;
-  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.22);
-  cursor: pointer; transition: background var(--ease), border-color var(--ease);
-}
-.q-switch-knob {
-  position: absolute; top: 1px; left: 1px; width: 16px; height: 16px;
-  border-radius: 50%; background: #fff; transition: transform var(--ease);
-}
-.q-switch.on { background: var(--gold); border-color: var(--gold); }
-.q-switch.on .q-switch-knob { transform: translateX(14px); }
-
-.q-size-row { display: flex; align-items: center; gap: .4rem; }
-.q-size-ico { font-family: var(--serif); color: rgba(255,255,255,.4); line-height: 1; user-select: none; }
-.q-size-ico--sm { font-size: .6rem; }
-.q-size-ico--lg { font-size: 1.05rem; }
-.q-size-val {
-  font-family: var(--sans); font-size: .68rem; font-weight: 600;
-  color: rgba(255,255,255,.45); min-width: 2.6em; text-align: left;
-}
-.q-size-slider {
-  -webkit-appearance: none; appearance: none;
-  flex: 1; min-width: 0; height: 32px; background: transparent; cursor: pointer;
-}
-.q-size-slider::-webkit-slider-runnable-track {
-  height: 3px; border-radius: 999px; background: rgba(255,255,255,.18);
-}
-.q-size-slider::-moz-range-track {
-  height: 3px; border-radius: 999px; background: rgba(255,255,255,.18);
-}
-.q-size-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 15px; height: 15px; margin-top: -6px; border-radius: 50%;
-  background: var(--gold); border: 2px solid var(--accent);
-  transition: transform var(--ease);
-}
-.q-size-slider::-moz-range-thumb {
-  width: 15px; height: 15px; border-radius: 50%;
-  background: var(--gold); border: 2px solid var(--accent);
-  transition: transform var(--ease);
-}
-.q-size-slider::-webkit-slider-thumb:hover,
-.q-size-slider::-moz-range-thumb:hover { transform: scale(1.15); }
-
 #annualGrid { max-width: calc(560px * var(--quad-scale, 1)); }
 @media (max-width: 700px) {
   .spread-layout { flex-direction: column; align-items: center; }
@@ -624,16 +535,6 @@
   display: flex; flex-direction: column;
   gap: var(--space-4, 1rem);
 }
-.finder-about-switch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-}
-.finder-about-voice-btn[disabled] {
-  opacity: .45;
-  cursor: default;
-}
 .finder-about-view { display: none; }
 .finder-about-view.is-active { display: block; }
 .finder-about-modern.is-active {
@@ -752,7 +653,6 @@
 .finder-about.is-joker .finder-about-lightshadow { display: none; }
 .finder-about.is-joker .finder-about-bond { display: none; }
 .finder-about.is-relationship .finder-about-inner { display: flex; }
-.finder-about.is-relationship .finder-about-switch { display: none; }
 .finder-about.is-relationship .finder-about-kws { order: 0; }
 .finder-about.is-relationship .finder-about-bond { order: 1; }
 .finder-about.is-relationship .finder-about-personality { display: none; }
@@ -950,7 +850,7 @@
   font-size: .85rem; color: var(--muted);
 }
 .ls-row {
-  --ls-card-w: calc(560px * var(--quad-scale, 1) / 7);
+  --ls-card-w: var(--quad-card-w, calc(560px * var(--quad-scale, 1) / 7));
   display: grid;
   grid-template-columns: repeat(7, minmax(0, var(--ls-card-w)));
   gap: .4rem .3rem;
@@ -1121,7 +1021,7 @@
   margin-top: 1rem;
 }
 .it-row {
-  --it-card-w: calc(560px * var(--quad-scale, 1) / 7);
+  --it-card-w: var(--quad-card-w, calc(560px * var(--quad-scale, 1) / 7));
   display: grid;
   grid-template-columns: repeat(5, minmax(0, var(--it-card-w)));
   gap: .55rem;
@@ -1897,11 +1797,25 @@
 .birth-item-body { flex: 1; min-width: 0; }
 .birth-name { font-family: var(--sans); font-size: .88rem; color: var(--text); }
 .birth-date { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+.birth-edit,
 .birth-del {
   flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 0;
-  background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer;
+  background: transparent; color: var(--muted); cursor: pointer;
   transition: color var(--ease), background var(--ease);
 }
+.birth-edit {
+  width: auto;
+  min-width: 2.25rem;
+  padding: 0 .45rem;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.birth-del { font-size: 1rem; }
+.birth-edit:hover { color: var(--gold-ink); background: rgba(199,154,84,.12); }
 .birth-del:hover { color: #e98a8a; background: rgba(233,138,138,.12); }
 .bday-note { font-size: .68rem; color: var(--muted); text-align: center; }
 
@@ -2107,48 +2021,7 @@
 .elements { padding: 0; }
 .el-inner { max-width: var(--max-w); margin: 0 auto; }
 .el-topline {
-  position: relative;
   min-height: 3rem;
-}
-.el-voice {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.el-voice[hidden] { display: none; }
-.el-voice-btn {
-  font-family: var(--sans);
-  font-size: .62rem;
-  font-weight: 600;
-  letter-spacing: .09em;
-  text-transform: lowercase;
-  color: rgba(255,255,255,.72);
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 999px;
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 .75rem;
-  min-width: 5.2rem;
-  cursor: pointer;
-  transition: all var(--ease);
-}
-.el-voice-btn:hover,
-.el-voice-btn:focus-visible {
-  color: var(--gold);
-  border-color: rgba(221,187,120,.42);
-}
-.el-voice-btn[aria-pressed="true"] {
-  border-color: var(--gold);
-  color: #221300;
-  background: linear-gradient(180deg, rgba(221,187,120,.96), rgba(199,154,84,.92));
-  box-shadow: 0 0 0 1px rgba(88,56,13,.14), 0 4px 12px rgba(0,0,0,.16);
 }
 .suit-row, .num-row {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
@@ -2157,10 +2030,6 @@
 .suit-row { min-height: 3rem; }
 @media (max-width: 700px) {
   .el-topline {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .45rem;
     min-height: 0;
   }
   .el-voice {

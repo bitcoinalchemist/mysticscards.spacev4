@@ -13,11 +13,6 @@ function buildSpreadGrid(gridEl, opts) {
   }
 
   let html = '';
-  html += '<div class="crown-label-row" aria-hidden="true">';
-  html += '<div class="crown-label-spacer"></div>';
-  html += `<div class="spread-col-label crown-col-label" data-crown="2">${SPREAD_PLANET_SYM.Crown}</div>`;
-  html += '<div class="crown-label-spacer"></div>';
-  html += '</div>';
   html += '<div class="crown-row">';
   html += '<div class="crown-side crown-joker" aria-hidden="true"></div>';
   for (let i = 51; i >= 49; i--) html += `<div class="sl-seat" data-pos="${i}"></div>`;
@@ -129,10 +124,14 @@ function buildSpreadGrid(gridEl, opts) {
         cards[k].classList.toggle('finder-pick', !!(rank && c.rank === rank && c.suit === suit));
       }
     },
-    setPickPartner(rank, suit) {
+    setPickPartner(rank, suit, extraRank, extraSuit) {
       for (const k in cards) {
         const c = SPREAD_CARDS[k];
-        cards[k].classList.toggle('finder-pick-partner', !!(rank && c.rank === rank && c.suit === suit));
+        const isMatch = !!(
+          (rank && c.rank === rank && c.suit === suit) ||
+          (extraRank && c.rank === extraRank && c.suit === extraSuit)
+        );
+        cards[k].classList.toggle('finder-pick-partner', isMatch);
       }
     },
     setScript(rank, suit) {

@@ -117,30 +117,42 @@
   </div><!-- /.section-bodywrap -->
 </section>
 
-<!-- ── Trigrams (the eight building blocks) — reference row, no heading. ── -->
-<div class="page-content page-section" id="trigrams" style="max-width: var(--max-w); padding: 1.6rem 2rem 0">
-  <div class="tg-pop" id="tgPop">
-    <div class="gua-row" id="trigram-row" style="--yang: var(--gold); margin: 0; justify-content: center; align-items: center;"></div>
-    <div class="tg-detailwrap"><div class="tg-detailmin">
-      <div class="tg-detail" id="tgDetail" aria-live="polite">
-        <button class="tg-nav" id="tgPrev" type="button" aria-label="Previous trigram">‹</button>
-        <div class="tg-card">
-          <div class="tg-head">
-            <div class="tg-fig" id="tgFig"></div>
-            <div>
-              <div class="tg-name" id="tgName"></div>
-              <div class="tg-sub" id="tgSub"></div>
+<!-- ── Trigrams (the eight building blocks) ── -->
+<section class="page-section section-open" id="trigrams">
+  <button class="section-toggle" type="button"
+          aria-expanded="true" aria-controls="trigramsBody"
+          data-section="trigrams">
+    <span class="section-label">Trigrams</span>
+    <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="section-bodywrap">
+    <div class="section-bodymin" id="trigramsBody">
+      <div class="section-shell">
+        <div class="tg-pop" id="tgPop">
+          <div class="gua-row" id="trigram-row" style="--yang: var(--gold); margin: 0; justify-content: center; align-items: center;"></div>
+          <div class="tg-detailwrap"><div class="tg-detailmin">
+            <div class="tg-detail" id="tgDetail" aria-live="polite">
+              <button class="tg-nav" id="tgPrev" type="button" aria-label="Previous trigram">‹</button>
+              <div class="tg-card">
+                <div class="tg-head">
+                  <div class="tg-fig" id="tgFig"></div>
+                  <div>
+                    <div class="tg-name" id="tgName"></div>
+                    <div class="tg-sub" id="tgSub"></div>
+                  </div>
+                </div>
+                <p class="tg-line" id="tgLine"></p>
+                <dl class="tg-attrs" id="tgAttrs"></dl>
+                <p class="tg-para" id="tgPara"></p>
+              </div>
+              <button class="tg-nav" id="tgNext" type="button" aria-label="Next trigram">›</button>
             </div>
-          </div>
-          <p class="tg-line" id="tgLine"></p>
-          <dl class="tg-attrs" id="tgAttrs"></dl>
-          <p class="tg-para" id="tgPara"></p>
+          </div></div>
         </div>
-        <button class="tg-nav" id="tgNext" type="button" aria-label="Next trigram">›</button>
       </div>
-    </div></div>
+    </div>
   </div>
-</div>
+</section>
 
 <!-- ── Hexagram popup ── -->
 <div class="hx-overlay" id="hxOverlay">

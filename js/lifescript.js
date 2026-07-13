@@ -48,6 +48,10 @@
     return `${RANK_NAMES[card.rank] || card.rank} of ${card.suit[0].toUpperCase() + card.suit.slice(1)}`;
   }
 
+  function readsLeftToRight() {
+    return !!(window.CardsStore && window.CardsStore.getQuadLtr && window.CardsStore.getQuadLtr());
+  }
+
   // Displacement ghost chips for one ruling card — mirrors the
   // Quadrations grid's .sl-ghost pair (Displaces / Displaced by).
   // `idx` is the card's position in CARDS/SPREAD_CARDS' shared solar
@@ -121,8 +125,9 @@
     const key = `${card.rank}_${card.suit}`;
     const script = (typeof LIFE_SCRIPTS !== 'undefined' ? LIFE_SCRIPTS : {})[key];
     if (!script) return '';
-    const displayScript = [...script].reverse();
-    const planetOrder = [6,5,4,3,2,1,0];
+    const ltr = readsLeftToRight();
+    const displayScript = ltr ? [...script] : [...script].reverse();
+    const planetOrder = ltr ? [0,1,2,3,4,5,6] : [6,5,4,3,2,1,0];
     return displayScript.map((cardStr, i) => {
       const cc = parseCard(cardStr);
       const planet = SPREAD_PLANETS[planetOrder[i]];

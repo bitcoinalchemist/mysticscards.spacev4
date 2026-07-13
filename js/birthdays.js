@@ -1,4 +1,4 @@
-// birthdays.js — the saved-birthdays tray (list + manual add
+// birthdays.js — the saved-birthdays tray (list + manual add/edit
 // form + export/import), rendered inline under the Finder alongside the
 // other picker trays. Also owns the shared "You / Partner" pick target
 // that this tray and js/finder-trays.js's Calendar both read
@@ -49,8 +49,10 @@
   // Which Finder slot a pick fills. Module-private; finder-trays.js reads/
   // sets it through the window accessors below.
   let _bdayTarget = 'self';
+  let _editingBirthId = null;
 
-  function loadBirth(entry, target) {
+  function loadBirth(entry, target, options) {
+    options = options || {};
     // "You" picks also carry the person's current age into Quadrations —
     // setAge/currentAge are bare classic-script globals from spread-grid.js.
     if (target !== 'partner' && typeof setAge === 'function') {
@@ -58,7 +60,7 @@
     }
     if (typeof window.loadDateInFinder !== 'function') return;
     window.loadDateInFinder(entry.month, entry.day, target, { name: entry.name });
-    if (typeof window.closeFinderTray === 'function') window.closeFinderTray('bday');
+    if (!options.keepTrayOpen && typeof window.closeFinderTray === 'function') window.closeFinderTray('bday');
   }
 
   // The person's Birth Card as a small parchment chip (rank + suit pip).
@@ -96,21 +98,31 @@
           '<div class="birth-date">' + MONTHS_SHORT[e.month - 1] + ' ' + e.day + ', ' + e.year +
             ' &middot; age ' + ageFromBirthYear(e.year, e.month, e.day) + '</div>' +
         '</div>' +
+        '<button type="button" class="birth-edit" data-edit="' + e.id + '" title="Edit" aria-label="Edit ' + escHtml(e.name) + '">Edit</button>' +
         '<button type="button" class="birth-del" data-del="' + e.id + '" title="Delete" aria-label="Delete ' + escHtml(e.name) + '">&times;</button>' +
       '</div>'
     ).join('');
     panel.querySelectorAll('.birth-item').forEach(item => {
       item.addEventListener('click', ev => {
-        if (ev.target.closest('[data-del]')) return;
+        if (ev.target.closest('[data-edit], [data-del]')) return;
         const id = +item.dataset.id;
         const entry = loadBirths().find(x => x.id === id);
         if (entry) loadBirth(entry, _bdayTarget);
       });
     });
+    panel.querySelectorAll('[data-edit]').forEach(b => {
+      b.addEventListener('click', ev => {
+        ev.stopPropagation();
+        const entry = loadBirths().find(x => x.id === +b.dataset.edit);
+        if (entry) openBirthEditPanel(entry);
+      });
+    });
     panel.querySelectorAll('[data-del]').forEach(b => {
       b.addEventListener('click', ev => {
         ev.stopPropagation();
-        saveBirths(loadBirths().filter(x => x.id !== +b.dataset.del));
+        const id = +b.dataset.del;
+        saveBirths(loadBirths().filter(x => x.id !== id));
+        if (_editingBirthId === id) closeBirthAddPanel();
         renderBirthPanel();
       });
     });
@@ -152,6 +164,23 @@
   }
 
   // ── Manual birthday entry (DD / MM / YYYY) ─────────────────────
+  function setBirthFormMode(entry) {
+    _editingBirthId = entry ? entry.id : null;
+    const saveBtn = document.getElementById('birthAddSave');
+    if (saveBtn) saveBtn.textContent = entry ? 'Update' : 'Save';
+  }
+
+  function clearBirthForm() {
+    const dEl = document.getElementById('baDay');
+    const mEl = document.getElementById('baMonth');
+    const yEl = document.getElementById('baYear');
+    const nEl = document.getElementById('baName');
+    if (dEl) dEl.value = '';
+    if (mEl) mEl.value = '';
+    if (yEl) yEl.value = '';
+    if (nEl) nEl.value = '';
+  }
+
   function openBirthAddPanel() {
     const dEl = document.getElementById('baDay');
     const mEl = document.getElementById('baMonth');
@@ -159,6 +188,8 @@
     const fDay = document.getElementById('fDay');
     const fM = fMonth ? parseInt(fMonth.value, 10) : NaN;
     const fD = fDay ? parseInt(fDay.value, 10) : NaN;
+    setBirthFormMode(null);
+    clearBirthForm();
     if (fD && fM) {
       dEl.value = String(fD).padStart(2, '0');
       mEl.value = String(fM).padStart(2, '0');
@@ -169,12 +200,29 @@
       document.getElementById(firstEmpty || 'baName').focus();
     }, 0);
   }
+
+  function openBirthEditPanel(entry) {
+    const dEl = document.getElementById('baDay');
+    const mEl = document.getElementById('baMonth');
+    const yEl = document.getElementById('baYear');
+    const nEl = document.getElementById('baName');
+    setBirthFormMode(entry);
+    dEl.value = String(entry.day).padStart(2, '0');
+    mEl.value = String(entry.month).padStart(2, '0');
+    yEl.value = String(entry.year);
+    nEl.value = entry.name;
+    document.getElementById('birthAddPanel').classList.add('open');
+    setTimeout(() => nEl.focus(), 0);
+  }
+
   function closeBirthAddPanel() {
     const p = document.getElementById('birthAddPanel');
     if (p) p.classList.remove('open');
     const err = document.getElementById('birthAddError');
     if (err) err.textContent = '';
+    setBirthFormMode(null);
   }
+
   function saveManualBirth() {
     const dEl = document.getElementById('baDay');
     const mEl = document.getElementById('baMonth');
@@ -197,14 +245,30 @@
     }
     const today = new Date(); today.setHours(0, 0, 0, 0);
     if (test.getTime() > today.getTime()) { err.textContent = 'Birthday can’t be in the future.'; dEl.focus(); return; }
-    const list = loadBirths();
-    const entry = { id: Date.now(), name, day: d, month: m, year: y };
-    list.push(entry);
+    const wasEditing = _editingBirthId !== null;
+    let entry = null;
+    let list = loadBirths();
+    if (wasEditing) {
+      list = list.map(item => {
+        if (item.id !== _editingBirthId) return item;
+        entry = { id: item.id, name, day: d, month: m, year: y };
+        return entry;
+      });
+      if (!entry) {
+        closeBirthAddPanel();
+        renderBirthPanel();
+        bdayToast('That saved birthday was not found.', true);
+        return;
+      }
+    } else {
+      entry = { id: Date.now(), name, day: d, month: m, year: y };
+      list.push(entry);
+    }
     saveBirths(list);
-    dEl.value = ''; mEl.value = ''; yEl.value = ''; nEl.value = '';
+    clearBirthForm();
     closeBirthAddPanel();
     renderBirthPanel();
-    loadBirth(entry, _bdayTarget);
+    loadBirth(entry, _bdayTarget, { keepTrayOpen: wasEditing });
   }
 
   function wireAddFormAutoAdvance() {

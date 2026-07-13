@@ -44,11 +44,11 @@
   let dom = null;
   let _selectedCard = null;
   let _selectedPartner = null;
+  let _selectedComposite = null;
   let _finderOverride = null;
   let _finderSnapshot = null;
   let _finderBirthLabel = '';
   let _transitionSource = null;
-  let _aboutView = 'modern';
   // When a snapshot is restored (reset button), this remembers which side
   // the overridden card came from so the solo→triptych entrance sends that
   // card back to its own slot instead of always replaying the left-card
@@ -126,8 +126,6 @@
       },
       about: {
         root:        document.getElementById('fAbout'),
-        switcher:    document.getElementById('fAboutSwitch'),
-        voiceToggle: document.getElementById('fAboutVoiceToggle'),
         modern:      document.getElementById('fAboutModern'),
         olney:       document.getElementById('fAboutOlney'),
         bond:        document.getElementById('fAboutBond'),
@@ -490,6 +488,8 @@
     const olneyOk   = !rel && typeof window.renderOlney === 'function'
       ? window.renderOlney(card, box.olney)
       : false;
+    const voice = window.CardsStore ? window.CardsStore.getVoice() : 'modern';
+    const showOlney = voice === 'olney' && olneyOk && !rel;
     if (!reading && !bondEntry && card.suit !== 'joker') { box.root.classList.add('is-empty'); return false; }
 
     if (box.bond) {
@@ -521,18 +521,8 @@
     box.root.classList.toggle('is-joker', !reading);
     box.root.classList.toggle('is-relationship', !!bondEntry);
     box.root.classList.toggle('is-olney-empty', !olneyOk);
-    if (box.switcher) box.switcher.hidden = !!rel;
-    if (_aboutView === 'olney' && !olneyOk) _aboutView = 'modern';
-    if (box.modern) box.modern.classList.toggle('is-active', _aboutView === 'modern');
-    if (box.olney) box.olney.classList.toggle('is-active', _aboutView === 'olney');
-    if (box.voiceToggle) {
-      const isOlney = _aboutView === 'olney';
-      box.voiceToggle.textContent = isOlney ? 'olney' : 'modern';
-      box.voiceToggle.setAttribute('aria-pressed', isOlney ? 'true' : 'false');
-      box.voiceToggle.disabled = !olneyOk;
-      box.voiceToggle.title = 'About reading voice: ' + (isOlney ? 'Olney' : 'Modern');
-      box.voiceToggle.setAttribute('aria-label', 'About reading voice: ' + (isOlney ? 'Olney' : 'Modern') + (olneyOk ? '. Activate to switch.' : '. Olney unavailable for this card.'));
-    }
+    if (box.modern) box.modern.classList.toggle('is-active', !showOlney);
+    if (box.olney) box.olney.classList.toggle('is-active', showOlney);
     return true;
   }
 
@@ -544,20 +534,32 @@
     return findCard(m, d);
   }
 
-  function updateGridPick(card, isPartner) {
+  function updateGridPick(card, mode, extraCard) {
     if (typeof ensureSpreadCtl !== 'function') return;
     const ctl = ensureSpreadCtl();
     const ok = card && card.suit !== 'joker';
-    if (isPartner) ctl.setPickPartner(ok ? card.rank : null, ok ? card.suit : null);
-    else {
+    if (mode === 'secondary') {
+      const extraOk = extraCard && extraCard.suit !== 'joker';
+      ctl.setPickPartner(
+        ok ? card.rank : null,
+        ok ? card.suit : null,
+        extraOk ? extraCard.rank : null,
+        extraOk ? extraCard.suit : null
+      );
+    } else {
       ctl.setPick(ok ? card.rank : null, ok ? card.suit : null);
       if (typeof ctl.setScript === 'function') ctl.setScript(ok ? card.rank : null, ok ? card.suit : null);
     }
   }
 
   function refreshFinderGridHighlights() {
-    updateGridPick(_selectedCard, false);
-    updateGridPick(_selectedPartner, true);
+    if (_selectedComposite) {
+      updateGridPick(_selectedComposite, 'primary');
+      updateGridPick(_selectedCard, 'secondary', _selectedPartner);
+      return;
+    }
+    updateGridPick(_selectedCard, 'primary');
+    updateGridPick(_selectedPartner, 'secondary');
   }
 
   function preserveAnchorPosition(anchor, work) {
@@ -823,8 +825,14 @@
     if (dom.results) dom.results.classList.toggle('triptych', state.targetMode === 'triptych');
     _selectedCard = state.you;
     _selectedPartner = state.partner;
-    updateGridPick(state.you, false);
-    updateGridPick(state.partner, true);
+    _selectedComposite = state.targetMode === 'triptych' ? state.comp : null;
+    if (_selectedComposite) {
+      updateGridPick(_selectedComposite, 'primary');
+      updateGridPick(state.you, 'secondary', state.partner);
+    } else {
+      updateGridPick(state.you, 'primary');
+      updateGridPick(state.partner, 'secondary');
+    }
     _renderMode = state.targetMode;
     updateResetButton();
     // Result tabs (About / Life Script / In Time). The whole
@@ -871,6 +879,7 @@
   function find() {
     runFinderUpdate();
   }
+  window.refreshFinderFromSettings = find;
 
   function toggleRel() {
     const willBeOn = !getFinderUiState().relOn;
@@ -990,13 +999,11 @@
         setFinderPanel(btn.dataset.panel, { collapsed: false });
       });
     }
-    if (dom.about && dom.about.switcher) {
-      dom.about.switcher.addEventListener('click', function (e) {
-        const btn = e.target.closest('#fAboutVoiceToggle');
-        if (!btn || btn.disabled) return;
-        _aboutView = _aboutView === 'modern' ? 'olney' : 'modern';
-        renderAbout(_selectedCard, null);
-      });
-    }
+    window.addEventListener('mc-voice-toggle', function () {
+      runFinderUpdate();
+    });
+    window.addEventListener('mc-read-dir-toggle', function () {
+      runFinderUpdate();
+    });
   });
 })();
