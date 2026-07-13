@@ -23,6 +23,21 @@
   'use strict';
 
   const SUIT_FROM_SYM = { '♥':'hearts', '♦':'diamonds', '♣':'clubs', '♠':'spades' };
+  const ZODIAC = [
+    { name: 'Capricorn', glyph: '♑', ruler: 'Saturn', start: [12, 22], end: [1, 19] },
+    { name: 'Aquarius', glyph: '♒', ruler: 'Saturn', start: [1, 20], end: [2, 18] },
+    { name: 'Pisces', glyph: '♓', ruler: 'Jupiter', start: [2, 19], end: [3, 20] },
+    { name: 'Aries', glyph: '♈', ruler: 'Mars', start: [3, 21], end: [4, 19] },
+    { name: 'Taurus', glyph: '♉', ruler: 'Venus', start: [4, 20], end: [5, 20] },
+    { name: 'Gemini', glyph: '♊', ruler: 'Mercury', start: [5, 21], end: [6, 20] },
+    { name: 'Cancer', glyph: '♋', ruler: 'Moon', start: [6, 21], end: [7, 22] },
+    { name: 'Leo', glyph: '♌', ruler: 'Sun', start: [7, 23], end: [8, 22] },
+    { name: 'Virgo', glyph: '♍', ruler: 'Mercury', start: [8, 23], end: [9, 22] },
+    { name: 'Libra', glyph: '♎', ruler: 'Venus', start: [9, 23], end: [10, 22] },
+    { name: 'Scorpio', glyph: '♏', ruler: 'Mars', start: [10, 23], end: [11, 21] },
+    { name: 'Sagittarius', glyph: '♐', ruler: 'Jupiter', start: [11, 22], end: [12, 21] }
+  ];
+  const SIDEREAL_LAHIRI_DAY_SHIFT = -24;
   const RANK_NAMES = {
     A: 'Ace',
     '2': 'Two',
@@ -52,6 +67,81 @@
     return !!(window.CardsStore && window.CardsStore.getQuadLtr && window.CardsStore.getQuadLtr());
   }
 
+  function dateNumber(month, day) {
+    return (month * 100) + day;
+  }
+
+  function zodiacForDate(month, day) {
+    const value = dateNumber(month, day);
+    return ZODIAC.find(function (sign) {
+      const start = dateNumber(sign.start[0], sign.start[1]);
+      const end = dateNumber(sign.end[0], sign.end[1]);
+      return start <= end
+        ? value >= start && value <= end
+        : value >= start || value <= end;
+    }) || null;
+  }
+
+  function shiftedDate(month, day, shiftDays) {
+    const dt = new Date(Date.UTC(2001, month - 1, day + shiftDays));
+    return { month: dt.getUTCMonth() + 1, day: dt.getUTCDate() };
+  }
+
+  function selectedBirthDateForCard(card) {
+    const mEl = document.getElementById('fMonth');
+    const dEl = document.getElementById('fDay');
+    const month = mEl ? parseInt(mEl.value, 10) : NaN;
+    const day = dEl ? parseInt(dEl.value, 10) : NaN;
+    if (!month || !day || typeof window.solarValue !== 'function') return null;
+    if (window.solarValue(month, day) !== card.sv) return null;
+    return { month, day };
+  }
+
+  function rulingCardChipHTML(sign, script) {
+    if (!sign) return '';
+    const planetIdx = SPREAD_PLANETS.indexOf(sign.ruler);
+    const cardStr = planetIdx >= 0 ? script[planetIdx] : '';
+    return cardStr ? (function () {
+      const c = parseCard(cardStr);
+      return `<span class="ls-stat-chip ls-zodiac-card ${c.suit}" title="${sign.ruler} ruling card">${c.rank}${c.sym}</span>`;
+    })() : '<span class="ls-stat-note">No seven-planet card seat</span>';
+  }
+
+  function zodiacStatsHTML(card, script) {
+    const date = selectedBirthDateForCard(card);
+    if (!date) return '';
+    const sign = zodiacForDate(date.month, date.day);
+    if (!sign) return '';
+    const siderealDate = shiftedDate(date.month, date.day, SIDEREAL_LAHIRI_DAY_SHIFT);
+    const siderealSign = zodiacForDate(siderealDate.month, siderealDate.day);
+    const rulingCardHTML = rulingCardChipHTML(sign, script);
+    const signText = `${sign.glyph} ${sign.name}`;
+    const rulerGlyph = SPREAD_PLANET_SYM[sign.ruler] || '';
+    const rulerText = rulerGlyph ? `${rulerGlyph} ${sign.ruler}` : sign.ruler;
+    const siderealRulerGlyph = siderealSign && SPREAD_PLANET_SYM[siderealSign.ruler] || '';
+    const siderealRulerText = siderealSign
+      ? (siderealRulerGlyph ? `${siderealRulerGlyph} ${siderealSign.ruler}` : siderealSign.ruler)
+      : '';
+    const siderealHTML = siderealSign ? `<div class="ls-zodiac-line">
+        <span class="ls-zodiac-kind">Sidereal</span>
+        <span class="ls-stat-chip" title="Sidereal sign, Lahiri-style birthday approximation">${siderealSign.glyph} ${siderealSign.name}</span>
+        <span class="ls-stat-chip" title="Sidereal classical sign ruler">${siderealRulerText}</span>
+        ${rulingCardChipHTML(siderealSign, script)}
+      </div>` : '';
+    return `<div class="ls-stat-block">
+      <div class="ls-stat-label">Zodiac</div>
+      <div class="ls-zodiac-stack">
+        <div class="ls-zodiac-line">
+          <span class="ls-zodiac-kind">Tropical</span>
+          <span class="ls-stat-chip" title="Tropical sun sign">${signText}</span>
+          <span class="ls-stat-chip" title="Classical sign ruler">${rulerText}</span>
+          ${rulingCardHTML}
+        </div>
+        ${siderealHTML}
+      </div>
+    </div>`;
+  }
+
   // Displacement ghost chips for one ruling card — mirrors the
   // Quadrations grid's .sl-ghost pair (Displaces / Displaced by).
   // `idx` is the card's position in CARDS/SPREAD_CARDS' shared solar
@@ -72,7 +162,7 @@
       const selfCls = oIdx === idx ? ' ls-ghost-self' : '';
       return `<div class="ls-ghost-pair">
         <div class="ls-ghost-label">${verb}</div>
-        <span class="ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>
+        <span class="ls-stat-chip ls-zodiac-card ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>
       </div>`;
     }).join('');
     return `<div class="ls-ghost-row">${chips}</div>`;
@@ -118,6 +208,7 @@
         <div class="ls-stat-label">Planets</div>
         <div class="ls-stat-chips">${planetsHTML}</div>
       </div>
+      ${zodiacStatsHTML(card, script)}
     </div>`;
   }
 
@@ -169,10 +260,26 @@
     <div class="ls-row">${rowHTML}</div>`;
   }
 
+  function parkSolarPanel(root) {
+    const panel = document.getElementById('fSolar');
+    if (panel && root && panel.parentNode !== root) root.appendChild(panel);
+  }
+
+  function mountSolarPanel(root) {
+    const panel = document.getElementById('fSolar');
+    const stats = root && root.querySelector('.ls-stats');
+    if (!panel || !stats) return;
+    const datesBlock = stats.querySelector('.ls-stat-block');
+    if (datesBlock && datesBlock.nextSibling) stats.insertBefore(panel, datesBlock.nextSibling);
+    else stats.appendChild(panel);
+    if (window.SolarTime && typeof window.SolarTime.refresh === 'function') window.SolarTime.refresh();
+  }
+
   function renderLifeScript(card) {
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
     const inner = root.querySelector('.ls-inner') || root;
+    parkSolarPanel(root);
     root.classList.remove('is-empty');
     if (!card) { root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     // Joker: has its own prose note but still returns true so the chip
@@ -188,6 +295,7 @@
       return false;
     }
     inner.innerHTML = panelHTML(card);
+    mountSolarPanel(inner);
     bindLifeScriptCardClicks(inner);
     return true;
   }
@@ -214,6 +322,7 @@
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
     const inner = root.querySelector('.ls-inner') || root;
+    parkSolarPanel(root);
     root.classList.remove('is-empty');
     if (!card || !partner || card.suit === 'joker' || partner.suit === 'joker' ||
         typeof window.lifeScriptConnection !== 'function') {

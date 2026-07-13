@@ -1,4 +1,4 @@
-// solar-time.js — Solar-day birth-card correction for the In Time section.
+// solar-time.js — Solar-day birth-card correction for the Life Script stats.
 //
 // Added 2026-07-11, adapting the earlier "Super" astrology.html "Solar
 // Day" feature. Given a birth date + clock time + birthplace, it uses the
@@ -22,7 +22,7 @@
 //     prevMs, nextMs }>
 //   zoneFor(text) -> canonical IANA zone (or null)
 //   lonFor(tz)    -> longitude east (or null)
-//   refresh()     -> re-render the In Time solar sub-panel
+//   refresh()     -> re-render the Solar Time stats sub-panel
 
 (function () {
   'use strict';
@@ -116,7 +116,7 @@
     });
   }
 
-  // ── In Time solar sub-panel (#fSolar) ────────────────────────────
+  // ── Solar Time stats sub-panel (#fSolar) ─────────────────────────
   var RANK_NAMES = { A: 'Ace', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five',
     '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine', '10': 'Ten',
     J: 'Jack', Q: 'Queen', K: 'King' };
@@ -138,7 +138,7 @@
   function cardTile(card, label, dimmed) {
     return '<div class="sol-card' + (dimmed ? ' dimmed' : '') + '">' +
       '<div class="sol-card-label">' + label + '</div>' +
-      '<div class="spread-card ' + card.suit + '">' + spreadCardPips(card) + '</div>' +
+      '<div class="ls-stat-chip ls-zodiac-card sol-card-chip ' + card.suit + '">' + card.rank + card.sym + '</div>' +
       '<div class="sol-card-name">' + cardName(card) + '</div></div>';
   }
   function fmtD(p) { return p.d + ' ' + MON[p.m - 1] + ' ' + p.y; }

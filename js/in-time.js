@@ -10,9 +10,10 @@
 // compare-card popup chrome. That part is intentionally still
 // deferred — it needs infrastructure (openCompareCard + those data
 // files) that doesn't exist yet.
-// This pass is the date-scroll nav only: the ‹ › year/month/day
-// steppers, the clickable date label (native date picker), and the
-// "Today" reset, all recomputing the 6-card row for the chosen date.
+// This pass is the date context only: the clickable date label (native
+// date picker) and the "Today" reset, all recomputing the 5-card row for
+// the chosen date. Period-card ‹ › controls handle most nearby timeline
+// navigation.
 //
 // The card math: for a given birth-card index B and current age A:
 //   • 13-Year    → deckAtAge(⌊A/91⌋+1) at position B, offset ⌊(A%91)/13⌋
@@ -53,9 +54,9 @@
 
   // ── Date-scroll state ────────────────────────────────────────────
   // viewDate is a local-midnight epoch (ms). renderInTime always shows
-  // the row "as of" this date; the nav buttons/date input/Today button
+  // the row "as of" this date; the date input/Today button
   // shift it and re-render. _lastCard remembers the last card passed to
-  // renderInTime so the nav controls (which don't get a card reference
+  // renderInTime so the date controls (which don't get a card reference
   // themselves) can trigger a re-render.
   let viewDate = localMidnight(new Date());
   let _lastCard = null;
@@ -135,35 +136,10 @@
       setViewDate(d.getTime());
     }
   }
-  function shiftViewDays(n) {
-    const d = new Date(viewDate);
-    d.setDate(d.getDate() + n);
-    d.setHours(0, 0, 0, 0); // normalize across DST
-    setViewDate(d.getTime());
-  }
-  function shiftViewYears(n) {
-    const d = new Date(viewDate);
-    d.setFullYear(d.getFullYear() + n);
-    d.setHours(0, 0, 0, 0);
-    setViewDate(d.getTime());
-  }
-  function shiftViewMonths(n) {
-    // Step by whole months — clamp the day to the target month's last day so
-    // e.g. Mar 31 → −1 month lands on Feb 28 (or 29), not the JS-default Mar 3.
-    const d = new Date(viewDate);
-    const targetDay = d.getDate();
-    d.setDate(1);
-    d.setMonth(d.getMonth() + n);
-    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    d.setDate(Math.min(targetDay, lastDay));
-    d.setHours(0, 0, 0, 0);
-    setViewDate(d.getTime());
-  }
   function dateNavHTML(age) {
     const ageText = typeof age === 'number' && age >= 0 ? `Age ${age}` : 'Pick a date';
     return `<div class="it-date-shell">
       <div class="it-date-head">
-        <div class="it-date-head-side" aria-hidden="true"></div>
         <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">
           <span class="it-date-age">${ageText}</span>
           <span class="it-date-value">${formatViewDate(viewDate)}</span>
@@ -171,26 +147,6 @@
         <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>
       </div>
       <input class="it-date-input" type="date" tabindex="-1" aria-hidden="true" value="${isoFromMs(viewDate)}" />
-      <div class="it-date-bar" role="group" aria-label="Shift the viewed date by year, month, or day">
-        <button class="it-date-nav" type="button" data-shift-year="-1" data-unit="year" title="Back one year" aria-label="Back one year">
-          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Year</span>
-        </button>
-        <button class="it-date-nav" type="button" data-shift-month="-1" data-unit="month" title="Back one month" aria-label="Back one month">
-          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Month</span>
-        </button>
-        <button class="it-date-nav" type="button" data-shift-day="-1" data-unit="day" title="Previous day" aria-label="Previous day">
-          <span class="it-date-nav-mark">−1</span><span class="it-date-nav-unit">Day</span>
-        </button>
-        <button class="it-date-nav" type="button" data-shift-day="1" data-unit="day" title="Next day" aria-label="Next day">
-          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Day</span>
-        </button>
-        <button class="it-date-nav" type="button" data-shift-month="1" data-unit="month" title="Forward one month" aria-label="Forward one month">
-          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Month</span>
-        </button>
-        <button class="it-date-nav" type="button" data-shift-year="1" data-unit="year" title="Forward one year" aria-label="Forward one year">
-          <span class="it-date-nav-mark">+1</span><span class="it-date-nav-unit">Year</span>
-        </button>
-      </div>
     </div>`;
   }
   function wireDateNav() {
@@ -207,16 +163,6 @@
         const dir = parseInt(cycleBtn.getAttribute('data-it-cycle') || '0', 10);
         if (!dir) return;
         shiftActiveHorizon(dir);
-        return;
-      }
-      const navBtn = ev.target.closest('.it-date-nav');
-      if (navBtn) {
-        const dy = parseInt(navBtn.dataset.shiftYear  || '0', 10);
-        const dm = parseInt(navBtn.dataset.shiftMonth || '0', 10);
-        const dd = parseInt(navBtn.dataset.shiftDay   || '0', 10);
-        if (dy) shiftViewYears(dy);
-        if (dm) shiftViewMonths(dm);
-        if (dd) shiftViewDays(dd);
         return;
       }
       const todayBtn = ev.target.closest('.it-date-today');
@@ -411,11 +357,11 @@
       </div>`;
     }).join('');
 
-    return `<div class="it-reading">${inTimeReadingHTML(active)}</div>
+    return `${dateNavHTML(age)}
+    <div class="it-reading">${inTimeReadingHTML(active)}</div>
     <div class="it-row-wrap">
       <div class="it-row">${rowHTML}</div>
     </div>
-    ${dateNavHTML(age)}
     `;
   }
 

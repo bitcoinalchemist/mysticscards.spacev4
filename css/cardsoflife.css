@@ -905,6 +905,44 @@
   color: var(--text);
   background: rgba(255,255,255,.03);
 }
+.ls-zodiac-stack {
+  display: grid;
+  gap: .42rem;
+  justify-items: center;
+}
+.ls-zodiac-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: .35rem .45rem;
+}
+.ls-zodiac-kind {
+  min-width: 4.6rem;
+  text-align: right;
+  font-family: var(--sans);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ls-zodiac-card {
+  font-family: var(--serif);
+  font-weight: 700;
+  background: rgba(253,250,245,.88);
+  color: var(--card-dark);
+}
+.ls-zodiac-card.hearts,
+.ls-zodiac-card.diamonds { color: var(--red); }
+.ls-zodiac-card.clubs { color: var(--green); }
+.ls-zodiac-card.spades { color: var(--navy); }
+.ls-stat-note {
+  align-self: center;
+  font-family: var(--sans);
+  font-size: .64rem;
+  color: var(--muted);
+}
 .ls-col {
   display: flex; flex-direction: column; align-items: center; gap: .25rem;
   min-inline-size: 0; width: 100%;
@@ -918,9 +956,7 @@
   color: var(--muted);
 }
 .ls-card { width: 100%; }
-/* Quadrations displacement chips for the selected birth card's stats
-   block. Reuses the grid's ghost-chip visual language under local
-   `.ls-ghost*` names. */
+/* Displacement chips for the selected birth card's stats block. */
 .ls-ghost-row {
   display: flex; justify-content: center; gap: .7rem; margin-top: .1rem; flex-wrap: wrap;
 }
@@ -939,22 +975,15 @@
   color: var(--muted);
 }
 .ls-ghost {
-  padding: .08rem .3rem;
-  font-family: var(--sans); font-size: .55rem; font-weight: 600;
-  letter-spacing: .03em; line-height: 1.2; border-radius: 4px;
-  background: rgba(253,250,245,.82);
   white-space: nowrap; user-select: none;
 }
 .ls-ghost-self { visibility: hidden; }
-.ls-ghost.hearts, .ls-ghost.diamonds { color: var(--red); }
-.ls-ghost.clubs  { color: var(--green); }
-.ls-ghost.spades { color: var(--navy); }
 @media (max-width: 560px) {
   .ls-stat-text { font-size: .62rem; }
   .ls-stat-chip { font-size: .62rem; padding: .16rem .42rem; }
+  .ls-zodiac-kind { min-width: 100%; text-align: center; }
   .ls-ghost-row { gap: .55rem; }
   .ls-ghost-label { font-size: .5rem; }
-  .ls-ghost { font-size: .5rem; padding: .06rem .24rem; }
 }
 .ls-joker-note {
   max-width: 560px; margin: 0 auto;
@@ -1010,15 +1039,18 @@
 /* ── Finder In Time panel (2026-07-10) ─────────────────────────────
    Five personal cards: 13-Year / 7-Year / Yearly / 52-Day / Daily,
    computed from the picked card's solar value and the age at
-   the date-nav bar's viewDate (see .it-date-bar below, added
-   2026-07-10). The period-reading popup (click a card to open its
-   full reading, with its own prev/next through the timeline) is still
+   the current In Time viewDate. The period-reading popup (click a card
+   to open its full reading, with its own prev/next through the timeline) is still
    deferred — needs the compare-card popup chrome + lazy-loaded
    reading data, neither of which exist yet. */
 .finder-intime { color: var(--secondary); }
 .it-header { text-align: center; margin-bottom: 1rem; }
 .it-row-wrap {
   margin-top: 1rem;
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .it-row {
   --it-card-w: var(--quad-card-w, calc(560px * var(--quad-scale, 1) / 7));
@@ -1170,10 +1202,6 @@
   margin: 0;
 }
 @media (max-width: 560px) {
-  .it-row {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    max-width: 100%;
-  }
   .it-row { gap: .22rem; }
   .it-label { font-size: .55rem; }
   .it-planet-name { font-size: .62rem; }
@@ -1195,15 +1223,19 @@
   .it-reading-copy { font-size: .92rem; line-height: 1.64; }
 }
 
-/* ── Solar Time sub-panel (2026-07-11) — a toggle inside the Time
-   section that corrects the birth card by the sun for near-midnight
-   births. Logic in js/solar-time.js (lazy-loads js/astronomy.js). */
+/* ── Solar Time stats sub-panel (2026-07-11, moved 2026-07-13) —
+   corrects the birth card by the sun for near-midnight births. Logic in
+   js/solar-time.js (lazy-loads js/astronomy.js). */
 .it-solar {
   margin-top: 1.5rem;
   padding: 1rem 1rem 1.15rem;
   border-radius: var(--r-lg);
   background: linear-gradient(180deg, rgba(20,16,37,.45), rgba(15,12,29,.68));
   text-align: center;
+}
+.ls-stats > .it-solar {
+  width: min(100%, 34rem);
+  margin: .1rem auto;
 }
 .it-solar-toggle {
   display: inline-flex; align-items: center; gap: .4rem;
@@ -1257,7 +1289,10 @@
   display: flex; justify-content: center; align-items: flex-start; gap: 1.2rem;
 }
 .sol-card { display: flex; flex-direction: column; align-items: center; gap: .45rem; }
-.sol-card .spread-card { width: 88px; }
+.sol-card-chip {
+  min-width: 2.5rem;
+  justify-content: center;
+}
 .sol-card.dimmed { opacity: .5; }
 .sol-card-label {
   font-family: var(--sans); font-size: .58rem; letter-spacing: .1em;
@@ -1297,74 +1332,22 @@
   text-align: center; max-width: 8.5rem; line-height: 1.3;
 }
 
-/* ── In Time date-scroll nav (2026-07-10) — clickable date label
-   (opens the hidden native date input), six step buttons for year /
-   month / day, and a "Today" reset that only shows once you've
-   scrolled away from today. */
+/* ── In Time date context (2026-07-10, simplified 2026-07-13) —
+   clickable date label (opens the hidden native date input) plus a
+   "Today" reset that only shows once you've scrolled away from today. */
 .it-date-shell {
-  margin-top: 1.15rem;
   max-width: min(100%, 30rem);
   width: 100%;
-  margin-inline: auto;
+  margin: 0 auto 1.05rem;
 }
 .it-date-head {
-  display: grid;
-  grid-template-columns: 1fr minmax(0, 20rem) 1fr;
-  align-items: center;
-  gap: .45rem;
-}
-.it-date-head-side {
-  min-width: 0;
-}
-.it-date-bar {
-  margin-top: .42rem;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: .3rem;
-}
-.it-date-nav {
-  min-width: 0;
-  min-height: 42px;
-  padding: .38rem .2rem .34rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .08rem;
-  background: rgba(25,20,46,.94);
-  border: 0;
-  border-radius: 14px;
-  line-height: 1;
-  font-family: var(--sans);
-  color: var(--secondary);
-  cursor: pointer;
-  transition: background var(--ease), color var(--ease), transform var(--ease);
-}
-.it-date-nav:hover {
-  background: rgba(58,46,96,.95);
-  color: var(--text);
-  transform: translateY(-1px);
-}
-.it-date-nav-mark {
+  position: relative;
   display: block;
-  font-family: var(--sans);
-  font-size: .84rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-.it-date-nav-unit {
-  display: block;
-  font-family: var(--sans);
-  font-size: .49rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--muted);
 }
 .it-date-label {
   font-family: var(--serif);
   font-size: .84rem;
-  padding: .58rem .7rem;
+  padding: .58rem 6.2rem .58rem 6.2rem;
   min-width: 0;
   text-align: center;
   display: flex;
@@ -1373,6 +1356,7 @@
   justify-content: center;
   gap: .14rem;
   width: 100%;
+  min-height: 3.2rem;
   background: linear-gradient(180deg, rgba(39,30,68,.92), rgba(24,19,45,.96));
   border: 0;
   border-radius: 18px;
@@ -1404,13 +1388,18 @@
   width: 0; height: 0; padding: 0; margin: 0; border: 0;
 }
 .it-date-today {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 2;
   font-family: var(--sans);
   font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
   font-weight: 600; color: var(--gold);
-  background: transparent; border: none; cursor: pointer;
-  padding: .25rem .55rem;
-  display: block; width: fit-content; text-align: right; margin: 0 0 0 auto;
-  min-height: 1.4rem;
+  background: rgba(15,12,29,.52); border: 0; border-left: 1px solid rgba(221,187,120,.18); cursor: pointer;
+  border-radius: 0 18px 18px 0;
+  padding: 0 .72rem;
+  display: flex; align-items: center; justify-content: center;
+  width: 5.7rem; text-align: center;
+  min-height: 100%;
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -1420,31 +1409,16 @@
   opacity: 1;
   pointer-events: auto;
 }
-.it-date-today:hover { text-decoration: underline; }
+.it-date-today:hover {
+  border-color: rgba(221,187,120,.38);
+  background: rgba(199,154,84,.12);
+}
 @media (max-width: 420px) {
   .it-date-shell {
     max-width: 100%;
-    margin-top: 1rem;
   }
-  .it-date-head {
-    grid-template-columns: minmax(0, 1fr);
-    gap: .5rem;
-  }
-  .it-date-head-side {
-    display: none;
-  }
-  .it-date-bar {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: .22rem;
-  }
-  .it-date-nav {
-    min-height: 36px;
-    padding: .32rem .12rem .28rem;
-  }
-  .it-date-nav-mark { font-size: .76rem; }
-  .it-date-nav-unit { font-size: .45rem; letter-spacing: .1em; }
   .it-date-label {
-    padding: .46rem .4rem;
+    padding: .46rem 4.9rem .46rem 4.9rem;
     font-size: .74rem;
     line-height: 1.2;
   }
@@ -1454,10 +1428,10 @@
   }
   .it-date-value { font-size: .88rem; }
   .it-date-today {
-    margin: 0 auto;
+    width: 4.5rem;
+    padding: 0 .35rem;
     font-size: .58rem;
     letter-spacing: .1em;
-    text-align: center;
   }
   .it-row-wrap { margin-top: .9rem; }
 }
@@ -1776,6 +1750,49 @@
 .ba-num { width: 3.4rem; text-align: center; }
 .ba-year { width: 4.4rem; text-align: center; }
 .ba-name { flex: 1; min-width: 8rem; }
+.birth-more-toggle {
+  margin: .58rem auto 0;
+  display: block;
+  border: 0;
+  background: transparent;
+  color: var(--gold-ink);
+  font-family: var(--sans);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.birth-more-toggle:hover { color: var(--gold); }
+.birth-more-details {
+  margin-top: .62rem;
+  padding-top: .68rem;
+  border-top: 1px solid var(--border);
+}
+.birth-add-row--details { align-items: flex-end; }
+.ba-detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: .26rem;
+  font-family: var(--sans);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.ba-detail-field--place { flex: 1; min-width: 10rem; }
+.ba-time { width: 8.2rem; }
+.ba-place { width: 100%; min-width: 0; }
+.birth-detail-note {
+  margin: .5rem 0 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: .74rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
 .birth-add-error { color: #e98a8a; font-size: .74rem; margin-top: .5rem; min-height: 1em; }
 
 .bday-list { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .85rem; }
@@ -1797,6 +1814,13 @@
 .birth-item-body { flex: 1; min-width: 0; }
 .birth-name { font-family: var(--sans); font-size: .88rem; color: var(--text); }
 .birth-date { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+.birth-meta {
+  margin-top: .12rem;
+  font-family: var(--sans);
+  font-size: .6rem;
+  color: var(--gold-ink);
+  letter-spacing: .03em;
+}
 .birth-edit,
 .birth-del {
   flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 0;

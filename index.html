@@ -157,6 +157,18 @@
                     <input type="text" id="baName" class="ba-field ba-name" placeholder="Name" aria-label="Name">
                     <button type="button" class="btn btn--gold" id="birthAddSave">Save</button>
                   </div>
+                  <button type="button" class="birth-more-toggle" id="birthMoreToggle" aria-expanded="false" aria-controls="birthMoreDetails">More details</button>
+                  <div class="birth-more-details" id="birthMoreDetails" hidden>
+                    <div class="birth-add-row birth-add-row--details">
+                      <label class="ba-detail-field"><span>Birth time</span>
+                        <input type="time" id="baTime" class="ba-field ba-time" step="60" aria-label="Birth time">
+                      </label>
+                      <label class="ba-detail-field ba-detail-field--place"><span>Birthplace</span>
+                        <input type="text" id="baPlace" class="ba-field ba-place" list="solZoneList" placeholder="city or zone" autocomplete="off" aria-label="Birthplace">
+                      </label>
+                    </div>
+                    <p class="birth-detail-note">Optional. Used to pre-fill Solar Time when this birthday is loaded.</p>
+                  </div>
                   <p class="birth-add-error" id="birthAddError" aria-live="polite"></p>
                 </div>
                 <div class="bday-list" id="birthPanel"></div>
@@ -261,16 +273,7 @@
                    shown as a single row. Populated by js/lifescript.js. -->
               <div class="finder-lifescript ns-panel" id="fLifeScript" role="tabpanel" aria-labelledby="chipLifeScript">
                 <div class="ls-inner"></div>
-                <div class="ns-panel-empty">Life Script isn't available for this card.</div>
-              </div>
-
-              <!-- In Time — Birth / 13-Year / 7-Year / Yearly / 52-Day
-                   / Daily period cards for the picked card. Populated
-                   by js/in-time.js, which lazy-loads its five period-
-                   reading data files on first open. -->
-              <div class="finder-intime ns-panel" id="fInTime" role="tabpanel" aria-labelledby="chipInTime">
-                <div class="it-inner"></div>
-                <div class="it-solar" id="fSolar">
+                <div class="it-solar ls-solar" id="fSolar">
                   <button type="button" class="it-solar-toggle" id="solToggle" aria-expanded="false" aria-controls="solBody">
                     <span class="it-solar-ico" aria-hidden="true">☉</span> Solar time
                   </button>
@@ -288,6 +291,15 @@
                     <div class="it-solar-out" id="solOut"></div>
                   </div>
                 </div>
+                <div class="ns-panel-empty">Life Script isn't available for this card.</div>
+              </div>
+
+              <!-- In Time — Birth / 13-Year / 7-Year / Yearly / 52-Day
+                   / Daily period cards for the picked card. Populated
+                   by js/in-time.js, which lazy-loads its five period-
+                   reading data files on first open. -->
+              <div class="finder-intime ns-panel" id="fInTime" role="tabpanel" aria-labelledby="chipInTime">
+                <div class="it-inner"></div>
                 <div class="ns-panel-empty">In Time isn't available for this card.</div>
               </div>
 

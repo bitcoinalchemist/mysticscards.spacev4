@@ -60,7 +60,17 @@
     }
     if (typeof window.loadDateInFinder !== 'function') return;
     window.loadDateInFinder(entry.month, entry.day, target, { name: entry.name });
+    applyBirthDetails(entry);
     if (!options.keepTrayOpen && typeof window.closeFinderTray === 'function') window.closeFinderTray('bday');
+  }
+
+  function applyBirthDetails(entry) {
+    if (!entry) return;
+    const timeEl = document.getElementById('solTime');
+    const placeEl = document.getElementById('solPlace');
+    if (timeEl) timeEl.value = entry.time || '';
+    if (placeEl) placeEl.value = entry.place || '';
+    if (window.SolarTime && typeof window.SolarTime.refresh === 'function') window.SolarTime.refresh();
   }
 
   // The person's Birth Card as a small parchment chip (rank + suit pip).
@@ -97,6 +107,7 @@
           '<div class="birth-name">' + escHtml(e.name) + '</div>' +
           '<div class="birth-date">' + MONTHS_SHORT[e.month - 1] + ' ' + e.day + ', ' + e.year +
             ' &middot; age ' + ageFromBirthYear(e.year, e.month, e.day) + '</div>' +
+          (e.time || e.place ? '<div class="birth-meta">Solar details saved</div>' : '') +
         '</div>' +
         '<button type="button" class="birth-edit" data-edit="' + e.id + '" title="Edit" aria-label="Edit ' + escHtml(e.name) + '">Edit</button>' +
         '<button type="button" class="birth-del" data-del="' + e.id + '" title="Delete" aria-label="Delete ' + escHtml(e.name) + '">&times;</button>' +
@@ -170,15 +181,29 @@
     if (saveBtn) saveBtn.textContent = entry ? 'Update' : 'Save';
   }
 
+  function setMoreDetailsOpen(open) {
+    const body = document.getElementById('birthMoreDetails');
+    const btn = document.getElementById('birthMoreToggle');
+    if (body) body.hidden = !open;
+    if (btn) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? 'Fewer details' : 'More details';
+    }
+  }
+
   function clearBirthForm() {
     const dEl = document.getElementById('baDay');
     const mEl = document.getElementById('baMonth');
     const yEl = document.getElementById('baYear');
     const nEl = document.getElementById('baName');
+    const tEl = document.getElementById('baTime');
+    const pEl = document.getElementById('baPlace');
     if (dEl) dEl.value = '';
     if (mEl) mEl.value = '';
     if (yEl) yEl.value = '';
     if (nEl) nEl.value = '';
+    if (tEl) tEl.value = '';
+    if (pEl) pEl.value = '';
   }
 
   function openBirthAddPanel() {
@@ -190,6 +215,7 @@
     const fD = fDay ? parseInt(fDay.value, 10) : NaN;
     setBirthFormMode(null);
     clearBirthForm();
+    setMoreDetailsOpen(false);
     if (fD && fM) {
       dEl.value = String(fD).padStart(2, '0');
       mEl.value = String(fM).padStart(2, '0');
@@ -206,11 +232,16 @@
     const mEl = document.getElementById('baMonth');
     const yEl = document.getElementById('baYear');
     const nEl = document.getElementById('baName');
+    const tEl = document.getElementById('baTime');
+    const pEl = document.getElementById('baPlace');
     setBirthFormMode(entry);
     dEl.value = String(entry.day).padStart(2, '0');
     mEl.value = String(entry.month).padStart(2, '0');
     yEl.value = String(entry.year);
     nEl.value = entry.name;
+    if (tEl) tEl.value = entry.time || '';
+    if (pEl) pEl.value = entry.place || '';
+    setMoreDetailsOpen(!!(entry.time || entry.place));
     document.getElementById('birthAddPanel').classList.add('open');
     setTimeout(() => nEl.focus(), 0);
   }
@@ -221,6 +252,7 @@
     const err = document.getElementById('birthAddError');
     if (err) err.textContent = '';
     setBirthFormMode(null);
+    setMoreDetailsOpen(false);
   }
 
   function saveManualBirth() {
@@ -228,11 +260,15 @@
     const mEl = document.getElementById('baMonth');
     const yEl = document.getElementById('baYear');
     const nEl = document.getElementById('baName');
+    const tEl = document.getElementById('baTime');
+    const pEl = document.getElementById('baPlace');
     const err = document.getElementById('birthAddError');
     const d = parseInt(dEl.value, 10);
     const m = parseInt(mEl.value, 10);
     const y = parseInt(yEl.value, 10);
     const name = (nEl.value || '').trim();
+    const time = (tEl && tEl.value || '').trim();
+    const place = (pEl && pEl.value || '').trim();
     err.textContent = '';
     if (!name)                       { err.textContent = 'Name is required.'; nEl.focus(); return; }
     if (!d || d < 1 || d > 31)       { err.textContent = 'Day must be 1–31.'; dEl.focus(); return; }
@@ -252,6 +288,8 @@
       list = list.map(item => {
         if (item.id !== _editingBirthId) return item;
         entry = { id: item.id, name, day: d, month: m, year: y };
+        if (time) entry.time = time;
+        if (place) entry.place = place;
         return entry;
       });
       if (!entry) {
@@ -262,6 +300,8 @@
       }
     } else {
       entry = { id: Date.now(), name, day: d, month: m, year: y };
+      if (time) entry.time = time;
+      if (place) entry.place = place;
       list.push(entry);
     }
     saveBirths(list);
@@ -283,6 +323,11 @@
       });
     });
     seq.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveManualBirth(); } });
+    });
+    ['baTime', 'baPlace'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveManualBirth(); } });
@@ -331,8 +376,14 @@
       if (!incoming) { bdayToast('No birthdays found in that file.', true); return; }
       const clean = incoming.filter(validBirth).map(o => ({
         id: Number.isFinite(o.id) ? o.id : Date.now() + Math.floor(Math.random() * 1e6),
-        name: o.name.trim(), day: o.day, month: o.month, year: o.year
-      }));
+        name: o.name.trim(), day: o.day, month: o.month, year: o.year,
+        time: typeof o.time === 'string' ? o.time.trim() : '',
+        place: typeof o.place === 'string' ? o.place.trim() : ''
+      })).map(o => {
+        if (!o.time) delete o.time;
+        if (!o.place) delete o.place;
+        return o;
+      });
       if (!clean.length) { bdayToast('No valid birthdays to import.', true); return; }
       const existing = loadBirths();
       const key = o => o.name.toLowerCase() + '|' + o.day + '|' + o.month + '|' + o.year;
@@ -356,6 +407,11 @@
     });
     const saveBtn = document.getElementById('birthAddSave');
     if (saveBtn) saveBtn.addEventListener('click', saveManualBirth);
+    const moreBtn = document.getElementById('birthMoreToggle');
+    if (moreBtn) moreBtn.addEventListener('click', () => {
+      const body = document.getElementById('birthMoreDetails');
+      setMoreDetailsOpen(body ? body.hidden : true);
+    });
     const exportBtn = document.getElementById('bdayExportBtn');
     if (exportBtn) exportBtn.addEventListener('click', exportBirths);
     const importBtn = document.getElementById('bdayImportBtn');

@@ -112,7 +112,7 @@
     v = Math.max(QUAD_SCALE_MIN, Math.min(QUAD_SCALE_MAX, Math.round(+v) || 100));
     const grid = document.getElementById('annualGrid');
     if (grid) grid.style.setProperty('--quad-scale', (v / 100).toFixed(2));
-    document.documentElement.style.setProperty('--quad-card-w', ((560 * v / 100) / 7).toFixed(2) + 'px');
+    document.documentElement.style.setProperty('--quad-card-w', 'calc((' + (560 * v / 100).toFixed(2) + 'px - (6 * .35rem)) / 7)');
     const val = document.getElementById('qSizeVal');
     if (val) val.textContent = v + '%';
     const slider = document.getElementById('qSizeSlider');
