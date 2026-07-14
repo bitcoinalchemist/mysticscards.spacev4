@@ -78,7 +78,7 @@ const SPREAD_SUITS  = ['hearts','clubs','diamonds','spades'];
 const SPREAD_SYMS   = { hearts:'♥', clubs:'♣', diamonds:'♦', spades:'♠' };
 const SPREAD_RANKS  = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SPREAD_PLANETS = ['Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune'];
-const SPREAD_PLANET_SYM = { Mercury:'☿', Venus:'♀', Mars:'♂', Jupiter:'♃', Saturn:'♄', Uranus:'♅', Neptune:'♆', Crown:'♛' };
+const SPREAD_PLANET_SYM = { Mercury:'☿', Venus:'♀', Mars:'♂', Jupiter:'♃', Saturn:'♄', Uranus:'♅', Neptune:'♆', Pluto:'♇', Moon:'☽', Sun:'☉', Crown:'♛' };
 
 const SPREAD_CARDS = [];
 SPREAD_SUITS.forEach(suit => {

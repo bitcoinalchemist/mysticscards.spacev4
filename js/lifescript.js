@@ -34,10 +34,45 @@
     { name: 'Leo', glyph: '♌', ruler: 'Sun', start: [7, 23], end: [8, 22] },
     { name: 'Virgo', glyph: '♍', ruler: 'Mercury', start: [8, 23], end: [9, 22] },
     { name: 'Libra', glyph: '♎', ruler: 'Venus', start: [9, 23], end: [10, 22] },
-    { name: 'Scorpio', glyph: '♏', ruler: 'Mars', start: [10, 23], end: [11, 21] },
+    { name: 'Scorpio', glyph: '♏', ruler: 'Pluto', start: [10, 23], end: [11, 21] },
     { name: 'Sagittarius', glyph: '♐', ruler: 'Jupiter', start: [11, 22], end: [12, 21] }
   ];
   const SIDEREAL_LAHIRI_DAY_SHIFT = -24;
+
+  // Decan tables — 3 decans per sign, 36 total.
+  //
+  // Chaldean / Egyptian decans: a fixed 7-planet rotation starting at
+  // Aries 0–10° = Mars. Order = Mars, Sun, Venus, Mercury, Moon, Saturn,
+  // Jupiter (the Chaldean weekday order). Each global decan (0..35) picks
+  // CHALDEAN_ORDER[globalDecan % 7].
+  const CHALDEAN_ORDER = ['Mars', 'Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter'];
+
+  // Ptolemaic / triplicity decans: 1st decan = sign's own classical
+  // ruler, 2nd = next sign of same element's ruler, 3rd = third sign of
+  // same element's ruler. Uses only classical rulers (so Scorpio stays
+  // Mars-Jupiter-Moon here even though its Zodiac-line ruler is set to
+  // Pluto/modern). Indexed in astrological sign order (0 = Aries).
+  const PTOLEMAIC_DECANS = [
+    ['Mars',    'Sun',     'Jupiter'],   // Aries       — Fire (Mars, Sun, Jupiter)
+    ['Venus',   'Mercury', 'Saturn'],    // Taurus      — Earth (Venus, Mercury, Saturn)
+    ['Mercury', 'Venus',   'Saturn'],    // Gemini      — Air (Mercury, Venus, Saturn)
+    ['Moon',    'Mars',    'Jupiter'],   // Cancer      — Water (Moon, Mars, Jupiter)
+    ['Sun',     'Jupiter', 'Mars'],      // Leo         — Fire
+    ['Mercury', 'Saturn',  'Venus'],     // Virgo       — Earth
+    ['Venus',   'Saturn',  'Mercury'],   // Libra       — Air
+    ['Mars',    'Jupiter', 'Moon'],      // Scorpio     — Water
+    ['Jupiter', 'Mars',    'Sun'],       // Sagittarius — Fire
+    ['Saturn',  'Venus',   'Mercury'],   // Capricorn   — Earth
+    ['Saturn',  'Mercury', 'Venus'],     // Aquarius    — Air
+    ['Jupiter', 'Moon',    'Mars']       // Pisces      — Water
+  ];
+
+  // Sign name → astrological index (0 = Aries … 11 = Pisces).
+  const SIGN_ASTRO_IDX = {
+    Aries: 0, Taurus: 1, Gemini: 2, Cancer: 3, Leo: 4, Virgo: 5,
+    Libra: 6, Scorpio: 7, Sagittarius: 8, Capricorn: 9, Aquarius: 10, Pisces: 11
+  };
+  const DECAN_ORDINAL = ['1st', '2nd', '3rd'];
   const RANK_NAMES = {
     A: 'Ace',
     '2': 'Two',
@@ -97,14 +132,147 @@
     return { month, day };
   }
 
-  function rulingCardChipHTML(sign, script) {
+  // Moon / Sun / Pluto cards, derived from the Life Spread (not in the
+  // hand-authored LIFE_SCRIPTS table).
+  //
+  // For a given birth card, LIFE_SCRIPTS[i] happens to line up with the
+  // seven consecutive Life-Spread positions RIGHT AFTER the birth card
+  // (birth_pos+1 … birth_pos+7 in deckAtAge(1)'s linear order). Reading
+  // Neptune → Mercury for display puts Mercury adjacent to the birth
+  // card on one side. Moon and Pluto extend that consecutive slice by
+  // one card on each end:
+  //   Sun    = the birth card itself (Leo's classical ruler is the Sun).
+  //   Moon   = the card at (birth pos − 1) mod 52 — the seat on the
+  //            birth card's opposite side from Mercury (visually to the
+  //            right of the birth card in the default Neptune → Mercury
+  //            display direction).
+  //   Pluto  = the card at (Neptune-card pos + 1) mod 52, equivalently
+  //            (birth pos + 8) mod 52 — the seat immediately after
+  //            Neptune (used as the modern Scorpio ruler).
+  function derivedCardFor(planet, card, script) {
+    if (typeof deckAtAge !== 'function' || typeof SPREAD_CARDS === 'undefined' ||
+        typeof CARDS === 'undefined') return null;
+    const life = deckAtAge(1);
+    const birthIdx = CARDS.findIndex(function (x) { return x.rank === card.rank && x.suit === card.suit; });
+    if (birthIdx < 0) return null;
+    if (planet === 'Sun') {
+      const sc = SPREAD_CARDS[birthIdx];
+      return sc ? { rank: sc.rank, suit: sc.suit, sym: sc.sym } : null;
+    }
+    let anchorIdx = -1, step = 0;
+    if (planet === 'Moon') { anchorIdx = birthIdx; step = -1; }
+    else if (planet === 'Pluto') {
+      const nep = script && script[6] ? parseCard(script[6]) : null;
+      if (!nep) return null;
+      anchorIdx = CARDS.findIndex(function (x) { return x.rank === nep.rank && x.suit === nep.suit; });
+      step = 1;
+    }
+    if (anchorIdx < 0) return null;
+    const anchorPos = life.indexOf(anchorIdx);
+    if (anchorPos < 0) return null;
+    const targetPos = (anchorPos + step + 52) % 52;
+    const targetIdx = life[targetPos];
+    const sc = SPREAD_CARDS[targetIdx];
+    return sc ? { rank: sc.rank, suit: sc.suit, sym: sc.sym } : null;
+  }
+
+  // Days in a zodiac sign's date range, handling the year-wrap for
+  // Capricorn (Dec 22 → Jan 19).
+  function signDayCount(sign) {
+    // Base year 2001 (non-leap) so Feb has 28 days consistently.
+    const start = Date.UTC(2001, sign.start[0] - 1, sign.start[1]);
+    const endMonth = sign.end[0];
+    const endYear  = (endMonth < sign.start[0]) ? 2002 : 2001;
+    const end   = Date.UTC(endYear, endMonth - 1, sign.end[1]);
+    return Math.round((end - start) / 86400000) + 1;
+  }
+
+  // Which decan (0 / 1 / 2) contains (month, day) inside `sign`?
+  // Uses an even day-split within the sign's date range. This is the
+  // fallback when astronomy.js isn't loaded — accurate to within a day
+  // or so, which is fine for 10°-wide buckets.
+  function decanIdxForDate(sign, month, day) {
+    if (!sign) return -1;
+    const total = signDayCount(sign);
+    const baseYear = 2001;
+    const startMs = Date.UTC(baseYear, sign.start[0] - 1, sign.start[1]);
+    const wrap = (sign.end[0] < sign.start[0]);
+    const dayYear = (wrap && month <= sign.end[0]) ? baseYear + 1 : baseYear;
+    const dayMs   = Date.UTC(dayYear, month - 1, day);
+    const daysIn  = Math.round((dayMs - startMs) / 86400000);
+    if (daysIn < 0) return -1;
+    return Math.min(2, Math.floor(daysIn * 3 / total));
+  }
+
+  // Try to use Astronomy Engine (already lazy-loaded by Solar Time when
+  // the user has computed a solar birth card). Returns tropical Sun
+  // ecliptic longitude in degrees, or null if unavailable.
+  function sunLonAt(year, month, day, hourUT) {
+    if (!window.Astronomy) return null;
+    try {
+      const t = window.Astronomy.MakeTime(new Date(Date.UTC(year, month - 1, day, hourUT || 12)));
+      return window.Astronomy.Ecliptic(window.Astronomy.GeoVector(window.Astronomy.Body.Sun, t, true)).elon;
+    } catch (e) { return null; }
+  }
+  // Precise decan from tropical longitude — 0..2.
+  function decanIdxForLon(lon) {
+    return Math.floor(((lon % 30) + 30) % 30 / 10);
+  }
+
+  // Sign name (per ZODIAC.name) → planet chip HTML for the given ruler.
+  // Returns "" if the ruler doesn't resolve to a card seat.
+  function planetChip(ruler, script, birthCard, title) {
+    const glyph = SPREAD_PLANET_SYM[ruler] || '';
+    const rulerText = glyph ? `${glyph} ${ruler}` : ruler;
+    const planetIdx = SPREAD_PLANETS.indexOf(ruler);
+    let cc = null;
+    if (planetIdx >= 0 && script && script[planetIdx]) cc = parseCard(script[planetIdx]);
+    else if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') cc = derivedCardFor(ruler, birthCard, script);
+    const cardChip = cc
+      ? `<span class="ls-stat-chip ls-zodiac-card ${cc.suit}" title="${ruler} ruling card">${cc.rank}${cc.sym}</span>`
+      : '';
+    return `<span class="ls-stat-chip" title="${title}">${rulerText}</span>${cardChip}`;
+  }
+
+  // Build the decan sub-row for one zodiac line. Both systems are shown;
+  // when Chaldean and Ptolemaic agree, they're merged into one chip pair
+  // to avoid noise.
+  function decanSubrowHTML(sign, decanIdx, script, birthCard) {
+    if (!sign || decanIdx < 0) return '';
+    const signIdx = SIGN_ASTRO_IDX[sign.name];
+    if (signIdx === undefined) return '';
+    const globalDecan = signIdx * 3 + decanIdx;
+    const chaldean  = CHALDEAN_ORDER[globalDecan % 7];
+    const ptolemaic = PTOLEMAIC_DECANS[signIdx][decanIdx];
+    const label = `${DECAN_ORDINAL[decanIdx]} decan`;
+    const systems = `<div class="ls-decan-system-row">
+      <span class="ls-decan-system">Chaldean</span>
+      ${planetChip(chaldean, script, birthCard, `${chaldean} — Chaldean/Egyptian decan ruler`)}
+    </div>
+    <div class="ls-decan-system-row">
+      <span class="ls-decan-system">Ptolemaic</span>
+      ${planetChip(ptolemaic, script, birthCard, `${ptolemaic} — Ptolemaic/triplicity decan ruler`)}
+    </div>`;
+    return `<div class="ls-decan-line">
+      <span class="ls-decan-label" title="${sign.name} decan by 10° arc">${label}</span>
+      ${systems}
+    </div>`;
+  }
+
+  function rulingCardChipHTML(sign, script, birthCard) {
     if (!sign) return '';
-    const planetIdx = SPREAD_PLANETS.indexOf(sign.ruler);
-    const cardStr = planetIdx >= 0 ? script[planetIdx] : '';
-    return cardStr ? (function () {
-      const c = parseCard(cardStr);
-      return `<span class="ls-stat-chip ls-zodiac-card ${c.suit}" title="${sign.ruler} ruling card">${c.rank}${c.sym}</span>`;
-    })() : '<span class="ls-stat-note">No seven-planet card seat</span>';
+    const ruler = sign.ruler;
+    // Extended ruler set: the 7 cardology planets + Moon (Cancer) +
+    // Sun (Leo) + Pluto (modern Scorpio).
+    const planetIdx = SPREAD_PLANETS.indexOf(ruler);
+    let cc = null;
+    if (planetIdx >= 0 && script && script[planetIdx]) {
+      cc = parseCard(script[planetIdx]);
+    } else if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') {
+      cc = derivedCardFor(ruler, birthCard, script);
+    }
+    if (!cc) return '<span class="ls-stat-note">No seven-planet card seat</span>';
+    return `<span class="ls-stat-chip ls-zodiac-card ${cc.suit}" title="${ruler} ruling card">${cc.rank}${cc.sym}</span>`;
   }
 
   function zodiacStatsHTML(card, script) {
@@ -114,7 +282,36 @@
     if (!sign) return '';
     const siderealDate = shiftedDate(date.month, date.day, SIDEREAL_LAHIRI_DAY_SHIFT);
     const siderealSign = zodiacForDate(siderealDate.month, siderealDate.day);
-    const rulingCardHTML = rulingCardChipHTML(sign, script);
+
+    // Precise decans via astronomy.js when it's already loaded (Solar
+    // Time lazy-loads it); otherwise fall back to the even day-split.
+    // Sun longitude on the same month/day varies by < 1° across recent
+    // years, so a reference year is plenty for 10°-wide decan buckets
+    // when we don't have the birth year.
+    const refYear = (typeof currentAge !== 'undefined' && Number.isFinite(currentAge))
+      ? (new Date().getUTCFullYear() - currentAge) : 2000;
+    const tropLon = sunLonAt(refYear, date.month, date.day, 12);
+    const tropDecan = (tropLon !== null)
+      ? decanIdxForLon(tropLon)
+      : decanIdxForDate(sign, date.month, date.day);
+    let sidDecan = -1;
+    if (siderealSign) {
+      // Lahiri ayanamsa ≈ 24° in the current era. Astronomy path uses
+      // the precise ayanamsa formula from sun-gate.js; the fallback
+      // reuses the day-shift approximation on siderealDate.
+      if (tropLon !== null) {
+        const AYAN_LAHIRI_J2000 = 23.85320;
+        const t = window.Astronomy.MakeTime(new Date(Date.UTC(refYear, date.month - 1, date.day, 12)));
+        const T = t.tt / 36525;
+        const ayan = AYAN_LAHIRI_J2000 + (5028.796195 * T + 1.1054348 * T * T) / 3600;
+        const sidLon = ((tropLon - ayan) % 360 + 360) % 360;
+        sidDecan = decanIdxForLon(sidLon);
+      } else {
+        sidDecan = decanIdxForDate(siderealSign, siderealDate.month, siderealDate.day);
+      }
+    }
+
+    const rulingCardHTML = rulingCardChipHTML(sign, script, card);
     const signText = `${sign.glyph} ${sign.name}`;
     const rulerGlyph = SPREAD_PLANET_SYM[sign.ruler] || '';
     const rulerText = rulerGlyph ? `${rulerGlyph} ${sign.ruler}` : sign.ruler;
@@ -122,20 +319,26 @@
     const siderealRulerText = siderealSign
       ? (siderealRulerGlyph ? `${siderealRulerGlyph} ${siderealSign.ruler}` : siderealSign.ruler)
       : '';
-    const siderealHTML = siderealSign ? `<div class="ls-zodiac-line">
-        <span class="ls-zodiac-kind">Sidereal</span>
-        <span class="ls-stat-chip" title="Sidereal sign, Lahiri-style birthday approximation">${siderealSign.glyph} ${siderealSign.name}</span>
-        <span class="ls-stat-chip" title="Sidereal classical sign ruler">${siderealRulerText}</span>
-        ${rulingCardChipHTML(siderealSign, script)}
+    const siderealHTML = siderealSign ? `<div class="ls-zodiac-cardlet">
+        <div class="ls-zodiac-kind">Sidereal</div>
+        <div class="ls-zodiac-line">
+          <span class="ls-stat-chip" title="Sidereal sign, Lahiri-style birthday approximation">${siderealSign.glyph} ${siderealSign.name}</span>
+          <span class="ls-stat-chip" title="Sidereal classical sign ruler">${siderealRulerText}</span>
+          ${rulingCardChipHTML(siderealSign, script, card)}
+        </div>
+        ${decanSubrowHTML(siderealSign, sidDecan, script, card)}
       </div>` : '';
     return `<div class="ls-stat-block">
       <div class="ls-stat-label">Zodiac</div>
       <div class="ls-zodiac-stack">
-        <div class="ls-zodiac-line">
-          <span class="ls-zodiac-kind">Tropical</span>
-          <span class="ls-stat-chip" title="Tropical sun sign">${signText}</span>
-          <span class="ls-stat-chip" title="Classical sign ruler">${rulerText}</span>
-          ${rulingCardHTML}
+        <div class="ls-zodiac-cardlet">
+          <div class="ls-zodiac-kind">Tropical</div>
+          <div class="ls-zodiac-line">
+            <span class="ls-stat-chip" title="Tropical sun sign">${signText}</span>
+            <span class="ls-stat-chip" title="Classical sign ruler">${rulerText}</span>
+            ${rulingCardHTML}
+          </div>
+          ${decanSubrowHTML(sign, tropDecan, script, card)}
         </div>
         ${siderealHTML}
       </div>
@@ -146,14 +349,20 @@
   // Quadrations grid's .sl-ghost pair (Displaces / Displaced by).
   // `idx` is the card's position in CARDS/SPREAD_CARDS' shared solar
   // order (what slDisplaces/slDisplacedBy expect). Fixed/semi-fixed
-  // cards (where the seat displaces itself) render a hidden self chip,
-  // same as the grid's `.sl-ghost-self` treatment.
+  // cards (where the seat displaces itself) render a note instead of an
+  // empty-looking pair.
   function ghostRowHTML(idx) {
     if (typeof slDisplaces !== 'function' || typeof slDisplacedBy !== 'function' ||
         typeof SPREAD_CARDS === 'undefined' || idx < 0) return '';
+    const displacesIdx = slDisplaces(idx);
+    const displacedByIdx = slDisplacedBy(idx);
+    if (displacesIdx === idx && displacedByIdx === idx) {
+      return '<p class="ls-displacement-note">No displacement pair. This card holds its own seat in the Life Spread.</p>';
+    }
+    const isMutualPair = displacesIdx === displacedByIdx;
     const pairs = [
-      ['Displaces', slDisplaces(idx)],
-      ['Displaced by', slDisplacedBy(idx)]
+      ['Displaces', displacesIdx],
+      ['Displaced by', displacedByIdx]
     ];
     const chips = pairs.map(function (pair) {
       const verb = pair[0], oIdx = pair[1];
@@ -165,7 +374,10 @@
         <span class="ls-stat-chip ls-zodiac-card ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>
       </div>`;
     }).join('');
-    return `<div class="ls-ghost-row">${chips}</div>`;
+    const mutualNote = isMutualPair
+      ? '<p class="ls-displacement-note ls-displacement-note--pair">Semi-fixed pair. These two cards exchange places with each other in the Life Spread.</p>'
+      : '';
+    return `<div class="ls-ghost-row">${chips}</div>${mutualNote}`;
   }
 
   function earthlySeatPlanetsHTML(card) {
@@ -176,14 +388,45 @@
     const pos = life.indexOf(idx);
     if (pos < 0) return '';
     if (pos >= 49) {
-      return `<span class="ls-stat-chip" title="Crown row">${SPREAD_PLANET_SYM.Crown} Crown</span>`;
+      return planetButtonHTML('Crown', 'Crown row');
     }
     const rowPlanet = SPREAD_PLANETS[Math.floor(pos / 7)];
     const colPlanet = SPREAD_PLANETS[pos % 7];
     return [
-      `<span class="ls-stat-chip" title="Row">${SPREAD_PLANET_SYM[rowPlanet]} ${rowPlanet}</span>`,
-      `<span class="ls-stat-chip" title="Column">${SPREAD_PLANET_SYM[colPlanet]} ${colPlanet}</span>`
+      planetButtonHTML(rowPlanet, 'Row'),
+      planetButtonHTML(colPlanet, 'Column')
     ].join('');
+  }
+
+  function planetButtonHTML(planet, title) {
+    const glyph = SPREAD_PLANET_SYM[planet] || '';
+    return `<button type="button" class="ls-stat-chip ls-planet-link" data-planet="${planet}" title="${title}: ${planet}" aria-label="Open ${planet} in Card Elements">${glyph ? glyph + ' ' : ''}${planet}</button>`;
+  }
+
+  function openPlanetFromStats(planet) {
+    if (!planet || (typeof window.showPlanet !== 'function' && typeof window.openPlanet !== 'function')) return;
+    const elements = document.getElementById('elements');
+    if (elements) {
+      elements.classList.add('section-open');
+      const toggle = elements.querySelector(':scope > .section-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    }
+    if (typeof window.showPlanet === 'function') window.showPlanet(planet);
+    else window.openPlanet(planet);
+    const target = document.getElementById('plPop') || elements;
+    if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function datesHTML(dates) {
+    if (!dates) return '';
+    const items = String(dates).split(/\s*,\s*/).filter(Boolean);
+    const rows = [];
+    for (let i = 0; i < items.length; i += 6) rows.push(items.slice(i, i + 6));
+    return `<div class="ls-date-grid">${rows.map(function (row) {
+      return `<div class="ls-date-row">${row.map(function (date) {
+        return `<span class="ls-date-item">${date}</span>`;
+      }).join('')}</div>`;
+    }).join('')}</div>`;
   }
 
   function birthStatsHTML(card, script) {
@@ -198,7 +441,7 @@
     return `<div class="ls-stats">
       ${dates ? `<div class="ls-stat-block">
         <div class="ls-stat-label">Dates</div>
-        <div class="ls-stat-text">${dates}</div>
+        ${datesHTML(dates)}
       </div>` : ''}
       <div class="ls-stat-block">
         <div class="ls-stat-label">Displacements</div>
@@ -302,6 +545,11 @@
 
   function bindLifeScriptCardClicks(root) {
     if (!root) return;
+    root.querySelectorAll('.ls-planet-link[data-planet]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openPlanetFromStats(btn.dataset.planet);
+      });
+    });
     root.querySelectorAll('.ls-card[data-idx]').forEach(function (el) {
       const idx = +el.dataset.idx;
       if (!Number.isInteger(idx) || idx < 0) return;

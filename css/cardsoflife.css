@@ -7,6 +7,7 @@
   --ctl-pill-track: .08em;
   --ctl-round-size: 30px;
   --ctl-round-font: 1rem;
+  --finder-tool-size: 32px;
   --ctl-date-font: .95rem;
   --ctl-date-pad-y: .35rem;
   --ctl-date-pad-x: .9rem;
@@ -199,10 +200,13 @@
 
 .finder-persons {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
+  grid-template-columns: max-content;
   align-items: start;
   justify-content: center;
   gap: clamp(.5rem, 3vw, 1rem);
+}
+.finder.rel-on .finder-persons {
+  grid-template-columns: repeat(2, minmax(0, max-content));
 }
 .finder-person {
   border: 0;
@@ -490,6 +494,7 @@
     --ctl-pill-track: .05em;
     --ctl-round-size: 28px;
     --ctl-round-font: .92rem;
+    --finder-tool-size: 32px;
     --ctl-date-font: .82rem;
     --ctl-date-pad-y: .32rem;
     --ctl-date-pad-x: .65rem;
@@ -886,6 +891,26 @@
   line-height: 1.5;
   color: var(--muted);
 }
+.ls-date-grid {
+  display: grid;
+  gap: .22rem;
+  justify-items: center;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+.ls-date-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: .42rem;
+}
+.ls-date-item {
+  font-family: var(--mono);
+  font-size: .68rem;
+  line-height: 1.45;
+  color: var(--muted);
+  white-space: nowrap;
+}
 .ls-stat-chips {
   display: flex;
   flex-wrap: wrap;
@@ -905,21 +930,71 @@
   color: var(--text);
   background: rgba(255,255,255,.03);
 }
+.ls-planet-link {
+  cursor: pointer;
+  transition: border-color var(--ease), color var(--ease), background var(--ease), transform var(--ease);
+}
+.ls-planet-link:hover,
+.ls-planet-link:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(199,154,84,.1);
+  transform: translateY(-1px);
+}
+.ls-planet-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.mini-card,
+.ls-zodiac-card,
+.cal-chip,
+.sol-card-chip,
+.bi-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--mini-card-min-w);
+  block-size: var(--mini-card-h);
+  padding: 0 var(--mini-card-pad-x);
+  border: 1px solid rgba(75,57,31,.18);
+  border-radius: var(--card-radius);
+  font-family: var(--serif);
+  font-size: clamp(.44rem, 1.35vw, var(--mini-card-font));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  background: rgba(253,250,245,.88);
+  color: var(--card-dark);
+}
 .ls-zodiac-stack {
   display: grid;
-  gap: .42rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  align-items: stretch;
+  width: 100%;
+}
+.ls-zodiac-cardlet {
+  display: grid;
+  align-content: start;
   justify-items: center;
+  gap: .45rem;
+  min-width: 0;
+  padding: .7rem .65rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,.025);
 }
 .ls-zodiac-line {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: .35rem .45rem;
+  gap: .32rem;
 }
 .ls-zodiac-kind {
-  min-width: 4.6rem;
-  text-align: right;
+  min-width: 0;
+  text-align: center;
   font-family: var(--sans);
   font-size: .58rem;
   font-weight: 700;
@@ -928,19 +1003,71 @@
   color: var(--muted);
 }
 .ls-zodiac-card {
-  font-family: var(--serif);
+  gap: 0;
+}
+/* Decan sub-row (one per Zodiac line). Sits directly beneath its parent
+   Tropical/Sidereal line, visually subordinate: quieter label, slightly
+   tighter chips, no dedicated grid track. */
+.ls-decan-line {
+  display: grid;
+  justify-items: center;
+  gap: .24rem;
+  margin-top: -.05rem;
+  opacity: .92;
+  width: 100%;
+}
+.ls-decan-label {
+  min-width: 100%;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: .55rem;
   font-weight: 700;
-  background: rgba(253,250,245,.88);
-  color: var(--card-dark);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ls-decan-system {
+  min-width: 5.8rem;
+  text-align: right;
+  font-family: var(--sans);
+  font-size: .55rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .82;
+}
+.ls-decan-system-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: .28rem;
+  min-width: 0;
+  width: 100%;
 }
 .ls-zodiac-card.hearts,
-.ls-zodiac-card.diamonds { color: var(--red); }
-.ls-zodiac-card.clubs { color: var(--green); }
-.ls-zodiac-card.spades { color: var(--navy); }
+.ls-zodiac-card.diamonds,
+.cal-chip.hearts,
+.cal-chip.diamonds { color: var(--red); }
+.ls-zodiac-card.clubs,
+.cal-chip.clubs { color: var(--green); }
+.ls-zodiac-card.spades,
+.cal-chip.spades { color: var(--navy); }
 .ls-stat-note {
   align-self: center;
   font-family: var(--sans);
   font-size: .64rem;
+  color: var(--muted);
+}
+.ls-displacement-note {
+  margin: .15rem auto 0;
+  max-width: 18rem;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: .82rem;
+  font-style: italic;
+  line-height: 1.45;
   color: var(--muted);
 }
 .ls-col {
@@ -980,8 +1107,11 @@
 .ls-ghost-self { visibility: hidden; }
 @media (max-width: 560px) {
   .ls-stat-text { font-size: .62rem; }
-  .ls-stat-chip { font-size: .62rem; padding: .16rem .42rem; }
-  .ls-zodiac-kind { min-width: 100%; text-align: center; }
+  .ls-date-row { gap: .28rem; }
+  .ls-date-item { font-size: .58rem; }
+  .ls-stat-chip:not(.ls-zodiac-card) { font-size: .62rem; padding: .16rem .42rem; }
+  .ls-zodiac-stack { grid-template-columns: 1fr; gap: .55rem; }
+  .ls-zodiac-cardlet { padding: .62rem .55rem .68rem; }
   .ls-ghost-row { gap: .55rem; }
   .ls-ghost-label { font-size: .5rem; }
 }
@@ -1036,10 +1166,10 @@
   .ls-connection-gloss { font-size: .86rem; }
 }
 
-/* ── Finder In Time panel (2026-07-10) ─────────────────────────────
+/* ── Finder Cycles panel (2026-07-10) ─────────────────────────────
    Five personal cards: 13-Year / 7-Year / Yearly / 52-Day / Daily,
    computed from the picked card's solar value and the age at
-   the current In Time viewDate. The period-reading popup (click a card
+   the current Cycles viewDate. The period-reading popup (click a card
    to open its full reading, with its own prev/next through the timeline) is still
    deferred — needs the compare-card popup chrome + lazy-loaded
    reading data, neither of which exist yet. */
@@ -1119,16 +1249,13 @@
   --it-reading-head-h: 3.85rem;
   --it-reading-help-h: 2.3rem;
   max-width: 42rem;
-  margin: 0 auto;
+  margin: 1.15rem auto 0;
   text-align: center;
-  padding: 1rem 1rem 1.1rem;
+  padding: .25rem 1rem 0;
   height: var(--it-reading-h);
   display: flex;
   flex-direction: column;
-  border-radius: var(--r-lg);
-  background:
-    linear-gradient(180deg, rgba(37,29,66,.52), rgba(20,16,37,.64)),
-    rgba(12,10,23,.65);
+  touch-action: pan-y;
 }
 .it-reading-head {
   display: flex;
@@ -1290,7 +1417,6 @@
 }
 .sol-card { display: flex; flex-direction: column; align-items: center; gap: .45rem; }
 .sol-card-chip {
-  min-width: 2.5rem;
   justify-content: center;
 }
 .sol-card.dimmed { opacity: .5; }
@@ -1332,7 +1458,7 @@
   text-align: center; max-width: 8.5rem; line-height: 1.3;
 }
 
-/* ── In Time date context (2026-07-10, simplified 2026-07-13) —
+/* ── Cycles date context (2026-07-10, simplified 2026-07-13) —
    clickable date label (opens the hidden native date input) plus a
    "Today" reset that only shows once you've scrolled away from today. */
 .it-date-shell {
@@ -1441,8 +1567,10 @@
    deliberately plain for now (see dev/CHANGELOG.txt); the priority
    was getting all three pickers working end to end. */
 .finder-tools {
+  position: relative;
   display: flex; align-items: center; justify-content: center;
-  gap: .5rem; margin-top: 1.25rem; flex-wrap: wrap;
+  gap: .5rem; width: fit-content; max-width: 100%;
+  margin: 1.25rem auto 0; flex-wrap: wrap;
 }
 .finder-tool-btn {
   display: inline-flex; align-items: center; gap: .3rem;
@@ -1454,11 +1582,20 @@
 }
 .finder-tool-btn:hover { border-color: var(--gold); color: var(--gold); }
 .finder-tool-btn.is-active { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.1); }
-.finder-tool-btn--icon { position: relative; padding: .45rem; }
-.finder-rel-toggle {
-  width: 30px;
-  height: 30px;
+.finder-tool-btn--icon {
+  position: relative;
+  width: var(--finder-tool-size);
+  height: var(--finder-tool-size);
   padding: 0;
+  justify-content: center;
+}
+.finder-tools > .finder-date-reset {
+  position: absolute;
+  right: calc(100% + .5rem);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.finder-rel-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1487,14 +1624,30 @@
 
 .finder-tray-wrap {
   display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows .35s ease;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    grid-template-rows .35s ease,
+    opacity .18s ease,
+    visibility 0s linear .35s;
   width: min(100%, var(--control-rail-w));
   margin-inline: auto;
 }
 #bdayTrayWrap {
   width: min(100%, calc(var(--control-rail-w) * .7));
 }
-.finder-tray-wrap.open { grid-template-rows: 1fr; margin-top: .85rem; }
+.finder-tray-wrap.open {
+  grid-template-rows: 1fr;
+  margin-top: .85rem;
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    grid-template-rows .35s ease,
+    opacity .18s ease,
+    visibility 0s linear 0s;
+}
 .finder-tray-min { overflow: hidden; min-height: 0; }
 .finder-tray {
   padding: .2rem 0 0;
@@ -1548,7 +1701,12 @@
 .pick-target-btn.is-active { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.1); }
 
 /* Calendar — 13 cols (day label + 12 months), compact date chips */
-.cal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cal-scroll {
+  width: min(100%, 620px);
+  margin-inline: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .cal-grid {
   width: 100%;
 }
@@ -1565,19 +1723,22 @@
   display: flex; align-items: center; justify-content: center;
 }
 .cal-day {
+  min-width: 0;
   border: 0; background: transparent; border-radius: var(--r-sm); padding: .15rem;
   cursor: pointer; transition: background var(--ease), transform var(--ease);
 }
 .cal-day:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
 .cal-day.cal-today { box-shadow: inset 0 0 0 1.5px var(--gold); }
 .cal-chip {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 1.4rem; border-radius: 4px; background: var(--card-paper); color: var(--card-dark);
+  min-inline-size: 0;
+  inline-size: 100%;
+  block-size: 1.18rem;
+  padding: 0;
+  background: var(--card-paper);
 }
-.cal-chip.hearts, .cal-chip.diamonds { color: var(--red); }
 .cal-chip.joker { background: var(--accent); color: var(--gold); }
-.cal-token { font-family: var(--sans); font-size: .6rem; font-weight: 700; }
-.cal-token-joker { font-size: .45rem; letter-spacing: .05em; }
+.cal-token { font: inherit; font-weight: inherit; }
+.cal-token-joker { font-size: .72em; letter-spacing: .05em; }
 
 /* Solar Values — calculator + deck browse */
 .sv-calc-inputs {
@@ -1685,9 +1846,9 @@
   justify-self: center;
 }
 .browse-cell .cal-chip {
-  min-width: 3.45rem;
-  min-height: 1.5rem;
-  padding: 0 .48rem;
+  min-inline-size: var(--mini-card-min-w);
+  block-size: var(--mini-card-h);
+  padding-inline: var(--mini-card-pad-x);
 }
 .browse-cell:hover { transform: translateY(-2px); }
 .browse-cell.sv-found .cal-chip {
@@ -1698,11 +1859,11 @@
   color: var(--gold-ink);
 }
 .browse-cell .cal-token-joker {
-  font-size: .6rem;
+  font-size: .72em;
   font-weight: 700;
   letter-spacing: .04em;
 }
-.browse-gap { min-height: 1.4rem; }
+.browse-gap { min-height: var(--mini-card-h); }
 .browse-joker-row {
   grid-column: 1 / -1;
   display: flex;
@@ -1804,13 +1965,11 @@
 }
 .birth-item:hover { border-color: var(--gold); background: rgba(199,154,84,.06); }
 .bi-chip {
-  flex-shrink: 0; width: 2.1rem; height: 2.1rem; border-radius: var(--r-sm);
-  background: var(--card-paper); color: var(--card-dark);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-weight: 600; font-size: .8rem;
+  flex-shrink: 0;
+  background: var(--card-paper);
 }
 .bi-chip.red { color: var(--red); }
-.bi-chip-joker { background: var(--accent); color: var(--gold); font-size: 1.1rem; }
+.bi-chip-joker { background: var(--accent); color: var(--gold); font-size: .72em; }
 .birth-item-body { flex: 1; min-width: 0; }
 .birth-name { font-family: var(--sans); font-size: .88rem; color: var(--text); }
 .birth-date { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
@@ -1870,15 +2029,13 @@
     border-radius: 3px;
   }
   .cal-chip {
-    min-height: .98rem;
+    block-size: 1.05rem;
     border-radius: 3px;
-  }
-  .cal-token {
-    font-size: .48rem;
+    font-size: .5rem;
   }
   .cal-token-joker {
-    font-size: .37rem;
-    letter-spacing: .03em;
+    font-size: .58em;
+    letter-spacing: .02em;
   }
   .sv-calc-inputs {
     grid-template-columns: 1fr auto 1fr;
@@ -1896,18 +2053,12 @@
     font-size: .45rem;
     letter-spacing: .04em;
   }
-  .browse-gap {
-    min-height: .98rem;
-  }
+  .browse-gap { min-height: var(--mini-card-h); }
   .browse-cell {
     gap: .22rem;
     padding: .05rem .06rem;
   }
-  .browse-cell .cal-chip {
-    min-width: 2.7rem;
-    min-height: 1.18rem;
-    padding: 0 .28rem;
-  }
+  .browse-cell .cal-chip { padding-inline: var(--mini-card-pad-x); }
   .browse-sv {
     min-width: .92rem;
     font-size: .46rem;
@@ -1957,12 +2108,6 @@
     font-size: .94rem;
     padding: .38rem .42rem .42rem;
   }
-  .finder-date-reset {
-    position: absolute;
-    left: calc(100% + .35rem);
-    top: 50%;
-    transform: translateY(-50%);
-  }
   .finder-rel-toggle {
     margin-top: .2rem;
   }
@@ -1986,6 +2131,7 @@
   }
   .cal-desktop-grid {
     grid-template-columns: 1.08rem repeat(12, minmax(0, 1fr));
+    min-width: 0;
   }
   .cal-col-header {
     font-size: .44rem;
@@ -1995,13 +2141,12 @@
     font-size: .44rem;
   }
   .cal-chip {
-    min-height: .88rem;
-  }
-  .cal-token {
-    font-size: .43rem;
+    block-size: .92rem;
+    font-size: .44rem;
   }
   .cal-token-joker {
-    font-size: .32rem;
+    font-size: .52em;
+    letter-spacing: .01em;
   }
   .browse-grid {
     column-gap: .04rem;
@@ -2011,18 +2156,12 @@
     font-size: .4rem;
     letter-spacing: .02em;
   }
-  .browse-gap {
-    min-height: .88rem;
-  }
+  .browse-gap { min-height: var(--mini-card-h); }
   .browse-cell {
     gap: .16rem;
     padding: .04rem;
   }
-  .browse-cell .cal-chip {
-    min-width: 2.2rem;
-    min-height: 1.04rem;
-    padding: 0 .18rem;
-  }
+  .browse-cell .cal-chip { padding-inline: var(--mini-card-pad-x); }
   .browse-sv {
     min-width: .78rem;
     font-size: .4rem;

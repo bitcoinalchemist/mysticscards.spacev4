@@ -125,6 +125,9 @@
   // Fold the whole section up (hide the rows too) when the active glyph is
   // re-clicked — matches clicking the active suit / number.
   function foldUp() { if (window.collapseElements) window.collapseElements(); else hide(); }
+  // Direct open: used by Life Script stat chips so repeated clicks keep
+  // the planet detail open instead of toggling it closed.
+  window.showPlanet = show;
   // Toggle: clicking the active planet folds the section up.
   window.openPlanet = function (name) { if (cur >= 0 && ORDER[cur] === name) foldUp(); else show(name); };
   // Exposed so the suit/number expander can close JUST this panel (keeping the

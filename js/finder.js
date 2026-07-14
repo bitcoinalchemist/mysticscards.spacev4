@@ -835,7 +835,7 @@
     }
     _renderMode = state.targetMode;
     updateResetButton();
-    // Result tabs (About / Life Script / In Time). The whole
+    // Result tabs (About / Life Script / Cycles). The whole
     // wrapper is hidden in triptych mode and when no card is picked.
     // Each panel's own render function decides whether it has content
     // for THIS card; empty panels get `.is-empty` so the placeholder

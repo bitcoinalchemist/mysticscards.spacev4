@@ -1,4 +1,4 @@
-// in-time.js — the "In Time" 5-card row (13-Year / 7-Year / Yearly /
+// in-time.js — the "Cycles" 5-card row (13-Year / 7-Year / Yearly /
 // 52-Day / Daily) for the Finder's picked card, plus the
 // date-scroll nav that lets you view the row "as of" any date. Added
 // 2026-07-10; date-nav added 2026-07-10 (was deferred in the first
@@ -33,6 +33,13 @@
 // and after spread-grid.js (which owns the `currentAge` global that
 // tells us the reader's real-today age).
 //
+// The five period-reading data files (~500 KB total) are LAZY-loaded on
+// first Cycles-tab open via ensureCycleData() — same pattern
+// solar-time.js uses for astronomy.js. The panel renders immediately
+// with the CARD_READINGS fallback text (which comes from cardsdata.js,
+// always loaded); when the promise resolves, renderInTime re-runs and
+// the real horizon text swaps in.
+//
 // PUBLIC on window:
 //   window.renderInTime(card) — populates `#fInTime`. Returns TRUE
 //     when there's real content; FALSE for the Joker or when the age
@@ -44,13 +51,57 @@
 
   const WD_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const IT_DEFAULT_FOCUS = 'daily';
-  const IT_READING_SOURCES = {
-    '13-year': typeof window !== 'undefined' ? window.THIRTEEN_YEAR_CARDS : null,
-    '7-year': typeof window !== 'undefined' ? window.SEVEN_YEAR_CARDS : null,
-    yearly: typeof window !== 'undefined' ? window.YEAR_CARDS : null,
-    '52-day': typeof window !== 'undefined' ? window.PERIOD_CARDS : null,
-    daily: typeof window !== 'undefined' ? window.DAILY_CARDS : null
-  };
+
+  // Live accessor for the horizon-specific reading data. Reads
+  // window.* at call time so the lookup works both before the lazy
+  // load resolves (returns null → fallback text) and after (returns
+  // the populated object → real horizon text).
+  function readingSourceFor(label) {
+    switch ((label || '').toLowerCase()) {
+      case '13-year': return window.THIRTEEN_YEAR_CARDS || null;
+      case '7-year':  return window.SEVEN_YEAR_CARDS   || null;
+      case 'yearly':  return window.YEAR_CARDS         || null;
+      case '52-day':  return window.PERIOD_CARDS       || null;
+      case 'daily':   return window.DAILY_CARDS        || null;
+    }
+    return null;
+  }
+
+  // Lazy-load the five period-reading data files (~500 KB total). All
+  // five ship as classic-script `window.*_CARDS = { ... }` assignments,
+  // so injecting them as async <script> tags is enough — no cache-
+  // buster query so the sw.js write-through cache-key stays clean.
+  var _cyclePromise = null;
+  function cyclesLoaded() {
+    return !!(window.DAILY_CARDS && window.PERIOD_CARDS && window.YEAR_CARDS
+      && window.SEVEN_YEAR_CARDS && window.THIRTEEN_YEAR_CARDS);
+  }
+  function ensureCycleData() {
+    if (cyclesLoaded()) return Promise.resolve();
+    if (_cyclePromise) return _cyclePromise;
+    var files = [
+      'js/dailycarddata.js',
+      'js/periodcarddata.js',
+      'js/yearcarddata.js',
+      'js/sevenyearcarddata.js',
+      'js/thirteenyearcarddata.js'
+    ];
+    _cyclePromise = Promise.all(files.map(function (src) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = function () { resolve(); };
+        s.onerror = function () { reject(new Error(src + ' failed to load')); };
+        document.head.appendChild(s);
+      });
+    })).catch(function (err) {
+      // Reset the cached promise so a later Cycles-tab open can retry.
+      _cyclePromise = null;
+      throw err;
+    });
+    return _cyclePromise;
+  }
 
   // ── Date-scroll state ────────────────────────────────────────────
   // viewDate is a local-midnight epoch (ms). renderInTime always shows
@@ -152,6 +203,7 @@
   function wireDateNav() {
     const root = document.getElementById('fInTime');
     if (!root) return;
+    let swipeStart = null;
     root.addEventListener('click', function (ev) {
       const focusBtn = ev.target.closest('[data-it-focus]');
       if (focusBtn) {
@@ -178,6 +230,23 @@
         input.click();
       }
     });
+    root.addEventListener('touchstart', function (ev) {
+      const reading = ev.target.closest('.it-reading');
+      if (!reading || !ev.touches || ev.touches.length !== 1) return;
+      const t = ev.touches[0];
+      swipeStart = { x: t.clientX, y: t.clientY };
+    }, { passive: true });
+    root.addEventListener('touchend', function (ev) {
+      if (!swipeStart) return;
+      const reading = ev.target.closest('.it-reading');
+      const t = ev.changedTouches && ev.changedTouches[0];
+      if (!reading || !t) { swipeStart = null; return; }
+      const dx = t.clientX - swipeStart.x;
+      const dy = t.clientY - swipeStart.y;
+      swipeStart = null;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+      shiftActiveHorizon(dx < 0 ? 1 : -1);
+    }, { passive: true });
     root.addEventListener('change', function (ev) {
       const input = ev.target.closest('.it-date-input');
       if (!input || !input.value) return;
@@ -221,10 +290,10 @@
 
   function missingDateHTML() {
     return `<div class="it-header">
-      <h3 class="it-title">In Time</h3>
+      <h3 class="it-title">Cycles</h3>
       <p class="it-lede">This section needs a birthday context.</p>
     </div>
-    <p class="it-empty-note">Add a <b>DD/MM</b>, load a saved birthday, or pick a calendar date to see the age-based In Time cards for this selection.</p>`;
+    <p class="it-empty-note">Add a <b>DD/MM</b>, load a saved birthday, or pick a calendar date to see the age-based cycle cards for this selection.</p>`;
   }
 
   function readingKey(card) {
@@ -245,13 +314,13 @@
     const reading = key && typeof CARD_READINGS !== 'undefined' ? CARD_READINGS[key] : null;
     return reading && reading.personality
       ? reading.personality.split(/\n\n+/).map(p => `<p>${p}</p>`).join('')
-      : '<p>This card has no saved In Time text for this horizon yet.</p>';
+      : '<p>This card has no saved Cycles text for this horizon yet.</p>';
   }
 
   function inTimeReadingHTML(pc) {
     const c = CARDS[pc.idx];
     if (!c) return '';
-    const src = IT_READING_SOURCES[pc.label.toLowerCase()] || null;
+    const src = readingSourceFor(pc.label);
     const key = readingKey(c);
     const entry = src && key ? src[key] : null;
     const text = entry && entry.planets && pc.planet ? entry.planets[pc.planet] : '';
@@ -291,7 +360,7 @@
       // Scrolled to before this birth date — nothing to compute, but keep
       // the nav bar live so the reader can scroll back into range.
       return `<div class="it-header">
-        <h3 class="it-title">In Time</h3>
+        <h3 class="it-title">Cycles</h3>
         <p class="it-lede">That date is before this birthday.</p>
       </div>
       ${dateNavHTML(null)}`;
@@ -358,10 +427,10 @@
     }).join('');
 
     return `${dateNavHTML(age)}
-    <div class="it-reading">${inTimeReadingHTML(active)}</div>
     <div class="it-row-wrap">
       <div class="it-row">${rowHTML}</div>
     </div>
+    <div class="it-reading">${inTimeReadingHTML(active)}</div>
     `;
   }
 
@@ -380,6 +449,16 @@
     const html = panelHTML(card);
     if (!html) { _activeCards = []; root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     inner.innerHTML = html;
+    // First open triggers the lazy load of the 5 horizon-reading data
+    // files (~500 KB). Fallback text renders immediately; re-render
+    // when the data lands so real horizon text swaps in. Guarded so
+    // subsequent renders (post-load) don't spin — cyclesLoaded() is
+    // true then and the outer `if` skips this block.
+    if (!cyclesLoaded()) {
+      ensureCycleData().then(function () {
+        if (_lastCard === card) renderInTime(card);
+      }).catch(function () { /* fallback text stays */ });
+    }
     return true;
   }
 

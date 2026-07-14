@@ -47,20 +47,20 @@
               '<span class="sh-setting-label">Reading voice</span>' +
               '<button type="button" class="sh-voice-btn" id="voiceToggle" aria-pressed="false" aria-label="Reading voice">modern</button>' +
             '</div>' +
+            '<div class="sh-setting-row">' +
+              '<span class="sh-setting-label">Alternate court cards</span>' +
+              '<button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false" aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>' +
+            '</div>' +
+            '<div class="sh-setting-row">' +
+              '<span class="sh-setting-label">Read left to right</span>' +
+              '<button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false" aria-label="Read left to right"><span class="q-switch-knob"></span></button>' +
+            '</div>' +
             '<div class="sh-setting-divider" aria-hidden="true"></div>' +
             '<div class="sh-setting-group">' +
               '<div class="sh-setting-head">Quadrations</div>' +
               '<div class="sh-setting-row">' +
-                '<span class="sh-setting-label">Alternate court cards</span>' +
-                '<button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false" aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>' +
-              '</div>' +
-              '<div class="sh-setting-row">' +
                 '<span class="sh-setting-label">Show displacements</span>' +
                 '<button type="button" class="q-switch" id="qDisp" role="switch" aria-checked="false" aria-label="Show displacements"><span class="q-switch-knob"></span></button>' +
-              '</div>' +
-              '<div class="sh-setting-row">' +
-                '<span class="sh-setting-label">Read left to right</span>' +
-                '<button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false" aria-label="Read left to right"><span class="q-switch-knob"></span></button>' +
               '</div>' +
               '<div class="sh-setting-row sh-setting-row--size">' +
                 '<span class="sh-setting-label">Card size</span>' +

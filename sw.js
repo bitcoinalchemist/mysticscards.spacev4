@@ -3,7 +3,13 @@
  * Network-first for same-origin; cache-first for Google Fonts.
  * PRECACHE lists every deployed file.
  */
-const CACHE = 'mysticscards-12';
+// Cache-key bump on every deployed change. The five period-reading data
+// files (dailycarddata, periodcarddata, yearcarddata, sevenyearcarddata,
+// thirteenyearcarddata — ~500 KB total) are intentionally NOT in the
+// precache list: js/in-time.js lazy-loads them on first Cycles-tab open.
+// The fetch handler's write-through still caches them after that first
+// fetch, so offline works once the user has opened Cycles once online.
+const CACHE = 'mysticscards-15';
 const PRECACHE = [
   './',
   'index.html',
@@ -30,11 +36,6 @@ const PRECACHE = [
   'js/finder.js',
   'js/olney.js',
   'js/lifescript.js',
-  'js/dailycarddata.js',
-  'js/periodcarddata.js',
-  'js/yearcarddata.js',
-  'js/sevenyearcarddata.js',
-  'js/thirteenyearcarddata.js',
   'js/tzcoords.js',
   'js/solar-time.js',
   'js/sun-gate.js',

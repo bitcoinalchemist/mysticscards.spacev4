@@ -13,44 +13,54 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="canonical" href="https://mysticscards.space/" />
   <meta name="theme-color" content="#100c1e" />
-  <meta name="version" content="2026-07-11" />
+  <meta name="version" content="2026-07-14" />
   <meta name="description" content="Cardology tools — birth cards, planetary periods, and readings." />
-  <link rel="stylesheet" href="css/site.css" />
+  <!-- OpenGraph / Twitter link previews. og-image is 1200×630. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mysticscards.space/" />
+  <meta property="og:title" content="Cards of Life — mysticscards.space" />
+  <meta property="og:description" content="Cardology tools — birth cards, planetary periods, and readings." />
+  <meta property="og:image" content="https://mysticscards.space/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cards of Life — mysticscards.space" />
+  <meta name="twitter:description" content="Cardology tools — birth cards, planetary periods, and readings." />
+  <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
+  <link rel="stylesheet" href="css/site.css?v=20260714b" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/cardsoflife.css?v=20260712a" />
+  <link rel="stylesheet" href="css/cardsoflife.css?v=20260714r" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
-<script src="js/stars.js"></script>
-<script src="js/site.js"></script>
+<script src="js/stars.js?v=20260714a"></script>
+<script src="js/site.js?v=20260714b"></script>
 <script src="js/castfield.js?v=20260711c" defer></script>
-<script src="js/store.js"></script>
+<script src="js/store.js?v=20260714a"></script>
 <script src="js/cardsdata.js?v=20260710d"></script>
 <script src="js/reltext.js?v=20260710a"></script>
 <script src="js/richmonddata.js?v=20260710c"></script>
 <script src="js/spread-grid.js?v=20260712a"></script>
-<script src="js/quadrations.js"></script>
-<script src="js/finder.js?v=20260711c"></script>
+<script src="js/quadrations.js?v=20260714a"></script>
+<script src="js/finder.js?v=20260714a"></script>
 <script src="js/olney.js?v=20260710c"></script>
-<script src="js/lifescript.js?v=20260710d"></script>
-<script src="js/dailycarddata.js?v=20260711a"></script>
-<script src="js/periodcarddata.js?v=20260711a"></script>
-<script src="js/yearcarddata.js?v=20260711a"></script>
-<script src="js/sevenyearcarddata.js?v=20260711a"></script>
-<script src="js/thirteenyearcarddata.js?v=20260711a"></script>
+<script src="js/lifescript.js?v=20260714h"></script>
+<!-- The 5 period-reading data files (dailycarddata, periodcarddata,
+     yearcarddata, sevenyearcarddata, thirteenyearcarddata — ~500 KB
+     total) are LAZY-loaded by js/in-time.js on first Cycles-tab open.
+     Not in this eager list, and intentionally not in sw.js PRECACHE. -->
 <script src="js/tzcoords.js?v=20260711a"></script>
 <script src="js/solar-time.js?v=20260711b"></script>
 <script src="js/sun-gate.js?v=20260711b"></script>
-<script src="js/in-time.js?v=20260711a"></script>
+<script src="js/in-time.js?v=20260714d"></script>
 <script src="js/birthdays.js?v=20260710d"></script>
 <script src="js/finder-trays.js?v=20260711a"></script>
 <script src="js/planetdata.js?v=20260711a"></script>
 <script src="js/elementsdata.js?v=20260711a"></script>
-<script src="js/elements.js?v=20260711a"></script>
+<script src="js/elements.js?v=20260714a"></script>
 
 <main>
   <h1 class="vh">Cards of Life — Cardology</h1>
+  <datalist id="solZoneList"></datalist>
 
   <section class="finder page-section section-open" id="finder">
     <button class="section-toggle" type="button"
@@ -79,7 +89,6 @@
                            placeholder="MM" aria-label="Your birth month">
                   </label>
                 </div>
-                <button type="button" id="fDateReset" class="finder-date-reset" aria-label="Restore selected date" title="Restore selected date" hidden>↻</button>
               </div>
             </fieldset>
             <fieldset class="finder-person" data-role="partner">
@@ -106,6 +115,8 @@
                Values all load inline under the Finder controls. Wired in
                js/birthdays.js + js/finder-trays.js. -->
           <div class="finder-tools">
+            <button type="button" id="fDateReset" class="finder-tool-btn finder-tool-btn--icon finder-date-reset"
+                    aria-label="Restore selected date" title="Restore selected date" hidden>↻</button>
             <button type="button" id="fRelToggle" class="finder-tool-btn finder-tool-btn--icon finder-rel-toggle"
                     title="Add partner" aria-label="Add partner" aria-pressed="false">+</button>
             <button type="button" id="finderBdayBtn" class="finder-tool-btn finder-tool-btn--icon"
@@ -230,14 +241,14 @@
           </div>
 
           <!-- Finder result panels — one of About / Life Script /
-               In Time visible at a time via the chip picker. The whole
+               Cycles visible at a time via the chip picker. The whole
                wrapper is hidden in triptych mode and when no card is
                picked. -->
           <div class="finder-panels" id="fPanels" hidden>
             <div class="ns-picker" id="fPanelPicker" role="tablist" aria-label="Card reading section">
               <button type="button" class="ns-chip is-active" id="chipAbout"      data-panel="about"      role="tab" aria-selected="true"  aria-controls="fAbout">About</button>
               <button type="button" class="ns-chip"           id="chipLifeScript" data-panel="lifescript" role="tab" aria-selected="false" aria-controls="fLifeScript">Stats</button>
-              <button type="button" class="ns-chip"           id="chipInTime"     data-panel="intime"     role="tab" aria-selected="false" aria-controls="fInTime">Time</button>
+              <button type="button" class="ns-chip"           id="chipInTime"     data-panel="intime"     role="tab" aria-selected="false" aria-controls="fInTime">Cycles</button>
             </div>
             <div class="finder-panels-body" id="fPanelBody" data-panel-active="about">
 
@@ -285,7 +296,6 @@
                       </label>
                       <label class="it-solar-field"><span>Birthplace</span>
                         <input type="text" id="solPlace" list="solZoneList" placeholder="city or zone" autocomplete="off" aria-label="Birthplace" />
-                        <datalist id="solZoneList"></datalist>
                       </label>
                     </div>
                     <div class="it-solar-out" id="solOut"></div>
@@ -294,13 +304,13 @@
                 <div class="ns-panel-empty">Life Script isn't available for this card.</div>
               </div>
 
-              <!-- In Time — Birth / 13-Year / 7-Year / Yearly / 52-Day
+              <!-- Cycles — Birth / 13-Year / 7-Year / Yearly / 52-Day
                    / Daily period cards for the picked card. Populated
                    by js/in-time.js, which lazy-loads its five period-
                    reading data files on first open. -->
               <div class="finder-intime ns-panel" id="fInTime" role="tabpanel" aria-labelledby="chipInTime">
                 <div class="it-inner"></div>
-                <div class="ns-panel-empty">In Time isn't available for this card.</div>
+                <div class="ns-panel-empty">Cycles aren't available for this card.</div>
               </div>
 
             </div>
