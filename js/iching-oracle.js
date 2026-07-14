@@ -94,6 +94,16 @@
       hexagramSVG(val, 0.5, changingLines);
   }
 
+  function wireResultTile(el, label, which, enabled) {
+    if (!el) return;
+    el.type = 'button';
+    el.title = label;
+    el.setAttribute('aria-label', label);
+    el.setAttribute('aria-pressed', 'false');
+    el.dataset.readingView = which;
+    el.disabled = !enabled;
+  }
+
   // ── Cast state ──
   var deck = null;
   var draws = [];   // line cards drawn this round, index 0 = line 1 (bottom)
@@ -614,7 +624,7 @@
     renderHexResult(document.getElementById('hexPrimary'), primary, 'Cast', changingIdx);
 
     var prim = document.getElementById('hexPrimary');
-    prim.onclick = function () { selectReading('primary'); };
+    wireResultTile(prim, 'Show the Cast hexagram', 'primary', true);
 
     var chg = document.getElementById('hexChanging');
     var sec = document.getElementById('hexSecondary');
@@ -622,18 +632,18 @@
       // Middle tile = the changing lines (its own view); right tile = Becomes.
       document.getElementById('changingCol').style.display = 'flex';
       renderChangingTile(chg, primary, changingIdx);
-      chg.onclick = function () { selectReading('lines'); };
+      wireResultTile(chg, 'Show the changing lines', 'lines', true);
 
       document.getElementById('becomesCol').style.display = 'flex';
       renderHexResult(sec, secondary, 'Becomes', null);
-      sec.onclick = function () { selectReading('secondary'); };
+      wireResultTile(sec, 'Show the Becomes hexagram', 'secondary', true);
 
       renderGoverningLine(changingIdx, primary, secondary);
     } else {
       document.getElementById('changingCol').style.display = 'none';
-      chg.onclick = null;
+      wireResultTile(chg, 'Show the changing lines', 'lines', false);
       document.getElementById('becomesCol').style.display = 'none';
-      sec.onclick = null;
+      wireResultTile(sec, 'Show the Becomes hexagram', 'secondary', false);
       document.getElementById('governingLine').innerHTML = '';
     }
 
@@ -670,6 +680,8 @@
     }
     document.getElementById('hexPrimary').classList.toggle('active', which === 'primary');
     document.getElementById('hexSecondary').classList.toggle('active', which === 'secondary');
+    document.getElementById('hexPrimary').setAttribute('aria-pressed', which === 'primary' ? 'true' : 'false');
+    document.getElementById('hexSecondary').setAttribute('aria-pressed', which === 'secondary' ? 'true' : 'false');
     var chg = document.getElementById('hexChanging');
     chg.classList.toggle('active', which === 'lines');
     chg.setAttribute('aria-pressed', which === 'lines' ? 'true' : 'false');
@@ -684,15 +696,15 @@
 
   // Run cb once the sixth card has finished dealing in, so the result reveals
   // as a deliberate beat AFTER the last card lands (the old fixed 360/390ms
-  // timers could fire while the sixth card was still mid-flip). dealIn is .42s
-  // (dealFade .25s under reduced motion) — both fire animationend; the timeout
+  // timers could fire while the sixth card was still mid-flip). ckDeal is .62s
+  // (ckFade .16s under reduced motion) — both fire animationend; the timeout
   // is a belt-and-braces fallback so the result never stays hidden.
   function afterSixthDeal(cb) {
     var el = slotEls[5];
     var done = false;
     var fire = function () { if (done) return; done = true; cb(); };
     if (el) el.addEventListener('animationend', fire, { once: true });
-    setTimeout(fire, 520);
+    setTimeout(fire, 700);
   }
 
   // A touch of ceremony: shimmer the cast-icon sparkle in time with the press
@@ -726,7 +738,7 @@
         return;
       }
       drawOne();
-      setTimeout(next, 150);
+      setTimeout(next, 125);
     })();
   }
 
@@ -736,6 +748,14 @@
   document.getElementById('castAllBtn').addEventListener('click', castAll);
   document.getElementById('saveReadingBtn').addEventListener('click', persistCurrentReading);
   document.getElementById('shareBtn').addEventListener('click', copyShareLink);
+  ['hexPrimary', 'hexChanging', 'hexSecondary'].forEach(function (id) {
+    var tile = document.getElementById(id);
+    if (!tile) return;
+    tile.addEventListener('click', function () {
+      if (tile.disabled || !tile.dataset.readingView) return;
+      selectReading(tile.dataset.readingView);
+    });
+  });
   document.getElementById('historyBtn').addEventListener('click', function(e) {
     e.stopPropagation();
     var panel = document.getElementById('histPanel');
@@ -788,4 +808,3 @@
 // The 8-trigram reference row (bottom of the page) MOVED to
 // js/iching-trigrams.js (2026-07-07). Its TRIGRAMS data moved to
 // ichingdata.js as window.TRIGRAMS_DATA.
-

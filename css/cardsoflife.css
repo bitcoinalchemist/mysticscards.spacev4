@@ -319,6 +319,9 @@
 .finder-date-reset[hidden] {
   display: none;
 }
+.finder-share-btn[hidden] {
+  display: none;
+}
 .finder-rel-toggle:hover { border-color: var(--gold); color: var(--gold); }
 .finder-rel-toggle.on { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.08); }
 
@@ -1575,6 +1578,12 @@
 .finder-tools > .finder-date-reset {
   position: absolute;
   right: calc(100% + .5rem);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.finder-tools > .finder-share-btn {
+  position: absolute;
+  left: calc(100% + .5rem);
   top: 50%;
   transform: translateY(-50%);
 }

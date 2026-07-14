@@ -111,6 +111,7 @@
       results: root.querySelector('.finder-results'),
       relBtn: document.getElementById('fRelToggle'),
       resetBtn: document.getElementById('fDateReset'),
+      shareBtn: document.getElementById('finderShareBtn'),
       you: {
         month: document.getElementById('fMonth'),
         day: document.getElementById('fDay'),
@@ -400,6 +401,97 @@
     const show = !!_finderOverride && hasDate;
     dom.resetBtn.hidden = !show;
     dom.resetBtn.classList.toggle('on', show);
+  }
+
+  function updateShareButton() {
+    if (!dom || !dom.shareBtn) return;
+    const show = !!(
+      (dom.you.result && dom.you.result.classList.contains('has-card')) ||
+      (dom.partner.result && dom.partner.result.classList.contains('has-card')) ||
+      (dom.composite.result && dom.composite.result.classList.contains('has-card'))
+    );
+    dom.shareBtn.hidden = !show;
+    dom.shareBtn.classList.toggle('is-active', false);
+  }
+
+  function finderShareUrl() {
+    if (!dom) dom = cacheDom();
+    const url = new URL(window.location.href);
+    url.hash = '';
+    ['m', 'd', 'rel', 'pm', 'pd', 'card'].forEach(function (key) {
+      url.searchParams.delete(key);
+    });
+    const m = dom && dom.you.month ? parseInt(dom.you.month.value, 10) : 0;
+    const d = dom && dom.you.day ? parseInt(dom.you.day.value, 10) : 0;
+    if (m && d) {
+      url.searchParams.set('m', String(m));
+      url.searchParams.set('d', String(d));
+    }
+    if (_finderOverride && _finderOverride.sv) {
+      url.searchParams.set('card', String(_finderOverride.sv));
+    }
+    const relOn = !!(dom && dom.root && dom.root.classList.contains('rel-on'));
+    const pm = dom && dom.partner.month ? parseInt(dom.partner.month.value, 10) : 0;
+    const pd = dom && dom.partner.day ? parseInt(dom.partner.day.value, 10) : 0;
+    if (relOn && pm && pd) {
+      url.searchParams.set('rel', '1');
+      url.searchParams.set('pm', String(pm));
+      url.searchParams.set('pd', String(pd));
+    }
+    return url.toString();
+  }
+
+  function showShareCopied() {
+    if (!dom || !dom.shareBtn) return;
+    const old = dom.shareBtn.getAttribute('title') || 'Share Finder link';
+    dom.shareBtn.setAttribute('title', 'Link copied');
+    dom.shareBtn.classList.add('is-active');
+    window.setTimeout(function () {
+      if (!dom || !dom.shareBtn) return;
+      dom.shareBtn.setAttribute('title', old);
+      dom.shareBtn.classList.remove('is-active');
+    }, 1400);
+  }
+
+  function shareFinderLink() {
+    const url = finderShareUrl();
+    const title = 'Cards of Life Finder';
+    const text = _selectedCard && _selectedCard.name
+      ? `${_selectedCard.name} on mysticscards.space`
+      : 'Cards of Life Finder on mysticscards.space';
+    if (navigator.share) {
+      navigator.share({ title, text, url }).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showShareCopied).catch(function () {
+        window.prompt('Copy this Finder link:', url);
+      });
+      return;
+    }
+    window.prompt('Copy this Finder link:', url);
+  }
+
+  function applySharedFinderState() {
+    if (!dom) dom = cacheDom();
+    if (!dom || !dom.you.month || !dom.you.day) return;
+    const params = new URLSearchParams(window.location.search);
+    const m = parseInt(params.get('m') || '', 10);
+    const d = parseInt(params.get('d') || '', 10);
+    const pm = parseInt(params.get('pm') || '', 10);
+    const pd = parseInt(params.get('pd') || '', 10);
+    const card = parseInt(params.get('card') || '', 10);
+    if (m && d && m >= 1 && m <= 12 && d >= 1 && d <= DAYS_IN_MONTH[m]) {
+      syncSlotDate(dom.you, m, d);
+    }
+    if (params.get('rel') === '1' && pm && pd && pm >= 1 && pm <= 12 && pd >= 1 && pd <= DAYS_IN_MONTH[pm]) {
+      setRelationshipMode(true);
+      syncSlotDate(dom.partner, pm, pd);
+    }
+    if (card >= 1 && card <= 53) {
+      const c = SPREAD_CARDS[card - 1];
+      if (c) setFinderOverride({ rank: c.rank, suit: c.suit, sym: c.sym, sv: card });
+    }
   }
 
   function cardName(card) {
@@ -826,6 +918,7 @@
     _selectedCard = state.you;
     _selectedPartner = state.partner;
     _selectedComposite = state.targetMode === 'triptych' ? state.comp : null;
+    updateShareButton();
     if (_selectedComposite) {
       updateGridPick(_selectedComposite, 'primary');
       updateGridPick(state.you, 'secondary', state.partner);
@@ -954,6 +1047,8 @@
       syncMonthInput(dom.partner.month);
       syncDayInput(dom.partner.day, null);
     }
+    applySharedFinderState();
+    runFinderUpdate({ animate: false });
 
     dom.you.month.addEventListener('input', function () { clearFinderOverride(); discardFinderSnapshot(); syncDayInput(dom.you.day, +this.value); find(); });
     dom.you.month.addEventListener('change', function () { clearFinderOverride(); discardFinderSnapshot(); normalizeMonthInput(this); syncDayInput(dom.you.day, +this.value); find(); });
@@ -984,6 +1079,7 @@
       });
     }
     if (dom.relBtn) dom.relBtn.addEventListener('click', toggleRel);
+    if (dom.shareBtn) dom.shareBtn.addEventListener('click', shareFinderLink);
 
     // Chip picker — click switches the active panel.
     if (dom.panels.picker) {

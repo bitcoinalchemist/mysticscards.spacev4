@@ -33,45 +33,51 @@
     rightSlot = '<a class="sh-hex" href="index.html" aria-label="Cards of Life" title="Cards of Life">' + CARDS_MARK + '</a>';
   }
 
+  var settingsRows =
+    '<div class="sh-setting-row">' +
+      '<span class="sh-setting-label">Floating cards</span>' +
+      '<button type="button" class="q-switch" id="bgToggle" role="switch" aria-checked="false" aria-label="Floating cards"><span class="q-switch-knob"></span></button>' +
+    '</div>';
+  if (page !== 'iching.html') {
+    settingsRows +=
+      '<div class="sh-setting-row">' +
+        '<span class="sh-setting-label">Reading voice</span>' +
+        '<button type="button" class="sh-voice-btn" id="voiceToggle" aria-pressed="false" aria-label="Reading voice">modern</button>' +
+      '</div>' +
+      '<div class="sh-setting-row">' +
+        '<span class="sh-setting-label">Alternate court cards</span>' +
+        '<button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false" aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>' +
+      '</div>' +
+      '<div class="sh-setting-row">' +
+        '<span class="sh-setting-label">Read left to right</span>' +
+        '<button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false" aria-label="Read left to right"><span class="q-switch-knob"></span></button>' +
+      '</div>' +
+      '<div class="sh-setting-divider" aria-hidden="true"></div>' +
+      '<div class="sh-setting-group">' +
+        '<div class="sh-setting-head">Quadrations</div>' +
+        '<div class="sh-setting-row">' +
+          '<span class="sh-setting-label">Show displacements</span>' +
+          '<button type="button" class="q-switch" id="qDisp" role="switch" aria-checked="false" aria-label="Show displacements"><span class="q-switch-knob"></span></button>' +
+        '</div>' +
+        '<div class="sh-setting-row sh-setting-row--size">' +
+          '<span class="sh-setting-label">Card size</span>' +
+          '<div class="q-size-row" role="group" aria-label="Card size">' +
+            '<span class="q-size-ico q-size-ico--sm" aria-hidden="true">A</span>' +
+            '<input type="range" id="qSizeSlider" class="q-size-slider" min="60" max="150" step="5" value="100" aria-label="Card size" title="Card size">' +
+            '<span class="q-size-ico q-size-ico--lg" aria-hidden="true">A</span>' +
+            '<span class="q-size-val" id="qSizeVal">100%</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
   var headerHtml =
     '<header class="site-header" id="siteHeader">' +
       '<div class="sh-inner">' +
         '<div class="sh-settings">' +
           '<button type="button" class="sh-settings-btn" id="shSettingsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="shSettingsPanel" aria-label="Site settings" title="Settings">⚙</button>' +
           '<div class="sh-settings-panel" id="shSettingsPanel">' +
-            '<div class="sh-setting-row">' +
-              '<span class="sh-setting-label">Floating cards</span>' +
-              '<button type="button" class="q-switch" id="bgToggle" role="switch" aria-checked="false" aria-label="Floating cards"><span class="q-switch-knob"></span></button>' +
-            '</div>' +
-            '<div class="sh-setting-row">' +
-              '<span class="sh-setting-label">Reading voice</span>' +
-              '<button type="button" class="sh-voice-btn" id="voiceToggle" aria-pressed="false" aria-label="Reading voice">modern</button>' +
-            '</div>' +
-            '<div class="sh-setting-row">' +
-              '<span class="sh-setting-label">Alternate court cards</span>' +
-              '<button type="button" class="q-switch" id="qAlt" role="switch" aria-checked="false" aria-label="Alternate court cards"><span class="q-switch-knob"></span></button>' +
-            '</div>' +
-            '<div class="sh-setting-row">' +
-              '<span class="sh-setting-label">Read left to right</span>' +
-              '<button type="button" class="q-switch" id="qLtr" role="switch" aria-checked="false" aria-label="Read left to right"><span class="q-switch-knob"></span></button>' +
-            '</div>' +
-            '<div class="sh-setting-divider" aria-hidden="true"></div>' +
-            '<div class="sh-setting-group">' +
-              '<div class="sh-setting-head">Quadrations</div>' +
-              '<div class="sh-setting-row">' +
-                '<span class="sh-setting-label">Show displacements</span>' +
-                '<button type="button" class="q-switch" id="qDisp" role="switch" aria-checked="false" aria-label="Show displacements"><span class="q-switch-knob"></span></button>' +
-              '</div>' +
-              '<div class="sh-setting-row sh-setting-row--size">' +
-                '<span class="sh-setting-label">Card size</span>' +
-                '<div class="q-size-row" role="group" aria-label="Card size">' +
-                  '<span class="q-size-ico q-size-ico--sm" aria-hidden="true">A</span>' +
-                  '<input type="range" id="qSizeSlider" class="q-size-slider" min="60" max="150" step="5" value="100" aria-label="Card size" title="Card size">' +
-                  '<span class="q-size-ico q-size-ico--lg" aria-hidden="true">A</span>' +
-                  '<span class="q-size-val" id="qSizeVal">100%</span>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
+            settingsRows +
           '</div>' +
         '</div>' +
         '<a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>' +

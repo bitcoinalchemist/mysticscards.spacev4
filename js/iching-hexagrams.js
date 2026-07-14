@@ -99,7 +99,8 @@ function trigramSVG(val, size = 1) {
   const grid = document.getElementById('hex-grid');
   if (!grid) return;
 
-  function buildGrid(seq) {
+  function buildGrid(seq, options) {
+    options = options || {};
     grid.innerHTML = '';
     const order = [];
     if (seq === 'kingwen') {
@@ -111,10 +112,11 @@ function trigramSVG(val, size = 1) {
       const bits = v.toString(2).padStart(6, '0');
       const kw = VAL_TO_KW[v];
       const cell = document.createElement('div');
-      cell.className = 'hex-ref-cell cell-in';
+      cell.className = 'hex-ref-cell' + (options.skipEntrance ? '' : ' cell-in');
       cell.style.setProperty('--i', i);   // per-cell stagger delay for cellIn
       cell.title = `King Wen ${kw} · Decimal ${v} · Binary ${bits}`;
       cell.dataset.val = v;
+      cell.dataset.bits = bits;
       cell.setAttribute('role', 'button');
       cell.tabIndex = 0;
       cell.setAttribute('aria-label', 'Hexagram, King Wen ' + kw);
@@ -134,22 +136,57 @@ function trigramSVG(val, size = 1) {
   }
   buildGrid('fuxi');
 
-  // Sequence toggle — clicking opens the grid in that order; clicking
-  // the active button again closes it.
+  function reduceMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function switchSequence(seq) {
+    if (reduceMotion()) {
+      buildGrid(seq, { skipEntrance: true });
+      grid.classList.add('open');
+      return;
+    }
+    const first = {};
+    grid.querySelectorAll('.hex-ref-cell[data-val]').forEach(function (cell) {
+      first[cell.dataset.val] = cell.getBoundingClientRect();
+    });
+    buildGrid(seq, { skipEntrance: true });
+    grid.classList.add('open');
+    const cells = Array.from(grid.querySelectorAll('.hex-ref-cell[data-val]'));
+    cells.forEach(function (cell) {
+      const from = first[cell.dataset.val];
+      if (!from) return;
+      const to = cell.getBoundingClientRect();
+      const dx = from.left - to.left;
+      const dy = from.top - to.top;
+      if (!dx && !dy) return;
+      cell.style.transition = 'none';
+      cell.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      cells.forEach(function (cell) {
+        if (!cell.style.transform) return;
+        cell.style.transition = 'transform .65s cubic-bezier(.22,1,.36,1)';
+        cell.style.transform = '';
+        cell.addEventListener('transitionend', function te() {
+          cell.style.transition = '';
+          cell.removeEventListener('transitionend', te);
+        });
+      });
+    }); });
+  }
+
+  // Sequence toggle — clicking switches the grid order. The Hexagrams
+  // section itself owns collapse/expand, so the active sequence button
+  // stays stable instead of minimising the grid.
   const seqToggle = document.getElementById('seqToggle');
   if (seqToggle) seqToggle.addEventListener('click', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
-    var hexGrid = document.getElementById('hex-grid');
-    if (btn.classList.contains('active')) {
-      btn.classList.remove('active');
-      hexGrid.classList.remove('open');
-    } else {
-      seqToggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      buildGrid(btn.dataset.seq);
-      hexGrid.classList.add('open');
-    }
+    if (btn.classList.contains('active')) return;
+    seqToggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    switchSequence(btn.dataset.seq);
   });
 
   // Codes toggle — reveals the 0–63 value and binary on every cell
