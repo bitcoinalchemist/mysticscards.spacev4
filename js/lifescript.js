@@ -496,11 +496,11 @@
 
     const rowHTML = scriptRowHTML(card);
 
-    return `${birthStatsHTML(card, script)}
-    <div class="ls-header">
+    return `<div class="ls-header">
       <h3 class="ls-title">Life Script</h3>
     </div>
-    <div class="ls-row">${rowHTML}</div>`;
+    <div class="ls-row">${rowHTML}</div>
+    ${birthStatsHTML(card, script)}`;
   }
 
   function parkSolarPanel(root) {
@@ -508,13 +508,17 @@
     if (panel && root && panel.parentNode !== root) root.appendChild(panel);
   }
 
+  function clearSolarPanel() {
+    const panel = document.getElementById('fSolar');
+    if (panel) panel.hidden = true;
+  }
+
   function mountSolarPanel(root) {
     const panel = document.getElementById('fSolar');
     const stats = root && root.querySelector('.ls-stats');
     if (!panel || !stats) return;
-    const datesBlock = stats.querySelector('.ls-stat-block');
-    if (datesBlock && datesBlock.nextSibling) stats.insertBefore(panel, datesBlock.nextSibling);
-    else stats.appendChild(panel);
+    panel.hidden = false;
+    stats.appendChild(panel);
     if (window.SolarTime && typeof window.SolarTime.refresh === 'function') window.SolarTime.refresh();
   }
 
@@ -524,15 +528,17 @@
     const inner = root.querySelector('.ls-inner') || root;
     parkSolarPanel(root);
     root.classList.remove('is-empty');
-    if (!card) { root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
+    if (!card) { clearSolarPanel(); root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     // Joker: has its own prose note but still returns true so the chip
     // stays enabled and the reader can visit the panel for context.
     if (card.suit === 'joker') {
+      clearSolarPanel();
       inner.innerHTML = panelHTML(card);
       return true;
     }
     const key = `${card.rank}_${card.suit}`;
     if (!(typeof LIFE_SCRIPTS !== 'undefined' && LIFE_SCRIPTS[key])) {
+      clearSolarPanel();
       root.classList.add('is-empty');
       inner.innerHTML = '';
       return false;

@@ -216,15 +216,12 @@
   }
 
   function wire() {
-    var panel = el('fSolar'), toggle = el('solToggle'), body = el('solBody');
-    if (!panel || !toggle) return;
+    var panel = el('fSolar'), body = el('solBody');
+    if (!panel) return;
     populateZones();
-    toggle.addEventListener('click', function () {
-      var open = panel.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (body) body.hidden = !open;
-      if (open) render();
-    });
+    panel.classList.add('open');
+    if (body) body.hidden = false;
+    render();
     var t = el('solTime'), p = el('solPlace');
     if (t) t.addEventListener('input', render);
     if (p) p.addEventListener('input', render);
