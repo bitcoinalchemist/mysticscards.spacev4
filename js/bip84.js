@@ -2,7 +2,8 @@
  *
  * Pure JS. Self-contained: SHA-256, SHA-512, HMAC-SHA512, RIPEMD-160,
  * secp256k1 (BigInt), bech32, Base58Check. No external libraries, no build step.
- * Verified against the official BIP84 test vectors (dev/bip39-iching/verify_bip84.js).
+ * Verified against the official BIP84 first-address vector
+ * (dev/tests/seedoracle-vectors.cjs).
  *
  * The heavy PBKDF2 (mnemonic → seed) is done by the caller (Web Crypto on the
  * page); this module takes the 64-byte seed and returns address + keys.

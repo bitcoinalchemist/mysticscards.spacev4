@@ -21,7 +21,7 @@
 //
 // Public API on window.SeedOracleHex:
 //   VAL_TO_KW      : 64-entry binary → King Wen bijection (mirrors iching.html)
-//   SUITS          : { hearts, clubs, diamonds, spades } → { name, sym, cls }
+//   SUITS          : { hearts, clubs, diamonds, spades } → { name, element, sym, cls }
 //   SUIT_ORDER     : ['hearts','clubs','diamonds','spades'] (fixed display order)
 //   SUIT_PIP_SVG   : ♠/♣ inline SVGs (♥/♦ render as Unicode)
 //   hexagramSVG(val, size)
@@ -94,10 +94,10 @@
   // → Spades. Hearts/Diamonds are red, Clubs/Spades dark : the same
   // suit colours as the rest of the site.
   var SUITS = {
-    hearts:   { name:'Hearts',   sym:'♥', cls:'suit-red'  },
-    clubs:    { name:'Clubs',    sym:'♣', cls:'suit-dark' },
-    diamonds: { name:'Diamonds', sym:'♦', cls:'suit-red'  },
-    spades:   { name:'Spades',   sym:'♠', cls:'suit-dark' }
+    hearts:   { name:'Hearts',   element:'Water', sym:'♥', cls:'suit-red'  },
+    clubs:    { name:'Clubs',    element:'Fire',  sym:'♣', cls:'suit-dark' },
+    diamonds: { name:'Diamonds', element:'Earth', sym:'♦', cls:'suit-red'  },
+    spades:   { name:'Spades',   element:'Air',   sym:'♠', cls:'suit-dark' }
   };
   var SUIT_ORDER = ['hearts','clubs','diamonds','spades'];
 

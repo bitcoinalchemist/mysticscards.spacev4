@@ -19,7 +19,7 @@
 //   checkPhrase(words)         : { ok, reason, entBytes? }; verifies BIP39 checksum
 //   phraseToVals(words)        : array of words → array of 6-bit hexagram values
 //   valsToWords(vals)          : array of 6-bit values → array of BIP39 words
-//   deriveSeed(mnemonic, outEl): async: writes 64-byte seed hex to outEl.textContent
+//   deriveSeed(mnemonic, outEl, passphrase?): async: writes 64-byte seed hex to outEl.textContent
 //                                (or the "needs a secure context" message)
 //   WL                         : the BIP39 word list (window.BIP39_WORDS mirror)
 //   IDX                        : reverse map: word → 0..2047
@@ -118,16 +118,17 @@
   // Async write into the target text element : matches the pre-extraction
   // shape (previously read #soSeed directly; now takes it as an argument so
   // it can be null-checked and the module stays DOM-lite).
-  function deriveSeed(mnemonic, outEl) {
-    if (!outEl) return;
+  function deriveSeed(mnemonic, outEl, passphrase) {
+    if (!outEl) return Promise.resolve();
     if (!(window.crypto && crypto.subtle)) {
       outEl.textContent = '(seed derivation needs a secure context : open via https/localhost)';
-      return;
+      return Promise.resolve();
     }
     var enc = new TextEncoder();
-    crypto.subtle.importKey('raw', enc.encode(mnemonic.normalize('NFKD')), { name: 'PBKDF2' }, false, ['deriveBits'])
+    passphrase = passphrase || '';
+    return crypto.subtle.importKey('raw', enc.encode(mnemonic.normalize('NFKD')), { name: 'PBKDF2' }, false, ['deriveBits'])
       .then(function (key) {
-        return crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode('mnemonic'), iterations: 2048, hash: 'SHA-512' }, key, 512);
+        return crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(('mnemonic' + passphrase).normalize('NFKD')), iterations: 2048, hash: 'SHA-512' }, key, 512);
       })
       .then(function (buf) {
         var a = new Uint8Array(buf), h = '';

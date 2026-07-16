@@ -167,7 +167,8 @@
         return;
       }
       if (periodNum <= 1) {
-        setViewDate(localMidnight(new Date(cycleStart + (6 * 52 * 86400000))));
+        const previousCycleStart = localMidnight(new Date(cycleYear - 1, birth.m - 1, birth.d));
+        setViewDate(localMidnight(new Date(previousCycleStart + (6 * 52 * 86400000))));
       } else {
         setViewDate(startMs - (52 * 86400000));
       }

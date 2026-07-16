@@ -10,8 +10,7 @@
 //   • Chapter VI : the proof: entropy readout + SHA instrument
 //   • Chapter VII : under-the-hood derived addresses (lazy)
 //   • The hexagram detail popup (shared chrome for "read this hexagram")
-//   • Copy button, phrase input debouncer, threshold actions,
-//     deep-link + init
+//   • New-reading reset, threshold actions, deep-link + init
 // (The former 24-word reading path was retired 2026-07-08 : twelve words
 // is now the only length this page casts. state.len stays as a variable
 // so cs / hexCount / castFree still read cleanly.)
@@ -368,8 +367,9 @@
       var spec=[];
       for(var i=0;i<6;i++) spec.push({ bit:(v>>(5-i))&1, cls:(i<2?'free':'cs') });
       box.innerHTML=slotHexSVG(spec, 2);
+      var sealedSuit=SUITS[suitOf(v)];
       cap.innerHTML='Your final hexagram: <strong>'+escapeHtml(d.name||'')+'</strong>, King Wen '+kw+'. '+
-        '<span class="so-key-free">Gold</span>: '+SUITS[suitOf(v)].name+'. '+
+        '<span class="so-key-free">Gold</span>: '+sealedSuit.name+' · '+sealedSuit.element+'. '+
         '<span class="so-key-cs">Amber</span>: SHA-256 checksum.';
     } else {
       box.innerHTML=slotHexSVG([{bit:null,cls:'free'},{bit:null,cls:'free'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'}], 2);
@@ -448,9 +448,9 @@
     var opts=vals.map(function(v){
       var kw=VAL_TO_KW[v], d=JD[kw]||{}, key=suitOf(v), s=SUITS[key];
       return '<button type="button" class="so-hex so-fh-opt '+s.cls+(v===cur?' is-cur':'')+'" data-v="'+v+'" '+
-        'aria-label="Seal with '+s.name+': '+(d.name||'')+', hexagram '+kw+(v===cur?', your chosen seal':'')+'">'+
-        '<span class="so-signature-label">Sign with</span>'+
-        '<div class="so-suit">'+suitLinesHTML(v)+'<span class="so-suit-pip">'+suitPip(s.sym)+'</span><span class="so-suit-name">'+s.name+'</span></div>'+
+        'aria-label="Seal with '+s.name+', element '+s.element+': '+(d.name||'')+', hexagram '+kw+(v===cur?', your chosen seal':'')+'">'+
+        '<span class="so-signature-label">Sign with</span>'+ 
+        '<div class="so-suit">'+suitLinesHTML(v)+'<span class="so-suit-pip">'+suitPip(s.sym)+'</span><span class="so-suit-name">'+s.name+'</span><span class="so-suit-element">'+s.element+'</span></div>'+ 
         '<div class="so-fh-hex">'+hexagramSVG(v,1.35)+'</div><div class="so-hex-name">'+(d.name||'-')+'</div>'+
         '<div class="so-hex-kw">King Wen '+kw+'</div></button>';
     }).join('');
@@ -482,10 +482,22 @@
       document.body.classList.add('so-just-sealed');
       setTimeout(function(){ document.body.classList.remove('so-just-sealed'); }, 1600);
     }
+    var chosen=SUITS[suitOf(v)];
     announce(byOracle
-      ? 'The oracle threw '+SUITS[suitOf(v)].name+'. Sealed.'
-      : 'Sealed with '+SUITS[suitOf(v)].name+'.');
+      ? 'The oracle threw '+chosen.name+', element '+chosen.element+'. Sealed.'
+      : 'Sealed with '+chosen.name+', element '+chosen.element+'.');
     elPhrase.scrollIntoView({ behavior:RM?'auto':'smooth', block:'center' });
+  }
+
+  function renderJourneyActions(){
+    var complete=_hexVals.length>=castFree();
+    ['soHexOne','soHexAll'].forEach(function(id){
+      var b=document.getElementById(id); if(b) b.disabled=_sealed || complete || !CRYPTO_OK;
+    });
+    var oracle=document.getElementById('soOracle');
+    if(oracle) oracle.disabled=_sealed || !complete || !CRYPTO_OK;
+    var fresh=document.getElementById('soNewReading');
+    if(fresh) fresh.hidden=!_sealed;
   }
 
   // (commitOracle + hexBitsToSeed retired 2026-07-08 alongside the
@@ -500,29 +512,13 @@
     setStatus(r.ok, r.ok?'Valid checksum':'Checksum mismatch');
     refreshDisplays(r);
   }
-  function syncFromPhrase(){        // words → hexagrams (forward direction)
-    var words=currentWords();
-    var r=checkPhrase(words);
-    if(words.length===12 && !words.some(function(w){return !(w in IDX);})){
-      state.len=words.length; state.vals=phraseToVals(words); syncLenButtons();
-      // sync the cast surface to the phrase either way: a VALID phrase is a
-      // sealed reading (open the journey); an invalid one becomes a cast in
-      // progress : the suit chooser then offers the seals that would repair it.
-      _hexVals=state.vals.slice(0, castFree());
-      _lineBits=state.vals.length ? bits(state.vals[0],6).split('').map(Number) : [];
-      _sealed=r.ok;
-      if(r.ok) raiseUnlock(4, 'Valid reading. Every chapter is open.');
-    } else if(words.length){ _sealed=false; }
-    setStatus(r.ok, r.ok?'Valid checksum':('Invalid: '+r.reason));
-    refreshDisplays(r);
-  }
   function refreshDisplays(r){
     renderLine(); renderStack(); renderHexStat(); renderWeave(); renderSealFig(); renderSuitSeals();
-    updateTamperVis(); renderTamperOut(); renderEntropy(); renderAddresses();
+    updateTamperVis(); renderTamperOut(); renderEntropy(); renderAddresses(); renderJourneyActions();
     if(r && r.ok){ deriveSeed(elPhrase.value.trim()); }
     else document.getElementById('soSeed').textContent='-';
   }
-  function renderAll(){ renderStack(); renderHexStat(); renderWeave(); renderSealFig(); renderSuitSeals(); updateTamperVis(); }
+  function renderAll(){ renderStack(); renderHexStat(); renderWeave(); renderSealFig(); renderSuitSeals(); updateTamperVis(); renderJourneyActions(); }
 
   // ══ Chapter VI : the proof ══
   // The bits under the words: raw entropy (hex + binary) and the checksum,
@@ -588,14 +584,22 @@
   // panel. The 64-byte seed is PBKDF2'd once and cached, so the 10 children are
   // cheap to derive and re-derive.
   var _addrToken = 0;
-  var _addr = { key:'', buf:null, sel:0, shown:false, off:0 };   // key = phrase|scheme; off = list start index
+  var _addr = { key:'', buf:null, sel:0, shown:false, off:0, revealPrivate:false };   // key = phrase|scheme; off = list start index
   var ADDR_COUNT = 10;
   var ADDR_MAX = 2147483647 - ADDR_COUNT;   // BIP32 non-hardened index ceiling
   function addrRow(k,v){ return '<div class="so-addr-row"><span class="so-addr-k">'+k+'</span><span class="so-addr-v">'+v+'</span></div>'; }
   function addrTrunc(s){ return s.length > 30 ? s.slice(0,16)+'…'+s.slice(-8) : s; }
   function addrDetailHTML(a, idx){
-    return '<p class="so-note">Receiving address #'+idx+' · '+a.label+' · <code>'+a.path+'</code>. Never fund it.</p>'+
-      addrRow('Address', a.address)+addrRow('Public key', a.pubkey)+addrRow('Private key (WIF)', a.wif);
+    var html='<p class="so-note">Receiving address #'+idx+' · '+a.label+' · <code>'+a.path+'</code>. Never fund it.</p>'+ 
+      addrRow('Address', a.address)+addrRow('Public key', a.pubkey);
+    if(_addr.revealPrivate){
+      html+='<p class="so-note">Unsafe private material: anyone with this key controls this address.</p>'+ 
+        addrRow('Private key (WIF)', a.wif)+
+        '<button type="button" class="so-addr-more" data-act="hide-private">Hide private key</button>';
+    } else {
+      html+='<button type="button" class="so-addr-more" data-act="reveal-private">Reveal unsafe private key</button>';
+    }
+    return html;
   }
   function paintAddr(box){
     if(!_addr.buf) return;
@@ -631,7 +635,7 @@
     if(!(window.crypto && crypto.subtle)){ box.innerHTML='<p class="so-note">Address derivation needs a secure context (https or localhost).</p>'; return; }
     var scheme=(document.getElementById('soAddrType')||{}).value || 'bip84';
     var phrase=words.join(' '), key=phrase+'|'+scheme;
-    if(_addr.key!==key){ _addr.key=key; _addr.sel=0; _addr.shown=false; _addr.buf=null; _addr.off=0; }   // reset on phrase/type change
+    if(_addr.key!==key){ _addr.key=key; _addr.sel=0; _addr.shown=false; _addr.buf=null; _addr.off=0; _addr.revealPrivate=false; }   // reset on phrase/type change
     if(_addr.buf){ paintAddr(box); return; }                                                  // seed cached → repaint sync
     box.innerHTML='<p class="so-note">Deriving...</p>';
     var token=++_addrToken, enc=new TextEncoder();
@@ -648,16 +652,23 @@
     if(box){
       box.addEventListener('click', function(e){
         var act=e.target.closest('[data-act]');
-        if(act){ var a=act.getAttribute('data-act'); if(a==='more'){ _addr.shown=true; _addr.off=0; } else { _addr.shown=false; } paintAddr(box); return; }
+        if(act){
+          var a=act.getAttribute('data-act');
+          if(a==='more'){ _addr.shown=true; _addr.off=0; }
+          else if(a==='less'){ _addr.shown=false; }
+          else if(a==='reveal-private'){ _addr.revealPrivate=true; }
+          else if(a==='hide-private'){ _addr.revealPrivate=false; }
+          paintAddr(box); return;
+        }
         var pg=e.target.closest('.so-addr-pg');
         if(pg && !pg.disabled){ _addr.off=clampOff(_addr.off + (+pg.getAttribute('data-d'))); paintAddr(box); return; }
         var item=e.target.closest('.so-addr-item');
-        if(item){ _addr.sel=+item.getAttribute('data-i'); paintAddr(box); }
+        if(item){ _addr.sel=+item.getAttribute('data-i'); _addr.revealPrivate=false; paintAddr(box); }
       });
       box.addEventListener('change', function(e){
         var jump=e.target.closest('#soAddrJump'); if(!jump) return;
         var n=parseInt(jump.value,10); if(isNaN(n)) n=0;
-        n=clampOff(n); _addr.off=n; _addr.sel=n; paintAddr(box);
+        n=clampOff(n); _addr.off=n; _addr.sel=n; _addr.revealPrivate=false; paintAddr(box);
       });
     }
   })();
@@ -682,12 +693,29 @@
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && document.getElementById('hxOverlay').classList.contains('open')) closeHexPopup(); });
 
   // ══ controls ══
-  // (Length switcher retired 2026-07-08 : twelve words is the only reading now.
-  // syncLenButtons kept as a no-op so the sync-from-phrase path still calls
-  // through cleanly; it also lets any future length-toggle drop back in with
-  // no other call-site changes.)
-  function syncLenButtons(){}
-  var t; elPhrase.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(syncFromPhrase, 250); });
+  function resetReading(){
+    state.len=12; state.vals=[]; state.focus=0;
+    _lineBits=[]; _hexVals=[]; _sealed=false; _tamperOn=false; _tamperIdx=-1;
+    _unlock=0;
+    if(window.SeedStore) window.SeedStore.setUnlock(0);
+    _addrToken++;
+    _addr={ key:'', buf:null, sel:0, shown:false, off:0, revealPrivate:false };
+    elPhrase.value='';
+    elStatus.className='so-status'; elStatus.querySelector('.msg').textContent='-';
+    document.body.classList.remove('so-just-sealed');
+    var seed=document.getElementById('soSeed'); if(seed) seed.textContent='-';
+    var shaIn=document.getElementById('soShaIn'); if(shaIn) shaIn.value='';
+    var shaErr=document.getElementById('soShaErr'); if(shaErr) shaErr.textContent='';
+    var shaOut=document.getElementById('soShaOut'); if(shaOut) shaOut.hidden=true;
+    var tamper=document.getElementById('soTamper');
+    if(tamper){ tamper.setAttribute('aria-pressed','false'); tamper.textContent='Test the seal: flip a line'; }
+    applyGates();
+    renderLine(); refreshDisplays(null);
+    announce('New reading ready.');
+    scrollToChapter('firstline');
+  }
+  var newReading=document.getElementById('soNewReading');
+  if(newReading) newReading.addEventListener('click', resetReading);
 
   var caveatLink = document.getElementById('soCaveatLink');
   if (caveatLink) {

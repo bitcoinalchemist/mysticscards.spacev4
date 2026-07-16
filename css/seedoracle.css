@@ -5,6 +5,11 @@
    first cast, the live ribbon and the tamper toy all live here. */
     .narrow { max-width: 720px; margin: 0 auto; }
 
+    /* The Seed Oracle reads as a centred ritual. Long machine values and
+       selectable address rows opt back into left alignment below. */
+    .so-ctx .narrow,
+    .so-alert { text-align: center; }
+
     /* The page's single .page-content wrapper (all sections live inside one
        <main>, so the shared .page-section + .page-section --section-gap rule
        owns the vertical rhythm). */
@@ -57,8 +62,8 @@
       box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
       --yang: var(--card-dark);
     }
-    .so-line-side { flex: 0 1 260px; }
-    .so-line-bits { display: flex; gap: 4px; min-height: 26px; }
+    .so-line-side { flex: 0 1 260px; display: flex; flex-direction: column; align-items: center; }
+    .so-line-bits { display: flex; justify-content: center; gap: 4px; min-height: 26px; }
     .so-line-bit {
       width: 22px; height: 26px; display: flex; align-items: center; justify-content: center;
       font-family: var(--mono); font-size: .78rem; color: var(--gold-ink);
@@ -124,6 +129,7 @@
     .so-hex .so-hex-kw { color: #8a7d60; font-size: var(--text-xs); margin-top: 2px; }
 
     .so-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: center; margin: var(--space-4) 0; }
+    .so-actions .btn[hidden] { display: none; }
 
     /* ── III · the weave : live ribbon (partial while casting) ── */
     .so-ribbon {
@@ -190,7 +196,7 @@
         var(--card-paper);
       box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
     }
-    .so-seal-figcap { flex: 0 1 300px; }
+    .so-seal-figcap { flex: 0 1 300px; text-align: center; }
     /* slot-hexagram line classes (drawn by slotHexSVG in js/seedoracle.js) :
        global to the page: the seal diagram, the locked 22nd tile, and the
        chapter-I line-by-line figure all use them. */
@@ -294,6 +300,7 @@
     .so-suit-pip .pip-svg { width: 1em; height: 1em; }
     .so-suit-pip .pip-uni { font-size: 1em; line-height: 1; }
     .so-suit-name { font-family: var(--serif); font-weight: 700; font-size: clamp(1.08rem, 2vw, 1.34rem); letter-spacing: 0; }
+    .so-suit-element { font-family: var(--sans); font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--suit) 62%, var(--card-dark)); }
     .so-fh-hex { position: relative; z-index: 1; margin: 3px 0 2px; }
     .so-fh-hex svg { width: 50px; height: auto; }
     .so-fh-opt .so-hex-name {
@@ -352,7 +359,7 @@
       border: 1px solid var(--border); border-radius: var(--r-md);
       padding: var(--space-3) var(--space-4); font-family: var(--mono);
       font-size: var(--text-md); line-height: 1.7; letter-spacing: .01em;
-      overflow-wrap: break-word;
+      overflow-wrap: break-word; text-align: center;
       outline: none;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
@@ -362,7 +369,7 @@
         0 0 0 2px rgba(199,154,84,.42),
         inset 0 1px 0 rgba(255,255,255,.05);
     }
-    .so-status { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-sm); }
+    .so-status { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-sm); }
     .so-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-muted); flex: 0 0 auto; }
     .so-status.valid .so-dot { background: var(--so-ok); box-shadow: 0 0 8px var(--so-ok); }
     .so-status.invalid .so-dot { background: var(--so-warn); }
@@ -385,7 +392,7 @@
     }
 
     /* ── VI · proof : entropy rows, SHA instrument ── */
-    .so-ent-row { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--rule); }
+    .so-ent-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--rule); text-align: center; }
     .so-ent-row:first-child { border-top: none; }
     .so-ent-k { color: var(--ink-muted); font-size: var(--text-sm); min-width: 140px; }
     .so-ent-v { font-family: var(--mono); font-size: var(--text-sm); color: var(--gold-ink); word-break: break-all; flex: 1 1 240px; }
@@ -393,7 +400,7 @@
 
     /* the SHA instrument (pared from the Calculator page's .sha block) */
     .so-sha { margin-top: var(--space-4); }
-    .so-sha-row { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; margin-top: var(--space-2); }
+    .so-sha-row { display: flex; justify-content: center; gap: var(--space-2); flex-wrap: wrap; align-items: center; margin-top: var(--space-2); }
     .so-sha-input {
       flex: 1 1 220px; min-width: 0;
       background: var(--surface); color: var(--text);
@@ -421,7 +428,7 @@
       display: block; font-family: var(--serif); font-size: var(--text-md);
       color: var(--gold-ink); margin-bottom: 4px;
     }
-    .so-alert p { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+    .so-alert p { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.6; margin: 0; text-align: center; }
 
     /* Collapsible prose (sub-folds inside chapters) */
     details.so-fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .55rem; }
@@ -438,17 +445,17 @@
 
     .so-mono { font-family: var(--mono); color: var(--gold-ink); font-size: .88em; }
 
-    .so-note { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.6; }
+    .so-note { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.6; text-align: center; }
     .so-credit { color: var(--ink-muted); font-size: var(--text-xs); text-align: center; margin-top: var(--space-5); }
     .so-credit a { color: var(--gold-ink); }
-    .so-seedout { word-break: break-all; font-family: var(--mono, monospace); font-size: var(--text-sm); color: var(--gold-ink); }
+    .so-seedout { word-break: break-all; font-family: var(--mono, monospace); font-size: var(--text-sm); color: var(--gold-ink); text-align: left; }
 
     /* Derived addresses (BIP44/49/84/86) */
-    .so-addr-controls { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-2); }
+    .so-addr-controls { display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-2); }
     .so-addr-controls label { color: var(--ink-muted); font-size: var(--text-sm); }
     .so-addr-controls select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 5px 10px; font-family: var(--sans); font-size: var(--text-sm); cursor: pointer; }
     .so-addr-out { margin-top: var(--space-2); }
-    .so-addr-row { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--rule); }
+    .so-addr-row { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--rule); text-align: left; }
     .so-addr-row:first-of-type { border-top: none; }
     .so-addr-k { color: var(--ink-muted); font-size: var(--text-sm); min-width: 130px; }
     .so-addr-v { font-family: var(--mono); font-size: var(--text-sm); color: var(--gold-ink); word-break: break-all; flex: 1 1 240px; }
@@ -459,7 +466,7 @@
     .so-addr-more:hover { color: var(--gold); border-bottom-color: currentColor; }
     .so-addr-listhead { margin-top: var(--space-3); color: var(--ink-muted); font-size: var(--text-xs);
       letter-spacing: .04em; text-transform: uppercase; }
-    .so-addr-list { margin-top: var(--space-2); display: flex; flex-direction: column; gap: 2px; }
+    .so-addr-list { margin-top: var(--space-2); display: flex; flex-direction: column; gap: 2px; text-align: left; }
     .so-addr-item { display: flex; align-items: center; gap: var(--space-3); width: 100%; text-align: left;
       font: inherit; background: none; border: 1px solid transparent; border-radius: var(--r-sm);
       padding: 6px 8px; cursor: pointer; transition: background var(--ease), border-color var(--ease); }
@@ -467,14 +474,14 @@
     .so-addr-item.is-sel { background: var(--surface); border-color: var(--gold); }
     .so-addr-idx { color: var(--ink-muted); font-family: var(--mono); font-size: var(--text-xs); min-width: 1.5em; text-align: right; }
     .so-addr-mono { font-family: var(--mono); font-size: var(--text-sm); color: var(--gold-ink); }
-    .so-addr-nav { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
+    .so-addr-nav { display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
     .so-addr-pg { font-family: var(--mono); font-size: var(--text-sm); color: var(--gold-ink); background: var(--surface);
       border: 1px solid var(--border); border-radius: var(--r-sm); min-height: 30px; padding: 0 10px; cursor: pointer;
       transition: border-color var(--ease), color var(--ease); }
     .so-addr-pg:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
     .so-addr-pg:disabled { opacity: .4; cursor: default; }
     .so-addr-range { font-family: var(--mono); font-size: var(--text-sm); color: var(--ink-muted); min-width: 6.5em; text-align: center; }
-    .so-addr-jump { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-muted); font-size: var(--text-sm); margin-left: auto; }
+    .so-addr-jump { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-muted); font-size: var(--text-sm); margin-left: 0; }
     .so-addr-jump input { width: 5.5em; background: var(--surface); color: var(--text); border: 1px solid var(--border);
       border-radius: var(--r-sm); padding: 5px 8px; font-family: var(--mono); font-size: var(--text-sm); }
     .so-addr-jump input:focus-visible { outline: none; border-color: var(--gold); }
@@ -490,7 +497,7 @@
     .so-fw-chip:hover, .so-fw-chip:focus-visible { border-color: var(--gold); color: var(--gold-ink); }
 
     /* stat / counter lines */
-    .so-geo-stat { margin-top: var(--space-2); font-family: var(--mono); font-size: var(--text-xs); color: var(--ink-muted); }
+    .so-geo-stat { margin-top: var(--space-2); font-family: var(--mono); font-size: var(--text-xs); color: var(--ink-muted); text-align: center; }
 
     /* Hexagram detail popup : page-level bits site.css leaves to each page */
     .hx-overlay {
