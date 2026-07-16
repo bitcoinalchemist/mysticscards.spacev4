@@ -89,6 +89,12 @@ body:not(.bg-enabled) .castfield-stage {
 }
 a { color: inherit; text-decoration: none; }
 
+/* Mobile browsers otherwise flash a translucent native highlight around the
+   tapped control. Keep keyboard focus rings via :focus-visible below. */
+button, a, [role="button"], summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 3px; }
 
 .skip-link {
