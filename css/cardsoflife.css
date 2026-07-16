@@ -841,7 +841,10 @@
 /* ── Finder Life Script panel (2026-07-10) ─────────────────────────
    Seven ruling cards for the picked card, one per planet
    (Neptune → Mercury), plus a compact birth-card stats block. */
-.finder-lifescript { color: var(--secondary); }
+.finder-lifescript {
+  color: var(--secondary);
+  container-type: inline-size;
+}
 .ls-header { text-align: center; margin: 0 0 .8rem; }
 .ls-title {
   margin: 0;
@@ -869,6 +872,10 @@
   max-width: calc(var(--ls-card-w) * 7 + (.3rem * 6));
 }
 .ls-stats {
+  --ls-card-w: min(
+    var(--quad-card-w, calc(560px * var(--quad-scale, 1) / 7)),
+    calc((100cqw - (.3rem * 6)) / 7)
+  );
   max-width: 620px;
   margin: 0 auto 1.15rem;
   display: grid;
@@ -949,9 +956,7 @@
   outline-offset: 2px;
 }
 .mini-card,
-.ls-zodiac-card,
 .cal-chip,
-.sol-card-chip,
 .bi-chip {
   display: inline-flex;
   align-items: center;
@@ -973,27 +978,25 @@
 .ls-zodiac-stack {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .65rem;
-  align-items: stretch;
+  gap: .85rem 1rem;
+  align-items: start;
   width: 100%;
 }
 .ls-zodiac-cardlet {
   display: grid;
   align-content: start;
   justify-items: center;
-  gap: .45rem;
+  gap: .52rem;
   min-width: 0;
-  padding: .7rem .65rem .75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: rgba(255,255,255,.025);
+  padding: .15rem 0 0;
 }
 .ls-zodiac-line {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: .32rem;
+  gap: .32rem .32rem;
+  width: 100%;
 }
 .ls-zodiac-kind {
   min-width: 0;
@@ -1005,57 +1008,47 @@
   text-transform: uppercase;
   color: var(--muted);
 }
-.ls-zodiac-card {
-  gap: 0;
-}
-/* Decan sub-row (one per Zodiac line). Sits directly beneath its parent
-   Tropical/Sidereal line, visually subordinate: quieter label, slightly
-   tighter chips, no dedicated grid track. */
-.ls-decan-line {
+.ls-zodiac-card-row {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   justify-items: center;
-  gap: .24rem;
-  margin-top: -.05rem;
-  opacity: .92;
+  align-items: start;
+  gap: clamp(.35rem, 1.8vw, .55rem);
   width: 100%;
 }
-.ls-decan-label {
-  min-width: 100%;
-  text-align: center;
-  font-family: var(--sans);
-  font-size: .55rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.ls-decan-system {
-  min-width: 5.8rem;
-  text-align: right;
-  font-family: var(--sans);
-  font-size: .55rem;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  opacity: .82;
-}
-.ls-decan-system-row {
+.ls-zodiac-card-slot {
   display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: .28rem;
+  gap: .24rem;
   min-width: 0;
   width: 100%;
 }
-.ls-zodiac-card.hearts,
-.ls-zodiac-card.diamonds,
+.ls-zodiac-card-label {
+  min-block-size: 2.4em;
+  font-family: var(--sans);
+  font-size: .52rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ls-prc-slot .ls-zodiac-card-label {
+  color: var(--gold-ink);
+}
+.ls-decan-slot .ls-zodiac-card-label {
+  color: var(--muted);
+}
+.ls-decan-slot .ls-stat-card {
+  width: calc(var(--ls-card-w) * .75);
+  max-width: calc(var(--ls-card-w) * .75);
+  min-inline-size: calc(var(--ls-card-w) * .75);
+}
 .cal-chip.hearts,
 .cal-chip.diamonds { color: var(--red); }
-.ls-zodiac-card.clubs,
 .cal-chip.clubs { color: var(--green); }
-.ls-zodiac-card.spades,
 .cal-chip.spades { color: var(--navy); }
 .ls-stat-note {
   align-self: center;
@@ -1086,9 +1079,20 @@
   color: var(--muted);
 }
 .ls-card { width: 100%; }
-/* Displacement chips for the selected birth card's stats block. */
+/* Full-size stats cards — same visual language and size as the
+   Ruling-card row above the stats block. Not in a grid, so we need to
+   fix the width instead of letting `.ls-card { width: 100% }` fill the
+   flex parent. */
+.ls-stat-card {
+  width: var(--ls-card-w);
+  max-width: var(--ls-card-w);
+  flex: 0 0 auto;
+  aspect-ratio: 5 / 7;
+  min-inline-size: var(--ls-card-w);
+}
+/* Displacement cards for the selected birth card's stats block. */
 .ls-ghost-row {
-  display: flex; justify-content: center; gap: .7rem; margin-top: .1rem; flex-wrap: wrap;
+  display: flex; justify-content: center; gap: .9rem; margin-top: .1rem; flex-wrap: wrap;
 }
 .ls-ghost-pair {
   display: flex;
@@ -1112,9 +1116,10 @@
   .ls-stat-text { font-size: .62rem; }
   .ls-date-row { gap: .28rem; }
   .ls-date-item { font-size: .58rem; }
-  .ls-stat-chip:not(.ls-zodiac-card) { font-size: .62rem; padding: .16rem .42rem; }
+  .ls-stat-chip { font-size: .62rem; padding: .16rem .42rem; }
   .ls-zodiac-stack { grid-template-columns: 1fr; gap: .55rem; }
-  .ls-zodiac-cardlet { padding: .62rem .55rem .68rem; }
+  .ls-zodiac-cardlet { padding: .1rem 0 0; }
+  .ls-zodiac-card-row { gap: .35rem; }
   .ls-ghost-row { gap: .55rem; }
   .ls-ghost-label { font-size: .5rem; }
 }
@@ -1404,9 +1409,6 @@
   display: flex; justify-content: center; align-items: flex-start; gap: 1.2rem;
 }
 .sol-card { display: flex; flex-direction: column; align-items: center; gap: .45rem; }
-.sol-card-chip {
-  justify-content: center;
-}
 .sol-card.dimmed { opacity: .5; }
 .sol-card-label {
   font-family: var(--sans); font-size: .58rem; letter-spacing: .1em;
@@ -1425,25 +1427,62 @@
   margin-bottom: .9rem;
 }
 .sun-gate-row {
+  display: grid;
+  grid-template-columns: minmax(4.4rem, 1fr) auto minmax(4.4rem, 1fr);
+  justify-content: center;
+  align-items: center;
+  gap: clamp(.45rem, 2.5vw, 1.1rem);
+  max-width: 28rem;
+  margin: 0 auto;
+}
+.sun-gate-row:not(:has(.sun-gate-center)) {
   display: flex; justify-content: center; align-items: flex-start;
-  flex-wrap: wrap; gap: 1.4rem;
+  flex-wrap: wrap; gap: clamp(.45rem, 2.5vw, 1.1rem);
 }
 .sun-gate-tile {
-  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  display: flex; flex-direction: column; align-items: center; gap: .32rem;
   --yang: var(--gold-ink);
-  min-width: 7rem;
+  min-width: 4.4rem;
+}
+.sun-gate-center {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+}
+.sun-gate-center .sol-cards {
+  margin: 0;
 }
 .sun-gate-z {
-  font-family: var(--sans); font-size: .55rem; letter-spacing: .08em;
+  font-family: var(--sans); font-size: .5rem; letter-spacing: .08em;
   text-transform: uppercase; color: var(--muted);
 }
 .sun-gate-fig { line-height: 0; }
 .sun-gate-id {
-  font-family: var(--serif); font-size: 1.05rem; color: var(--gold-ink);
+  font-family: var(--serif); font-size: .88rem; color: var(--gold-ink);
 }
 .sun-gate-name {
-  font-family: var(--serif); font-size: .86rem; color: var(--secondary);
-  text-align: center; max-width: 8.5rem; line-height: 1.3;
+  font-family: var(--serif); font-size: .74rem; color: var(--secondary);
+  text-align: center; max-width: 5.8rem; line-height: 1.2;
+}
+@media (max-width: 340px) {
+  .sun-gate-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    max-width: 18rem;
+  }
+  .sun-gate-center {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+}
+@media (max-width: 300px) {
+  .sun-gate-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .sun-gate-center {
+    grid-column: auto;
+  }
 }
 
 /* ── Cycles date context (2026-07-10, simplified 2026-07-13) —
@@ -1692,35 +1731,10 @@
 }
 .pick-target-btn.is-active { border-color: var(--gold); color: var(--gold); background: rgba(199,154,84,.1); }
 
-/* Calendar — 13 cols (day label + 12 months), compact date chips */
-.cal-scroll {
-  width: min(100%, 620px);
-  margin-inline: auto;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.cal-grid {
-  width: 100%;
-}
-.cal-desktop-grid {
-  display: grid; grid-template-columns: 2rem repeat(12, minmax(2.5rem, 1fr));
-  gap: 2px; min-width: 620px;
-}
-.cal-col-header {
-  font-family: var(--sans); font-size: .6rem; font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--gold-ink); text-align: center; padding: .25rem 0;
-}
-.cal-row-label {
-  font-family: var(--mono); font-size: .62rem; color: var(--muted);
-  display: flex; align-items: center; justify-content: center;
-}
-.cal-day {
-  min-width: 0;
-  border: 0; background: transparent; border-radius: var(--r-sm); padding: .15rem;
-  cursor: pointer; transition: background var(--ease), transform var(--ease);
-}
-.cal-day:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
-.cal-day.cal-today { box-shadow: inset 0 0 0 1.5px var(--gold); }
+/* Compact date/card chip — shared with Solar Values' browse-cell.
+   (Was originally the Calendar tray's cell chip; the Calendar was
+   retired 2026-07-16 but the chip styling still serves the browse
+   grid.) */
 .cal-chip {
   min-inline-size: 0;
   inline-size: 100%;
@@ -2000,26 +2014,6 @@
     overscroll-behavior-x: contain;
     padding-bottom: .12rem;
   }
-  .cal-scroll {
-    overflow-x: clip;
-  }
-  .cal-desktop-grid {
-    grid-template-columns: 1.22rem repeat(12, minmax(0, 1fr));
-    gap: 1px;
-    min-width: 0;
-  }
-  .cal-col-header {
-    font-size: .5rem;
-    letter-spacing: .03em;
-    padding: .15rem 0;
-  }
-  .cal-row-label {
-    font-size: .5rem;
-  }
-  .cal-day {
-    padding: .05rem;
-    border-radius: 3px;
-  }
   .cal-chip {
     block-size: 1.05rem;
     border-radius: 3px;
@@ -2120,17 +2114,6 @@
     grid-column: 2;
     flex-wrap: nowrap;
     gap: .35rem;
-  }
-  .cal-desktop-grid {
-    grid-template-columns: 1.08rem repeat(12, minmax(0, 1fr));
-    min-width: 0;
-  }
-  .cal-col-header {
-    font-size: .44rem;
-    padding: .1rem 0;
-  }
-  .cal-row-label {
-    font-size: .44rem;
   }
   .cal-chip {
     block-size: .92rem;

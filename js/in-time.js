@@ -21,17 +21,13 @@
 //   • Yearly     → deckAtAge(⌊A/7⌋+1)  at position B, offset A%7
 //   • 52-Day     → deckAtAge(A+1)      at position B, offset ⌊daysSinceBday/52⌋
 //   • Daily      → deckAtAge(weeksAlive%90+1) at position B, offset weekdayShift
-// A (age) is now derived from the VIEWED date, not just the Quadrations
-// stepper: the stepper anchors the reader's real birth year (today's
-// real age minus the stepper value), then age-at-viewDate is that birth
-// year measured against the viewed date's last-birthday year — the
-// same two-step anchor used throughout this module, so scrolling the
-// date changes which age's cards show.
+// A (age) is derived from the VIEWED date and Finder's currentAge anchor
+// (usually supplied by a saved birthday's birth year). Quadrations has
+// its own independent age stepper and does not change this anchor.
 //
 // Reads deckAtAge / SPREAD_PLANETS / SPREAD_PLANET_SYM / CARDS /
 // spreadCardPips via classic-script globals. Loaded after cardsdata.js
-// and after spread-grid.js (which owns the `currentAge` global that
-// tells us the reader's real-today age).
+// and after spread-grid.js (which owns Finder's `currentAge` anchor).
 //
 // The five period-reading data files (~500 KB total) are LAZY-loaded on
 // first Cycles-tab open via ensureCycleData() — same pattern
@@ -42,9 +38,7 @@
 //
 // PUBLIC on window:
 //   window.renderInTime(card) — populates `#fInTime`. Returns TRUE
-//     when there's real content; FALSE for the Joker or when the age
-//     stepper is missing (the row needs an age to compute derived
-//     cards).
+//     when there's real content; FALSE for the Joker.
 
 (function () {
   'use strict';
@@ -345,11 +339,11 @@
     if (birthSv < 1 || birthSv > 52) return '';   // Joker guard (also handled by isEmpty in renderInTime)
     const birthIdx = birthSv - 1;
 
-    // The Quadrations stepper anchors the reader's REAL birth year (their
+    // Finder's currentAge anchors the reader's REAL birth year (their
     // real-today age against real-today's last birthday). Age-at-viewDate
     // is then that fixed birth year measured against the VIEWED date's
     // last-birthday year, so scrolling the date changes which age's cards
-    // show — the same two-step anchor used throughout this module.
+    // show. Quadrations keeps a separate quadAge for its spread browsing.
     const anchorAge  = (typeof currentAge === 'number' ? currentAge : 0);
     const realLbYear = lastBdayYearOf(Date.now(), date.m, date.d);
     const birthYear  = realLbYear - anchorAge;

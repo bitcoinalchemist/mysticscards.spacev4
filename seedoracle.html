@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seed Oracle — BIP39 × I Ching — mysticscards.space</title>
-  <meta name="description" content="A guided divination curiosity: cast I Ching hexagrams line by line until they become a BIP39 seed phrase — and understand the checksum seal on the way. For wonder, not for storing real funds." />
+  <title>Seed Oracle: BIP39 × I Ching: mysticscards.space</title>
+  <meta name="description" content="Cast I Ching hexagrams line by line until they become a BIP39 seed phrase. For wonder, not for storing real funds." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
@@ -20,7 +20,7 @@
 </head>
 <body class="starry so-ctx">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
-<script src="js/site.js"></script>
+<script src="js/site.js?v=20260715a"></script>
 
 <!-- One .page-content wrapper + one <main>: every .page-section is a sibling,
      so the shared --section-gap rule owns the vertical rhythm. The page is a
@@ -29,68 +29,38 @@
 <div class="page-content">
 
   <main id="main">
-    <h1 class="vh">Seed Oracle — a guided journey from I Ching hexagrams to a BIP39 seed phrase</h1>
+    <h1 class="vh">Seed Oracle: I Ching hexagrams into a BIP39 seed phrase</h1>
 
     <!-- announces chapter unlocks to screen readers -->
     <div class="vh" aria-live="polite" id="soAnnounce"></div>
 
-    <!-- ── The journey rail — the shape of the whole path, lit as you walk it ── -->
-    <nav class="so-rail" id="soRail" aria-label="The journey"></nav>
+    <aside class="so-alert so-alert--top" role="note">
+      <p>Never store real funds in any seed shown here. Never paste a real phrase into this or any web page. For a real wallet, generate it offline using an air-gapped device.</p>
+    </aside>
 
-    <!-- ══ 0 · The Threshold — always open ══ -->
-    <section class="page-section so-chapter" id="threshold" data-level="0">
-      <span class="section-label">The Threshold</span>
-      <div class="narrow">
-        <p class="so-note so-lede">A Bitcoin seed phrase and an I&nbsp;Ching cast are the same act:
-        meaning drawn from honest chance. Twelve seed words are 132 bits of information. A hexagram
-        is six lines, and a line holds one bit — solid yang is 1, broken yin is 0. Six into 132 goes
-        exactly twenty-two times: <strong>a seed is a stack of twenty-two hexagrams</strong>. This
-        page walks that identity from your first thrown line to the finished phrase — and at the end,
-        the last free lines are not thrown at all. They are yours to choose.</p>
-
-        <aside class="so-topnote" role="note">
-          <span class="so-topnote-mark" aria-hidden="true">✳</span>
-          <span>A divination toy that happens to speak fluent BIP39 — cast for wonder, and never
-          store real funds in any seed shown here. <a href="#learn" id="soCaveatLink">The full
-          caution</a> waits at the end of the journey.</span>
-        </aside>
-
-        <div class="so-actions">
-          <button class="btn btn--gold" id="soBegin" type="button">Begin the cast</button>
-        </div>
-        <p class="so-skips">
-          <button class="so-quiet" id="soSkip" type="button">I've walked this before — show everything</button>
-          <span aria-hidden="true">·</span>
-          <button class="so-quiet" id="soHavePhrase" type="button">Already have a phrase? Read it as hexagrams</button>
-        </p>
-      </div>
-    </section>
-
-    <!-- ══ I · One line, one coin — gate: Begin ══ -->
-    <section class="page-section so-chapter" id="firstline" data-level="1">
+    <!-- ══ I · The cast ══ -->
+    <section class="page-section so-chapter" id="firstline" data-level="0">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="firstlineBody"
               data-section="firstline">
-        <span class="section-label">I · One line, one coin</span>
+        <span class="section-label">I · The cast</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="firstlineBody">
           <div class="narrow">
-            <p class="so-note">Every oracle starts with a coin. In the machine's tongue, a coin toss
-            is one <strong>bit</strong> — the smallest possible fact, a 1 or a 0. In the oracle's
-            tongue it is one cast line — solid yang or broken yin. The same event, written in two
-            scripts. Six throws build a hexagram, from the bottom line up; which means every hexagram
-            <em>is</em> six bits. Throw your first line.</p>
+            <p class="so-note">Cast a line, a hexagram, or the whole reading. Yang is 1. Yin is 0.</p>
 
             <div class="so-line-stage">
               <div class="so-line-fig" id="soLineFig" aria-hidden="true"></div>
               <div class="so-line-side">
                 <div class="so-line-bits" id="soLineBits" aria-hidden="true"></div>
-                <div class="so-geo-stat" id="soLineStat">no lines yet — six to throw</div>
+                <div class="so-geo-stat" id="soLineStat">no lines yet, six to throw</div>
                 <div class="so-actions" style="justify-content:flex-start; margin:var(--space-3) 0 0">
                   <button class="btn btn--gold" id="soLineCast" type="button">Cast a line</button>
+                  <button class="btn btn--ghost" id="soHexOne" type="button">Cast a hexagram</button>
+                  <button class="btn btn--ghost" id="soHexAll" type="button">Cast all</button>
                 </div>
               </div>
             </div>
@@ -99,7 +69,6 @@
               <p class="so-note" id="soLineDoneText"></p>
               <div class="so-actions" style="justify-content:flex-start">
                 <button class="btn btn--ghost" id="soLineRead" type="button">Read its judgment</button>
-                <button class="btn btn--gold" id="soLineNext" type="button">Carry it into the full cast ↓</button>
               </div>
             </div>
           </div>
@@ -107,88 +76,40 @@
       </div>
     </section>
 
-    <!-- ══ II · The cast of twenty-one — gate: first hexagram complete ══ -->
-    <section class="page-section so-chapter" id="mnemonic" data-level="2">
-      <button class="section-toggle" type="button"
-              aria-expanded="false" aria-controls="mnemonicBody"
-              data-section="mnemonic">
-        <span class="section-label">II · The cast of twenty-one</span>
-        <span class="so-lockdot" aria-hidden="true"></span>
-        <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="section-bodywrap">
-        <div class="section-bodymin" id="mnemonicBody">
-          <div class="narrow">
-            <p class="so-note">One hexagram down. A seed needs to be <strong>unguessable</strong> —
-            in the machine's tongue, 128 bits of entropy: 2<sup>128</sup> possibilities, more than
-            there are grains of sand if every grain were itself a computer guessing since the
-            beginning of time. In the oracle's tongue: the cast must be undirected — a fair coin, an
-            open hand; a steered reading reads only you. This page draws its chance from the
-            browser's cryptographic well (<span class="so-mono">crypto.getRandomValues</span>) and
-            refuses to cast at all if that well is missing.</p>
-            <p class="so-note">Cast on — to <strong>twenty-one</strong>. Tap any thrown hexagram to
-            re-throw just it. The twenty-second slot stands apart: it will not throw, and the next
-            chapters are the reason why.</p>
-
-            <div class="so-geo-stat" id="soHexStat">—</div>
-            <div class="so-actions" style="justify-content:flex-start; margin:var(--space-2) 0 0">
-              <button class="btn btn--ghost" id="soHexOne" type="button">Cast one</button>
-              <button class="btn btn--ghost" id="soHexAll" type="button">Cast the rest</button>
-            </div>
-
-            <span class="section-label" style="margin-top:var(--space-5)">The reading</span>
-            <div class="so-stack" id="soStack" role="group" aria-label="Hexagram stack — the cast in progress"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ III · From lines to words — the weave — gate: 21 cast ══ -->
+    <!-- ══ II · From lines to words : the weave : gate: 21 cast ══ -->
     <section class="page-section so-chapter" id="weave" data-level="3">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="weaveBody"
               data-section="weave">
-        <span class="section-label">III · From lines to words</span>
+        <span class="section-label vh">From lines to words</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="weaveBody">
           <div class="narrow">
-            <p class="so-note">Words are numbers wearing clothes. The BIP39 word list holds exactly
-            2048 words — 2<sup>11</sup> — so every seed word is an eleven-bit number in costume:
-            <span class="so-mono">00000000000</span> is <em>abandon</em>,
-            <span class="so-mono">11111111111</span> is <em>zoo</em>. Your cast lays bits down six at
-            a time; the words take them up eleven at a time. Six against eleven never phases the same
-            way twice — that offset is the <strong>weave</strong>, and the ribbon below is your actual
-            cast: each band of shading one hexagram's six lines, each group of eleven one word.</p>
-            <p class="so-note">Eleven words stand complete. The twelfth is starving — six cells
-            short. The missing cells belong to the hexagram that would not throw.</p>
+            <p class="so-note">Tap a hexagram to re-cast it. The ribbon below shows the same cast as seed words.</p>
+            <div class="so-geo-stat" id="soHexStat">-</div>
+            <div class="so-stack" id="soStack" role="group" aria-label="Hexagram stack, the cast in progress"></div>
             <div class="so-ribbon" id="soRibbon" aria-label="Your cast, bit by bit, grouped into words"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ══ IV · The seal — a seed must prove itself — gate: 21 cast ══ -->
+    <!-- ══ III · The seal : a seed must prove itself : gate: 21 cast ══ -->
     <section class="page-section so-chapter" id="seal" data-level="3">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="sealBody"
               data-section="seal">
-        <span class="section-label">IV · The seal</span>
+        <span class="section-label">III · The seal</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="sealBody">
           <div class="narrow">
-            <p class="so-note">A seed must prove itself. In the machine's tongue: the final four bits
-            of a twelve-word seed are not chosen — they are the <strong>checksum</strong>, the first
-            four bits of SHA-256 over the 128 entropy bits. A fingerprint of everything you cast,
-            folded into the phrase itself, so that a mistyped or misremembered seed betrays itself:
-            change anything, anywhere, and fifteen times out of sixteen the ending no longer matches.
-            In the oracle's tongue: the reading must <strong>cohere</strong> — the oracle countersigns
-            what chance has written, and a forged or fumbled line will not take the seal.</p>
+            <p class="so-note">The final four bits are a checksum. Change the cast and the seal changes.</p>
 
             <div class="so-ledger" aria-label="The count">
               <span>21 hexagrams · 126 lines</span><span class="so-ledger-op">+</span>
@@ -201,62 +122,37 @@
             <div class="so-seal-figwrap">
               <div class="so-seal-fig" id="soSealFig" aria-hidden="true"></div>
               <p class="so-note so-seal-figcap" id="soSealFigCap">The twenty-second hexagram: its
-              <span class="so-key-cs">top four lines</span> are the seal — the mathematics' hand.
+              <span class="so-key-cs">top four lines</span> are the seal.
               Its <span class="so-key-free">bottom two</span> are the last free lines. They are
               covered next.</p>
             </div>
 
             <div class="so-tamper" id="soTamperWrap" hidden>
               <div class="so-actions" style="justify-content:flex-start; margin:var(--space-3) 0 var(--space-2)">
-                <button class="btn btn--ghost" id="soTamper" type="button" aria-pressed="false">Test the seal — flip a line</button>
+                <button class="btn btn--ghost" id="soTamper" type="button" aria-pressed="false">Test the seal: flip a line</button>
               </div>
-              <p class="so-note" id="soTamperNote">Your reading is sealed. Enter the test, tap any
-              cell in the ribbon above, and watch the whole seal refuse a single flipped line. Tap
-              the cell again — or leave the test — to restore the true cast. Nothing you do here
-              touches your committed reading.</p>
+              <p class="so-note" id="soTamperNote">Enter the test and tap a ribbon cell. Tap it again to restore the cast.</p>
               <div class="so-geo-stat" id="soTamperOut" aria-live="polite"></div>
             </div>
 
-            <details class="so-fold so-fold-sec">
-              <summary><span>The same seal, in the word tongue</span><svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-              <p class="so-note">A 12-word seed is not twelve free words — the last word folds the
-              checksum in. Bring the first <span id="soFwN">11</span> (your own cast's, or any from
-              the word list) and the oracle reveals every final word that coheres — sixteen endings
-              exist, exactly one for each pattern the seal can demand. Pick one and it completes the
-              phrase.</p>
-              <textarea class="so-phrase" id="soFwIn" spellcheck="false" autocomplete="off"
-                aria-label="The first words of a seed — all but the final word"
-                placeholder="the first words, space-separated"></textarea>
-              <div class="so-actions" style="justify-content:flex-start; margin-top:var(--space-2)">
-                <button class="btn btn--ghost" id="soFwGo">Reveal the final word</button>
-              </div>
-              <div class="so-fw-out" id="soFwOut" aria-live="polite"></div>
-            </details>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ══ V · The suit seal — the climax — gate: 21 cast ══ -->
+    <!-- ══ IV · The suit seal : the climax : gate: 21 cast ══ -->
     <section class="page-section so-chapter" id="suitseal" data-level="3">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="suitsealBody"
               data-section="suitseal">
-        <span class="section-label">V · The suit seal</span>
+        <span class="section-label">IV · The suit seal</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="suitsealBody">
           <div class="narrow">
-            <p class="so-note">Two free lines remain — and two lines can fall four ways. Four is a
-            number this site knows well: the four <strong>suits</strong>, the four elements of the
-            old tarot correspondence. Read bottom-first: yin·yin is Hearts, yin·yang Clubs,
-            yang·yin Diamonds, yang·yang Spades.</p>
-            <p class="so-note"><strong>So the last free act of this seed is not a throw. It is a
-            choice.</strong> Chance cast the reading; your hand signs it; the mathematics seals it.
-            Each suit completes your same twenty-one hexagrams into a different valid reading — the
-            oracle computes the four seal lines each choice demands. Choose your suit.</p>
+            <p class="so-note">Two free lines remain. Choose the suit that signs the seal.</p>
 
             <div class="so-fh-out" id="soFhOut" aria-live="polite"></div>
             <div class="so-actions" style="justify-content:flex-start; margin-top:var(--space-2)">
@@ -267,12 +163,9 @@
               <span class="section-label" style="margin-top:var(--space-4)">The phrase</span>
               <div class="so-phrase-wrap">
                 <textarea class="so-phrase" id="soPhrase" spellcheck="false" autocomplete="off"
-                  aria-label="Seed phrase (twelve or twenty-four words)"
-                  placeholder="Your sealed phrase appears here — or paste one to read it as hexagrams"></textarea>
-                <div class="so-status" id="soStatus"><span class="so-dot"></span><span class="msg">—</span></div>
-              </div>
-              <div class="so-actions" style="margin-top:var(--space-2)">
-                <button class="btn btn--ghost" id="soCopy">Copy words</button>
+                  aria-label="Seed phrase (twelve words)"
+                  placeholder="Your sealed phrase appears here. Paste one to read it as hexagrams."></textarea>
+                <div class="so-status" id="soStatus"><span class="so-dot"></span><span class="msg">-</span></div>
               </div>
             </div>
           </div>
@@ -280,21 +173,19 @@
       </div>
     </section>
 
-    <!-- ══ VI · The proof — gate: sealed ══ -->
+    <!-- ══ V · The proof : gate: sealed ══ -->
     <section class="page-section so-chapter" id="proof" data-level="4">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="proofBody"
               data-section="proof">
-        <span class="section-label">VI · The proof</span>
+        <span class="section-label">V · The proof</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="proofBody">
           <div class="narrow">
-            <p class="so-note">Nothing on this page needs believing. Below are the bits beneath your
-            words — the raw entropy and its checksum — and the instrument to check the seal with your
-            own hands.</p>
+            <p class="so-note">The bits under the phrase.</p>
 
             <div class="so-ent-out" id="soEntOut"><p class="so-note">Seal a reading above to see its entropy.</p></div>
 
@@ -304,7 +195,7 @@
               <p class="so-note">Verify the seal yourself: hash your entropy, and the first four bits
               of the digest must be your four seal lines.</p>
               <div class="so-sha-row">
-                <input class="so-sha-input" id="soShaIn" type="text" placeholder="hex bytes — e.g. deadbeef" spellcheck="false" aria-label="Hex bytes to hash" />
+                <input class="so-sha-input" id="soShaIn" type="text" placeholder="hex bytes, e.g. deadbeef" spellcheck="false" aria-label="Hex bytes to hash" />
                 <button class="btn btn--ghost" id="soShaFrom" type="button" title="Copy your cast's entropy hex into the box">From cast</button>
                 <button class="btn btn--gold" id="soShaGo" type="button">Hash</button>
               </div>
@@ -316,20 +207,17 @@
               </div>
             </div>
 
-            <p class="so-note" style="margin-top:var(--space-5)">And the road runs both ways: paste
-            any phrase into the box in chapter V and the page reads it straight back into hexagrams —
-            words to lines to words, losslessly.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ══ VII · Under the hood — gate: sealed ══ -->
+    <!-- ══ VI · Under the hood : gate: sealed ══ -->
     <section class="page-section so-chapter section-start-closed" id="underhood" data-level="4">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="underhoodBody"
               data-section="underhood">
-        <span class="section-label">VII · Under the hood</span>
+        <span class="section-label">VI · Under the hood</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
@@ -339,8 +227,8 @@
 
             <details class="so-fold so-fold-sec">
               <summary><span>The seed these words make</span><svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-              <p class="so-note">For the curious: the 512-bit BIP39 seed (PBKDF2-HMAC-SHA512, empty passphrase) that these words expand into — the number a real wallet would grow its whole tree of keys from. Shown to make the idea concrete, not to be used.</p>
-              <p class="so-seedout" id="soSeed">—</p>
+              <p class="so-note">The 512-bit BIP39 seed these words expand into. Do not use it.</p>
+              <p class="so-seedout" id="soSeed">-</p>
             </details>
 
             <details class="so-fold so-fold-sec" id="soAddrFold">
@@ -362,30 +250,18 @@
       </div>
     </section>
 
-    <!-- ══ VIII · By hand, and credits — gate: sealed ══ -->
+    <!-- ══ VII · Credits : gate: sealed ══ -->
     <section class="page-section so-chapter section-start-closed" id="learn" data-level="4">
       <button class="section-toggle" type="button"
               aria-expanded="false" aria-controls="learnBody"
               data-section="learn">
-        <span class="section-label">VIII · By hand, and credits</span>
+        <span class="section-label">VII · Credits</span>
         <span class="so-lockdot" aria-hidden="true"></span>
         <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="section-bodywrap">
         <div class="section-bodymin" id="learnBody">
           <div class="narrow">
-            <aside class="so-alert" role="note">
-              <strong class="so-alert-h">A curiosity, not a wallet</strong>
-              <p>This is a divination toy that happens to speak fluent BIP39. Cast hexagrams for wonder — but never store real funds in any seed shown here, and never paste a phrase you actually use into this (or any) web page. For a real wallet, generate it <strong>offline</strong> on a hardware or air-gapped device. Everything here runs in your browser and is sent nowhere; still, treat every phrase you see as throwaway.</p>
-            </aside>
-            <aside class="so-alert">
-              <strong class="so-alert-h">By hand, offline</strong>
-              <div class="so-howto">
-                <p>You don't have to trust this page, or any computer. The whole mapping is human-scale. Each hexagram is six coin-tosses: <span class="so-mono">heads = a solid yang line (1)</span>, <span class="so-mono">tails = a broken yin line (0)</span>. Cast 22 hexagrams for a twelve-word reading.</p>
-                <p>Write each hexagram's six lines bottom-to-top as 1s and 0s, string all the bits together, then chop them into groups of <strong>11</strong>. Each group is a number from 0&ndash;2047 — look it up in the printed BIP39 word list and you have your phrase.</p>
-                <p>The one step a pencil can't manage is the <strong>seal</strong> — the final lines are a SHA-256 hash of all the rest, so a machine has to confirm them. You walked why in chapter IV: everything else is coins, a word list, and arithmetic.</p>
-              </div>
-            </aside>
             <p class="so-credit" style="text-align:left; margin-top:var(--space-2)">
               Built on <a href="https://github.com/iancoleman/bip39" target="_blank" rel="noopener">Ian Coleman's BIP39</a>
               (MIT, © 2014–2016 Ian Coleman). Hexagram readings are a direct English translation of the original Zhōu Yì judgments.
@@ -441,16 +317,16 @@
 <script src="js/bip39-words.js"></script>
 <script src="js/bip84.js"></script>
 <script src="js/stars.js"></script>
-<!-- Delegated section-toggle listener — every [data-section] chapter
+<!-- Delegated section-toggle listener : every [data-section] chapter
      header becomes a window.toggleSection() call. -->
 <script>document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-section]');
   if (el) window.toggleSection(el.dataset.section);
 });</script>
-<script src="js/seedoracle-store.js"></script>
-<script src="js/seedoracle-bitcoin.js"></script>
+<script src="js/seedoracle-store.js?v=20260715a"></script>
+<script src="js/seedoracle-bitcoin.js?v=20260715a"></script>
 <script src="js/seedoracle-hexagrams.js"></script>
-<script src="js/seedoracle.js?v=20260710f"></script>
-<script src="js/seedoracle-geomancy.js?v=20260712a"></script>
+<script src="js/seedoracle.js?v=20260715a"></script>
+<script src="js/seedoracle-geomancy.js?v=20260715a"></script>
 </body>
 </html>

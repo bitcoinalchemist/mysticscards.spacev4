@@ -2,6 +2,7 @@
   'use strict';
 
   var page = window.location.pathname.split('/').pop() || 'index.html';
+  var isCardsPage = page === 'index.html' || page === '';
   var BG_KEY = 'mc-castfield-enabled';
   var VOICE_KEY = 'cardsoflife_voice';
 
@@ -27,7 +28,7 @@
     '</svg>';
 
   var rightSlot = '';
-  if (page === 'index.html' || page === '') {
+  if (isCardsPage) {
     rightSlot = '<a class="sh-hex" href="iching.html" aria-label="I Ching Oracle" title="I Ching Oracle">' + ICHING_MARK + '</a>';
   } else if (page === 'iching.html') {
     rightSlot = '<a class="sh-hex" href="index.html" aria-label="Cards of Life" title="Cards of Life">' + CARDS_MARK + '</a>';
@@ -38,7 +39,7 @@
       '<span class="sh-setting-label">Floating cards</span>' +
       '<button type="button" class="q-switch" id="bgToggle" role="switch" aria-checked="false" aria-label="Floating cards"><span class="q-switch-knob"></span></button>' +
     '</div>';
-  if (page !== 'iching.html') {
+  if (isCardsPage) {
     settingsRows +=
       '<div class="sh-setting-row">' +
         '<span class="sh-setting-label">Reading voice</span>' +
@@ -140,7 +141,7 @@
     var settingsBtn = document.getElementById('shSettingsBtn');
     var panel = document.getElementById('shSettingsPanel');
     applyBgPref(readBgPref());
-    applyVoicePref(readVoicePref());
+    if (voiceBtn) applyVoicePref(readVoicePref());
     if (input) {
       input.addEventListener('click', function () {
         applyBgPref(input.getAttribute('aria-checked') !== 'true');

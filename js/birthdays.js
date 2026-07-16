@@ -11,7 +11,7 @@
 // that lane opens; this is the functional first cut asked for in chat.
 //
 // Loaded as a classic script AFTER spread-grid.js (bare `setAge` global —
-// syncs the Quadrations age stepper to the picked person's current age)
+// anchors Finder's age-based panels to the picked person's current age)
 // and AFTER finder.js (window.loadDateInFinder).
 //
 // PUBLIC on window — read by finder-trays.js:
@@ -53,8 +53,8 @@
 
   function loadBirth(entry, target, options) {
     options = options || {};
-    // "You" picks also carry the person's current age into Quadrations —
-    // setAge/currentAge are bare classic-script globals from spread-grid.js.
+    // "You" picks carry the person's current age into Finder's age-based
+    // panels. Quadrations keeps its own independent age stepper.
     if (target !== 'partner' && typeof setAge === 'function') {
       setAge(ageFromBirthYear(entry.year, entry.month, entry.day));
     }
@@ -154,7 +154,6 @@
   function setBdayTarget(t) {
     _bdayTarget = t === 'partner' ? 'partner' : 'self';
     [['bdayTargetSelf', 'bdayTargetPartner'],
-     ['calTargetSelf', 'calTargetPartner'],
      ['deckTargetSelf', 'deckTargetPartner']].forEach(pair => {
       const s = document.getElementById(pair[0]), p = document.getElementById(pair[1]);
       if (s) s.classList.toggle('is-active', _bdayTarget === 'self');
@@ -418,7 +417,7 @@
     const importFile = document.getElementById('bdayImportFile');
     if (importBtn) importBtn.addEventListener('click', () => importFile.click());
     if (importFile) importFile.addEventListener('change', importBirthsFromFile);
-    ['bdayTargetSelf', 'bdayTargetPartner', 'calTargetSelf', 'calTargetPartner', 'deckTargetSelf', 'deckTargetPartner'].forEach(id => {
+    ['bdayTargetSelf', 'bdayTargetPartner', 'deckTargetSelf', 'deckTargetPartner'].forEach(id => {
       const b = document.getElementById(id);
       if (b) b.addEventListener('click', () => setBdayTarget(b.dataset.target));
     });

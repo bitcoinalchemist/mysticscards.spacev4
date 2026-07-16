@@ -219,25 +219,40 @@
     return Math.floor(((lon % 30) + 30) % 30 / 10);
   }
 
-  // Sign name (per ZODIAC.name) → planet chip HTML for the given ruler.
-  // Returns "" if the ruler doesn't resolve to a card seat.
-  function planetChip(ruler, script, birthCard, title) {
+  // Full-size stats card face — same visual language as the Ruling-card
+  // row above the stats block (parchment face, pip layout, rank/suit
+  // corners, sized by --ls-card-w which mirrors Quadrations).
+  // Clickable: data-idx is picked up by bindLifeScriptCardClicks.
+  function statsCardHTML(cc, opts) {
+    opts = opts || {};
+    if (!cc) return '';
+    const face = typeof spreadCardPips === 'function'
+      ? spreadCardPips(cc)
+      : `<span class="ls-token">${cc.rank}${cc.sym}</span>`;
+    const idx = (typeof CARDS !== 'undefined')
+      ? CARDS.findIndex(function (x) { return x.rank === cc.rank && x.suit === cc.suit; })
+      : -1;
+    const extra = opts.extraCls ? ' ' + opts.extraCls : '';
+    const title = opts.title || fullCardName(cc);
+    return `<div class="spread-card ls-card ls-stat-card ${cc.suit}${extra}" data-idx="${idx}" role="button" tabindex="0" aria-label="Load ${fullCardName(cc)} in finder" title="${title}">${face}</div>`;
+  }
+
+  function zodiacCardSlotHTML(label, ruler, script, birthCard, title, extraCls) {
     const glyph = SPREAD_PLANET_SYM[ruler] || '';
     const rulerText = glyph ? `${glyph} ${ruler}` : ruler;
     const planetIdx = SPREAD_PLANETS.indexOf(ruler);
     let cc = null;
     if (planetIdx >= 0 && script && script[planetIdx]) cc = parseCard(script[planetIdx]);
     else if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') cc = derivedCardFor(ruler, birthCard, script);
-    const cardChip = cc
-      ? `<span class="ls-stat-chip ls-zodiac-card ${cc.suit}" title="${ruler} ruling card">${cc.rank}${cc.sym}</span>`
-      : '';
-    return `<span class="ls-stat-chip" title="${title}">${rulerText}</span>${cardChip}`;
+    const cardHTML = cc ? statsCardHTML(cc, { title: `${ruler} ruling card` }) : '';
+    return `<div class="ls-zodiac-card-slot${extraCls ? ' ' + extraCls : ''}">
+      <span class="ls-zodiac-card-label">${label}</span>
+      <span class="ls-stat-chip" title="${title}">${rulerText}</span>
+      ${cardHTML}
+    </div>`;
   }
 
-  // Build the decan sub-row for one zodiac line. Both systems are shown;
-  // when Chaldean and Ptolemaic agree, they're merged into one chip pair
-  // to avoid noise.
-  function decanSubrowHTML(sign, decanIdx, script, birthCard) {
+  function decanCardSlotsHTML(sign, decanIdx, script, birthCard) {
     if (!sign || decanIdx < 0) return '';
     const signIdx = SIGN_ASTRO_IDX[sign.name];
     if (signIdx === undefined) return '';
@@ -245,34 +260,16 @@
     const chaldean  = CHALDEAN_ORDER[globalDecan % 7];
     const ptolemaic = PTOLEMAIC_DECANS[signIdx][decanIdx];
     const label = `${DECAN_ORDINAL[decanIdx]} decan`;
-    const systems = `<div class="ls-decan-system-row">
-      <span class="ls-decan-system">Chaldean</span>
-      ${planetChip(chaldean, script, birthCard, `${chaldean} — Chaldean/Egyptian decan ruler`)}
-    </div>
-    <div class="ls-decan-system-row">
-      <span class="ls-decan-system">Ptolemaic</span>
-      ${planetChip(ptolemaic, script, birthCard, `${ptolemaic} — Ptolemaic/triplicity decan ruler`)}
-    </div>`;
-    return `<div class="ls-decan-line">
-      <span class="ls-decan-label" title="${sign.name} decan by 10° arc">${label}</span>
-      ${systems}
-    </div>`;
+    return {
+      ptolemaic: zodiacCardSlotHTML('Ptolemaic decan', ptolemaic, script, birthCard, `${label}: ${ptolemaic} — Ptolemaic/triplicity decan ruler`, 'ls-decan-slot'),
+      chaldean: zodiacCardSlotHTML('Chaldean decan', chaldean, script, birthCard, `${label}: ${chaldean} — Chaldean/Egyptian decan ruler`, 'ls-decan-slot')
+    };
   }
 
-  function rulingCardChipHTML(sign, script, birthCard) {
+  function rulingCardSlotHTML(sign, script, birthCard) {
     if (!sign) return '';
     const ruler = sign.ruler;
-    // Extended ruler set: the 7 cardology planets + Moon (Cancer) +
-    // Sun (Leo) + Pluto (modern Scorpio).
-    const planetIdx = SPREAD_PLANETS.indexOf(ruler);
-    let cc = null;
-    if (planetIdx >= 0 && script && script[planetIdx]) {
-      cc = parseCard(script[planetIdx]);
-    } else if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') {
-      cc = derivedCardFor(ruler, birthCard, script);
-    }
-    if (!cc) return '<span class="ls-stat-note">No seven-planet card seat</span>';
-    return `<span class="ls-stat-chip ls-zodiac-card ${cc.suit}" title="${ruler} ruling card">${cc.rank}${cc.sym}</span>`;
+    return zodiacCardSlotHTML('Planetary Ruling Card', ruler, script, birthCard, `${ruler} planetary ruling card`, 'ls-prc-slot');
   }
 
   function zodiacStatsHTML(card, script) {
@@ -311,7 +308,8 @@
       }
     }
 
-    const rulingCardHTML = rulingCardChipHTML(sign, script, card);
+    const rulingCardHTML = rulingCardSlotHTML(sign, script, card);
+    const tropDecans = decanCardSlotsHTML(sign, tropDecan, script, card);
     const signText = `${sign.glyph} ${sign.name}`;
     const rulerGlyph = SPREAD_PLANET_SYM[sign.ruler] || '';
     const rulerText = rulerGlyph ? `${rulerGlyph} ${sign.ruler}` : sign.ruler;
@@ -319,14 +317,18 @@
     const siderealRulerText = siderealSign
       ? (siderealRulerGlyph ? `${siderealRulerGlyph} ${siderealSign.ruler}` : siderealSign.ruler)
       : '';
+    const siderealDecans = siderealSign ? decanCardSlotsHTML(siderealSign, sidDecan, script, card) : null;
     const siderealHTML = siderealSign ? `<div class="ls-zodiac-cardlet">
         <div class="ls-zodiac-kind">Sidereal</div>
         <div class="ls-zodiac-line">
           <span class="ls-stat-chip" title="Sidereal sign, Lahiri-style birthday approximation">${siderealSign.glyph} ${siderealSign.name}</span>
           <span class="ls-stat-chip" title="Sidereal classical sign ruler">${siderealRulerText}</span>
-          ${rulingCardChipHTML(siderealSign, script, card)}
         </div>
-        ${decanSubrowHTML(siderealSign, sidDecan, script, card)}
+        <div class="ls-zodiac-card-row">
+          ${siderealDecans ? siderealDecans.ptolemaic : ''}
+          ${rulingCardSlotHTML(siderealSign, script, card)}
+          ${siderealDecans ? siderealDecans.chaldean : ''}
+        </div>
       </div>` : '';
     return `<div class="ls-stat-block">
       <div class="ls-stat-label">Zodiac</div>
@@ -336,9 +338,12 @@
           <div class="ls-zodiac-line">
             <span class="ls-stat-chip" title="Tropical sun sign">${signText}</span>
             <span class="ls-stat-chip" title="Classical sign ruler">${rulerText}</span>
-            ${rulingCardHTML}
           </div>
-          ${decanSubrowHTML(sign, tropDecan, script, card)}
+          <div class="ls-zodiac-card-row">
+            ${tropDecans ? tropDecans.ptolemaic : ''}
+            ${rulingCardHTML}
+            ${tropDecans ? tropDecans.chaldean : ''}
+          </div>
         </div>
         ${siderealHTML}
       </div>
@@ -369,9 +374,13 @@
       const oc = SPREAD_CARDS[oIdx];
       if (!oc) return '';
       const selfCls = oIdx === idx ? ' ls-ghost-self' : '';
+      const cardHTML = statsCardHTML(oc, {
+        extraCls: 'ls-ghost' + selfCls,
+        title: `${verb} ${fullCardName(oc)}`
+      });
       return `<div class="ls-ghost-pair">
         <div class="ls-ghost-label">${verb}</div>
-        <span class="ls-stat-chip ls-zodiac-card ls-ghost ${oc.suit}${selfCls}" title="${verb} ${oc.rank}${oc.sym}">${oc.rank}${oc.sym}</span>
+        ${cardHTML}
       </div>`;
     }).join('');
     const mutualNote = isMutualPair
@@ -513,6 +522,13 @@
     if (panel) panel.hidden = true;
   }
 
+  function detachSolarPanel() {
+    const panel = document.getElementById('fSolar');
+    if (!panel) return;
+    panel.hidden = true;
+    if (document.body && panel.parentNode !== document.body) document.body.appendChild(panel);
+  }
+
   function mountSolarPanel(root) {
     const panel = document.getElementById('fSolar');
     const stats = root && root.querySelector('.ls-stats');
@@ -527,6 +543,7 @@
     if (!root) return false;
     const inner = root.querySelector('.ls-inner') || root;
     parkSolarPanel(root);
+    clearSolarPanel();
     root.classList.remove('is-empty');
     if (!card) { clearSolarPanel(); root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     // Joker: has its own prose note but still returns true so the chip
@@ -576,7 +593,7 @@
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
     const inner = root.querySelector('.ls-inner') || root;
-    parkSolarPanel(root);
+    detachSolarPanel();
     root.classList.remove('is-empty');
     if (!card || !partner || card.suit === 'joker' || partner.suit === 'joker' ||
         typeof window.lifeScriptConnection !== 'function') {

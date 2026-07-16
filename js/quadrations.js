@@ -166,7 +166,7 @@
     _initQuadCardSize();
     restoreQuadToggles();
     // Sync the endpoint label to whatever spread the spread-grid boot rendered.
-    syncSpreadLabel(currentAge + 1);
+    syncSpreadLabel((typeof quadAge === 'number' ? quadAge : 0) + 1);
     alignQuadControls();
     window.addEventListener('resize', alignQuadControls);
   });

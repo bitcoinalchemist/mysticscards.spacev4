@@ -1,6 +1,6 @@
-// seedoracle-store.js — the ONE source of truth for Seed Oracle
-// localStorage. Currently holds only the unlock level (0-4), which
-// gates which chapters the reader can open.
+// seedoracle-store.js : the ONE source of truth for Seed Oracle
+// sessionStorage. Currently holds only the unlock level (0-4), which
+// gates which chapters the reader can open during the current tab visit.
 //
 // Same seam pattern as js/store.js (Cards of Life) and
 // js/iching-store.js (I Ching). Everything else in the Seed Oracle
@@ -12,15 +12,15 @@
 (function () {
   'use strict';
 
-  function _get(k)    { try { return localStorage.getItem(k); } catch (e) { return null; } }
-  function _set(k, v) { try { localStorage.setItem(k, v); }    catch (e) {} }
+  function _get(k)    { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function _set(k, v) { try { sessionStorage.setItem(k, v); }    catch (e) {} }
 
   var K_UNLOCK = 'seedoracle_unlock';
 
   window.SeedStore = {
     // Chapter unlock level: 0..4. Level rises as the reader completes
-    // each chapter's proof, and never falls (raiseUnlock in the journey
-    // module only writes when the new value is HIGHER).
+    // each chapter's proof, and never falls within the current tab visit
+    // (raiseUnlock in the journey module only writes when the new value is HIGHER).
     // Clamped to 0..4 in case a corrupted key returns something weird.
     getUnlock: function () {
       var raw = parseInt(_get(K_UNLOCK), 10);

@@ -1,4 +1,4 @@
-// seedoracle-bitcoin.js — the Bitcoin math for the Seed Oracle:
+// seedoracle-bitcoin.js : the Bitcoin math for the Seed Oracle:
 // SHA-256 (compact public-domain implementation for the BIP39 checksum),
 // BIP39 word ↔ bit conversion + validation, and PBKDF2-HMAC-SHA512 seed
 // derivation via Web Crypto.
@@ -12,17 +12,17 @@
 // window.SeedOracleBitcoin at IIFE entry).
 //
 // Public API on window.SeedOracleBitcoin:
-//   bits(n, width)             — zero-padded binary string
-//   sha256Bytes(bytes)         — Uint8Array → Uint8Array(32) SHA-256 digest
-//   entropyToMnemonic(entBytes)— entropy Uint8Array → space-joined 12/24 words
-//   phraseToBits(words)        — array of words → concatenated 11-bit strings
-//   checkPhrase(words)         — { ok, reason, entBytes? }; verifies BIP39 checksum
-//   phraseToVals(words)        — array of words → array of 6-bit hexagram values
-//   valsToWords(vals)          — array of 6-bit values → array of BIP39 words
-//   deriveSeed(mnemonic, outEl)— async: writes 64-byte seed hex to outEl.textContent
+//   bits(n, width)             : zero-padded binary string
+//   sha256Bytes(bytes)         : Uint8Array → Uint8Array(32) SHA-256 digest
+//   entropyToMnemonic(entBytes): entropy Uint8Array → space-joined 12/24 words
+//   phraseToBits(words)        : array of words → concatenated 11-bit strings
+//   checkPhrase(words)         : { ok, reason, entBytes? }; verifies BIP39 checksum
+//   phraseToVals(words)        : array of words → array of 6-bit hexagram values
+//   valsToWords(vals)          : array of 6-bit values → array of BIP39 words
+//   deriveSeed(mnemonic, outEl): async: writes 64-byte seed hex to outEl.textContent
 //                                (or the "needs a secure context" message)
-//   WL                         — the BIP39 word list (window.BIP39_WORDS mirror)
-//   IDX                        — reverse map: word → 0..2047
+//   WL                         : the BIP39 word list (window.BIP39_WORDS mirror)
+//   IDX                        : reverse map: word → 0..2047
 
 (function () {
   'use strict';
@@ -95,7 +95,7 @@
   function checkPhrase(words) {
     if (words.some(function (w) { return !(w in IDX); })) return { ok: false, reason: 'unknown word' };
     var n = words.length;
-    if ([12, 18, 24].indexOf(n) === -1) return { ok: false, reason: n + ' words — use 12 or 24' };
+    if ([12, 18, 24].indexOf(n) === -1) return { ok: false, reason: n + ' words : use 12 or 24' };
     var b = phraseToBits(words), ent = Math.floor(b.length / 33) * 32, cs = b.length - ent;
     var eb = b.slice(0, ent), cb = b.slice(ent), bytes = [];
     for (var i = 0; i < ent; i += 8) bytes.push(parseInt(eb.slice(i, i + 8), 2));
@@ -115,13 +115,13 @@
   }
 
   // ── PBKDF2-HMAC-SHA512 seed (via Web Crypto; graceful if unavailable) ──
-  // Async write into the target text element — matches the pre-extraction
+  // Async write into the target text element : matches the pre-extraction
   // shape (previously read #soSeed directly; now takes it as an argument so
   // it can be null-checked and the module stays DOM-lite).
   function deriveSeed(mnemonic, outEl) {
     if (!outEl) return;
     if (!(window.crypto && crypto.subtle)) {
-      outEl.textContent = '(seed derivation needs a secure context — open via https/localhost)';
+      outEl.textContent = '(seed derivation needs a secure context : open via https/localhost)';
       return;
     }
     var enc = new TextEncoder();

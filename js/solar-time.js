@@ -13,8 +13,9 @@
 // (js/tzcoords.js) keyed by the IANA zone the birthplace picker resolves
 // to; the DST-aware UTC offset comes from the browser's own tz database.
 //
-// Reads SPREAD_CARDS + spreadCardPips + currentAge as classic-script
-// globals (loaded earlier), and window.TZ_COORDS from tzcoords.js.
+// Reads SPREAD_CARDS + spreadCardPips + Finder's currentAge anchor as
+// classic-script globals (loaded earlier), and window.TZ_COORDS from
+// tzcoords.js. Quadrations keeps a separate quadAge.
 //
 // PUBLIC on window.SolarTime:
 //   solarDate({year,month,day,hour,minute}, tz) -> Promise<{
@@ -136,10 +137,42 @@
     return (RANK_NAMES[card.rank] || card.rank) + ' of ' + suit;
   }
   function cardTile(card, label, dimmed) {
+    // Full-size stats card face — same visual language as Life Script's
+    // Ruling-card row. Joker uses spreadCardPips' built-in joker corners.
+    var face = (typeof window.spreadCardPips === 'function')
+      ? window.spreadCardPips(card)
+      : (card.rank + card.sym);
+    var idx = -1;
+    if (typeof SPREAD_CARDS !== 'undefined' && card.suit !== 'joker') {
+      for (var i = 0; i < SPREAD_CARDS.length; i++) {
+        if (SPREAD_CARDS[i].rank === card.rank && SPREAD_CARDS[i].suit === card.suit) { idx = i; break; }
+      }
+    }
+    var idxAttr = idx >= 0 ? ' data-idx="' + idx + '"' : '';
+    var role = idx >= 0 ? ' role="button" tabindex="0"' : '';
     return '<div class="sol-card' + (dimmed ? ' dimmed' : '') + '">' +
       '<div class="sol-card-label">' + label + '</div>' +
-      '<div class="ls-stat-chip ls-zodiac-card sol-card-chip ' + card.suit + '">' + card.rank + card.sym + '</div>' +
+      '<div class="spread-card ls-card ls-stat-card sol-card-face ' + card.suit + '"' + idxAttr + role +
+        ' aria-label="Load ' + cardName(card) + ' in finder">' + face + '</div>' +
       '<div class="sol-card-name">' + cardName(card) + '</div></div>';
+  }
+
+  function bindSolCards(root) {
+    if (!root) return;
+    root.querySelectorAll('.ls-stat-card[data-idx]').forEach(function (el) {
+      var idx = parseInt(el.dataset.idx, 10);
+      if (!Number.isInteger(idx) || idx < 0) return;
+      var open = function () {
+        if (typeof window.loadCardInFinder === 'function') window.loadCardInFinder(idx);
+      };
+      el.style.cursor = 'pointer';
+      el.onclick = open;
+      el.onkeydown = function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        open();
+      };
+    });
   }
   function fmtD(p) { return p.d + ' ' + MON[p.m - 1] + ' ' + p.y; }
 
@@ -178,24 +211,23 @@
     out.innerHTML = '<p class="sol-hint">Consulting the sun…</p>';
     solarDate(b, tz).then(function (res) {
       var solarCard = cardForDate(res.solar.m, res.solar.d);
-      var cardsBlock;
+      var verdictHTML, cardsHTML;
       if (res.differs) {
         var clockCard = cardForDate(res.civil.m, res.civil.d);
-        cardsBlock =
-          '<p class="sol-verdict">By the clock this birth is <strong>' + fmtD(res.civil) +
+        verdictHTML = '<p class="sol-verdict">By the clock this birth is <strong>' + fmtD(res.civil) +
           '</strong>, but by the sun it belongs to <strong>' + fmtD(res.solar) +
-          '</strong> — the solar day had not yet turned.</p>' +
-          '<div class="sol-cards">' + cardTile(clockCard, 'Clock date', true) +
+          '</strong> — the solar day had not yet turned.</p>';
+        cardsHTML = '<div class="sol-cards">' + cardTile(clockCard, 'Clock date', true) +
           cardTile(solarCard, 'Solar day', false) + '</div>';
       } else {
-        cardsBlock =
-          '<p class="sol-verdict">Clock and sun agree: this birth belongs to <strong>' + fmtD(res.civil) + '</strong>.</p>' +
-          '<div class="sol-cards">' + cardTile(solarCard, 'Birth card', false) + '</div>';
+        verdictHTML = '<p class="sol-verdict">Clock and sun agree: this birth belongs to <strong>' + fmtD(res.civil) + '</strong>.</p>';
+        cardsHTML = '<div class="sol-cards">' + cardTile(solarCard, 'Birth card', false) + '</div>';
       }
       // Personality Sun hexagram (gate) — hexagram only, computed from the
       // same birth instant. Owned by js/sun-gate.js; no-op if not loaded.
-      var gatesBlock = (window.SunGate && typeof window.SunGate.html === 'function') ? window.SunGate.html(res.t) : '';
-      out.innerHTML = cardsBlock + gatesBlock;
+      var gatesBlock = (window.SunGate && typeof window.SunGate.html === 'function') ? window.SunGate.html(res.t, cardsHTML) : '';
+      out.innerHTML = verdictHTML + (gatesBlock || cardsHTML);
+      bindSolCards(out);
     }).catch(function (e) {
       out.innerHTML = '<p class="sol-hint">Could not compute solar time (' + (e && e.message ? e.message : 'error') + ').</p>';
     });

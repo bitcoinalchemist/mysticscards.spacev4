@@ -1,7 +1,7 @@
 /* ── page-specific styles (per site convention) ───────────────────────
    Pulls global tokens from css/site.css; declares only page-local aliases
    (the status colours, which have no global token). v2.0: the page is a
-   GATED JOURNEY — chapter locking, the journey rail, the line-by-line
+   GATED JOURNEY : chapter locking, the line-by-line
    first cast, the live ribbon and the tamper toy all live here. */
     .narrow { max-width: 720px; margin: 0 auto; }
 
@@ -18,38 +18,19 @@
       color: var(--gold-ink); margin-bottom: var(--space-2);
     }
 
-    /* Local hexagram ink (yang is near-black on parchment) + status colours.
-       --so-ok / --so-warn are the only page-local colours: no global token
-       exists for success/error text on the dark ground. */
+    /* Local hexagram ink (yang is near-black on parchment), status colours,
+       and the checksum amber used across the seal/proof surfaces. */
     .so-stack { --yang: var(--card-dark); }
-    .so-ctx { --so-ok: #7fd79a; --so-warn: #e79a92; }
+    .so-ctx { --so-ok: #7fd79a; --so-warn: #e79a92; --so-cs: #a5702e; }
 
     #learn + #geomancy {
       margin-block-start: clamp(1.2rem, 3vw, 1.8rem);
     }
 
-    /* ══ The journey rail — the shape of the path, lit as it unlocks ══ */
-    .so-rail {
-      display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-      gap: 2px 4px; max-width: 760px; margin: 1.2rem auto .4rem; padding: 0 .5rem;
-    }
-    .so-rail-item {
-      font-family: var(--sans); font-size: .6rem; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase;
-      color: var(--ink-muted); background: none; border: none; border-radius: 999px;
-      padding: 6px 9px; cursor: pointer; white-space: nowrap;
-      transition: color var(--ease), opacity var(--ease);
-    }
-    .so-rail-item:hover:not(:disabled) { color: var(--gold-ink); }
-    .so-rail-item[aria-current="true"] { color: var(--gold); }
-    .so-rail-item:disabled { opacity: .32; cursor: default; }
-    .so-rail-sep { color: var(--ink-muted); opacity: .4; font-size: .55rem; }
-    @media (max-width: 560px) { .so-rail-item { padding: 5px 6px; letter-spacing: .08em; } }
-
     /* ══ Chapter locking ══
        A locked chapter shows its dim heading (with an amber lock-dot) and
        nothing else; the body is collapsed + inert (set by JS). Unlocking
-       removes .so-locked and adds .section-open — the shared grid-rows
+       removes .so-locked and adds .section-open : the shared grid-rows
        unfurl in site.css does the reveal. */
     .so-chapter.so-locked > .section-toggle { opacity: .35; cursor: default; }
     .so-chapter.so-locked > .section-toggle .section-chev { visibility: hidden; }
@@ -58,25 +39,6 @@
       background: var(--so-warn); opacity: .8; display: none;
     }
     .so-chapter.so-locked > .section-toggle .so-lockdot { display: inline-block; }
-
-    /* ── Threshold ── */
-    .so-lede { font-size: var(--text-md); line-height: 1.75; }
-    .so-topnote {
-      display: flex; align-items: flex-start; gap: var(--space-2);
-      max-width: 720px; margin: var(--space-4) auto;
-      background: var(--surface); border: 1px solid var(--rule-strong);
-      border-radius: var(--r-md); padding: var(--space-2) var(--space-3);
-      color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.5;
-    }
-    .so-topnote .so-topnote-mark { color: var(--so-warn); font-style: normal; flex: 0 0 auto; }
-    .so-topnote a { color: var(--gold-ink); }
-    .so-skips { text-align: center; margin-top: var(--space-2); color: var(--ink-muted); font-size: var(--text-sm); }
-    .so-quiet {
-      background: none; border: none; padding: 2px 4px; cursor: pointer;
-      font-family: var(--sans); font-size: var(--text-sm); color: var(--gold-ink);
-      border-bottom: 1px solid transparent; transition: color var(--ease), border-color var(--ease);
-    }
-    .so-quiet:hover, .so-quiet:focus-visible { color: var(--gold); border-bottom-color: currentColor; }
 
     /* ── I · One line, one coin ── */
     .so-line-stage {
@@ -105,7 +67,7 @@
     .so-line-bit.is-empty { color: transparent; border-style: dashed; opacity: .5; }
     .so-line-done { margin-top: var(--space-4); }
 
-    /* ── II · stack — 22 slots, filled as cast ── */
+    /* ── II · stack : 22 slots, filled as cast ── */
     .so-stack {
       display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2);
       max-width: 440px; margin: var(--space-4) auto;
@@ -136,13 +98,13 @@
       #soStack .so-hex { transition: box-shadow var(--ease), border-color var(--ease); }
       #soStack .so-hex:hover { transform: none; }
     }
-    /* Empty slot — not yet cast: bare dashed outline on the night ground */
+    /* Empty slot : not yet cast: bare dashed outline on the night ground */
     #soStack .so-hex.is-slot {
       background: none; box-shadow: none; border-style: dashed; border-color: var(--rule-strong);
       cursor: default;
     }
     #soStack .so-hex.is-slot:hover { border-color: var(--rule-strong); transform: none; box-shadow: none; }
-    /* The 22nd — the seal slot: parchment ghosted, waiting for chapters IV–V */
+    /* The 22nd : the seal slot: parchment ghosted, waiting for chapters IV–V */
     #soStack .so-hex.is-seal-slot { opacity: .55; cursor: default; }
     #soStack .so-hex.is-seal-slot:hover { border-color: #e3d8c4; transform: none;
       box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45); }
@@ -163,7 +125,7 @@
 
     .so-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: center; margin: var(--space-4) 0; }
 
-    /* ── III · the weave — live ribbon (partial while casting) ── */
+    /* ── III · the weave : live ribbon (partial while casting) ── */
     .so-ribbon {
       display: flex; flex-wrap: wrap; justify-content: center;
       gap: var(--space-3) var(--space-4);
@@ -183,7 +145,7 @@
       background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
     }
     .so-bit.alt { background: var(--surface-alt); }
-    .so-bit.is-cs { color: var(--so-warn); border-color: var(--so-warn); background: rgba(231,154,146,.08); }
+    .so-bit.is-cs { color: var(--so-cs); border-color: var(--so-cs); background: rgba(165,112,46,.10); }
     .so-bit.is-free { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; color: var(--gold-ink); }
     .so-bit.is-empty { color: transparent; border-style: dashed; background: none; opacity: .55; }
     /* ribbon ↔ stack linkage: hovering one lights the other */
@@ -196,15 +158,15 @@
     .so-bit.is-bad { background: rgba(231,154,146,.28); color: #fff; }
     .so-ribbon-key { flex-basis: 100%; text-align: center; margin-top: var(--space-2); }
     .so-ribbon-key .so-key-free { color: var(--gold-ink); }
-    .so-ribbon-key .so-key-cs { color: var(--so-warn); }
+    .so-ribbon-key .so-key-cs { color: var(--so-cs); }
     .so-key-free { color: var(--gold-ink); }
-    .so-key-cs { color: var(--so-warn); }
+    .so-key-cs { color: var(--so-cs); }
     @media (max-width: 560px) {
       .so-bit { width: 12px; height: 16px; font-size: .56rem; border-radius: 2px; }
       .so-ribbon { gap: var(--space-2) var(--space-3); }
     }
 
-    /* ── IV · the seal — ledger + final-hexagram diagram + tamper ── */
+    /* ── IV · the seal : ledger + final-hexagram diagram + tamper ── */
     .so-ledger {
       display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
       gap: 4px 10px; margin: var(--space-4) auto;
@@ -213,7 +175,7 @@
     }
     .so-ledger-op { color: var(--gold-ink); opacity: .7; }
     .so-ledger-free { color: var(--gold-ink); }
-    .so-ledger-cs { color: var(--so-warn); }
+    .so-ledger-cs { color: var(--so-cs); }
     .so-seal-figwrap {
       display: flex; align-items: center; justify-content: center; gap: var(--space-5);
       flex-wrap: wrap; margin: var(--space-4) 0;
@@ -229,42 +191,146 @@
       box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
     }
     .so-seal-figcap { flex: 0 1 300px; }
-    /* slot-hexagram line classes (drawn by slotHexSVG in js/seedoracle.js) —
+    /* slot-hexagram line classes (drawn by slotHexSVG in js/seedoracle.js) :
        global to the page: the seal diagram, the locked 22nd tile, and the
        chapter-I line-by-line figure all use them. */
     .so-ctx svg .so-l-free { fill: var(--gold); }
-    .so-ctx svg .so-l-cs { fill: #a5702e; }
+    .so-ctx svg .so-l-cs { fill: var(--so-cs); }
     .so-ctx svg .so-l-slot { fill: none; stroke: var(--rule-strong); stroke-dasharray: 4 3; }
     .so-ctx svg .so-l-slot-free { fill: none; stroke: var(--gold); stroke-dasharray: 4 3; }
-    .so-ctx svg .so-l-slot-cs { fill: none; stroke: #a5702e; stroke-dasharray: 4 3; }
+    .so-ctx svg .so-l-slot-cs { fill: none; stroke: var(--so-cs); stroke-dasharray: 4 3; }
     /* inside the parchment line-caster/seal tiles the plain slots read warm */
     .so-line-fig svg .so-l-slot, #soStack .so-hex svg .so-l-slot { stroke: #cbbfa4; }
 
     /* ── V · suit cards + phrase reveal ── */
-    .so-fh-opts { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: var(--space-2); justify-content: center; }
-    .so-fh-opt { font: inherit; width: 122px; box-sizing: border-box; cursor: pointer;
-      transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease); }
-    .so-fh-opt:hover { border-color: var(--gold); transform: translateY(-2px);
-      box-shadow: 0 0 0 1px var(--gold), 0 7px 18px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.5); }
-    .so-fh-opt.is-cur { box-shadow: 0 0 0 2px var(--gold), inset 0 1px 0 rgba(255,255,255,.5); }
-    @media (prefers-reduced-motion: reduce) { .so-fh-opt:hover { transform: none; } }
+    .so-fh-opts {
+      --seal-card-w: clamp(134px, 21vw, 174px);
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, var(--seal-card-w)));
+      justify-content: center;
+      gap: clamp(.75rem, 2vw, 1rem);
+      margin-top: var(--space-4);
+    }
+    .so-fh-opt {
+      position: relative;
+      overflow: hidden;
+      font: inherit;
+      width: 100%;
+      min-height: clamp(206px, 26vw, 244px);
+      box-sizing: border-box;
+      cursor: pointer;
+      padding: 12px 12px 11px;
+      border-width: 1px;
+      border-color: color-mix(in srgb, var(--suit) 18%, #e3d8c4);
+      border-radius: var(--r-md);
+      isolation: isolate;
+      transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease), filter var(--ease);
+    }
+    .so-fh-opt::before,
+    .so-fh-opt::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .so-fh-opt::before {
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 11%, color-mix(in srgb, var(--suit) 18%, transparent), transparent 31%),
+        linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,0) 38%),
+        linear-gradient(165deg, rgba(120,90,40,0) 58%, rgba(120,90,40,.10));
+      opacity: .95;
+    }
+    .so-fh-opt::after {
+      inset: 8px;
+      border: 1px solid color-mix(in srgb, var(--suit) 36%, rgba(120,90,40,.28));
+      border-radius: calc(var(--r-md) - 2px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+    }
+    .so-fh-opt:hover {
+      border-color: var(--suit);
+      transform: translateY(-4px);
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--suit) 62%, var(--gold)),
+        0 16px 32px rgba(0,0,0,.42),
+        0 0 22px color-mix(in srgb, var(--suit) 24%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.56);
+    }
+    .so-fh-opt:active { transform: translateY(-1px); }
+    .so-fh-opt.is-cur {
+      border-color: var(--gold);
+      box-shadow:
+        0 0 0 2px var(--gold),
+        0 0 0 5px rgba(199,154,84,.18),
+        0 15px 34px rgba(0,0,0,.44),
+        0 0 26px rgba(199,154,84,.46),
+        inset 0 1px 0 rgba(255,255,255,.56);
+    }
+    .so-signature-label {
+      display: block;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 5px;
+      font-family: var(--sans);
+      font-size: .58rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--suit) 68%, #8a7d60);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .so-fh-opt:hover, .so-fh-opt:active { transform: none; }
+    }
     .so-fw-count { color: var(--ink-muted); font-size: var(--text-sm); margin-bottom: var(--space-2); }
     .so-fw-count.warn { color: var(--so-warn); }
     /* the two lines a suit sets, drawn small above the pip */
-    .so-suit-lines { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; align-items: center; }
-    .so-suit-lines .so-sl-row { display: flex; gap: 3px; }
-    .so-suit-lines i { display: block; height: 3px; border-radius: 1px; background: currentColor; }
-    .so-suit-lines .so-sl-yang { width: 22px; }
-    .so-suit-lines .so-sl-yin { width: 9px; }
-    .so-suit { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-bottom: 5px; }
-    .so-suit-pip { font-size: 26px; line-height: 1; display: inline-flex; }
+    .so-suit-lines { display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px; align-items: center; }
+    .so-suit-lines .so-sl-row { display: flex; gap: 4px; }
+    .so-suit-lines i { display: block; height: 4px; border-radius: 999px; background: currentColor; }
+    .so-suit-lines .so-sl-yang { width: 34px; }
+    .so-suit-lines .so-sl-yin { width: 14px; }
+    .so-suit { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 6px; }
+    .so-suit-pip { font-size: clamp(32px, 4.4vw, 42px); line-height: 1; display: inline-flex; filter: drop-shadow(0 1px 0 rgba(255,255,255,.28)); }
     .so-suit-pip .pip-svg { width: 1em; height: 1em; }
     .so-suit-pip .pip-uni { font-size: 1em; line-height: 1; }
-    .so-suit-name { font-family: var(--serif); font-weight: 600; font-size: 1.02rem; letter-spacing: .02em; }
+    .so-suit-name { font-family: var(--serif); font-weight: 700; font-size: clamp(1.08rem, 2vw, 1.34rem); letter-spacing: 0; }
+    .so-fh-hex { position: relative; z-index: 1; margin: 3px 0 2px; }
+    .so-fh-hex svg { width: 50px; height: auto; }
+    .so-fh-opt .so-hex-name {
+      position: relative;
+      z-index: 1;
+      min-height: 2.35em;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-size: clamp(.9rem, 1.5vw, 1.03rem);
+      line-height: 1.16;
+      color: var(--card-dark);
+    }
+    .so-fh-opt .so-hex-kw {
+      position: relative;
+      z-index: 1;
+      margin-top: 5px;
+      font-family: var(--mono);
+      font-size: .64rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--suit) 48%, #8a7d60);
+    }
     .so-fh-opt.suit-red  { --suit: var(--red); }
     .so-fh-opt.suit-dark { --suit: var(--card-dark); }
     .so-fh-opt.suit-red  .so-suit-pip, .so-fh-opt.suit-red  .so-suit-name, .so-fh-opt.suit-red  .so-suit-lines { color: var(--red); }
     .so-fh-opt.suit-dark .so-suit-pip, .so-fh-opt.suit-dark .so-suit-name, .so-fh-opt.suit-dark .so-suit-lines { color: var(--card-dark); }
+    @media (max-width: 760px) {
+      .so-fh-opts { grid-template-columns: repeat(2, minmax(0, min(42vw, 168px))); }
+    }
+    @media (max-width: 390px) {
+      .so-fh-opts { gap: .6rem; }
+      .so-fh-opt { padding-inline: 9px; min-height: 204px; }
+      .so-fh-hex svg { width: 46px; }
+      .so-suit-lines .so-sl-yang { width: 30px; }
+      .so-suit-lines .so-sl-yin { width: 12px; }
+    }
 
     /* the tucked length chips (the 24·44 footnote) */
     .so-len { display: inline-flex; gap: 4px; margin-left: 8px; vertical-align: middle; }
@@ -274,13 +340,27 @@
 
     /* Mnemonic panel (the phrase reveal) */
     .so-phrase-reveal { margin-top: var(--space-5); }
-    .so-phrase-wrap { position: relative; margin-bottom: var(--space-2); }
+    .so-phrase-wrap { position: relative; max-width: 100%; margin-bottom: var(--space-2); }
     .so-phrase {
-      width: 100%; min-height: 84px; resize: vertical;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 84px;
+      resize: vertical;
       background: var(--surface); color: var(--text);
       border: 1px solid var(--border); border-radius: var(--r-md);
       padding: var(--space-3) var(--space-4); font-family: var(--mono);
       font-size: var(--text-md); line-height: 1.7; letter-spacing: .01em;
+      overflow-wrap: break-word;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .so-phrase:focus-visible {
+      border-color: var(--gold);
+      box-shadow:
+        0 0 0 2px rgba(199,154,84,.42),
+        inset 0 1px 0 rgba(255,255,255,.05);
     }
     .so-status { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-sm); }
     .so-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-muted); flex: 0 0 auto; }
@@ -290,7 +370,7 @@
     .so-status.valid .msg { color: var(--so-ok); }
     .so-status.invalid .msg { color: var(--so-warn); }
 
-    /* the payoff cascade — fired once when the reading seals */
+    /* the payoff cascade : fired once when the reading seals */
     @keyframes soSealIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .so-just-sealed #soStack .so-hex.is-sealed { animation: soSealIn .5s ease both; }
     .so-just-sealed .so-bit.is-cs,
@@ -304,12 +384,12 @@
       .so-just-sealed .so-phrase-reveal { animation: none; }
     }
 
-    /* ── VI · proof — entropy rows, SHA instrument ── */
+    /* ── VI · proof : entropy rows, SHA instrument ── */
     .so-ent-row { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--rule); }
     .so-ent-row:first-child { border-top: none; }
     .so-ent-k { color: var(--ink-muted); font-size: var(--text-sm); min-width: 140px; }
     .so-ent-v { font-family: var(--mono); font-size: var(--text-sm); color: var(--gold-ink); word-break: break-all; flex: 1 1 240px; }
-    .so-ent-v.so-ent-cs { color: var(--so-warn); }
+    .so-ent-v.so-ent-cs { color: var(--so-cs); }
 
     /* the SHA instrument (pared from the Calculator page's .sha block) */
     .so-sha { margin-top: var(--space-4); }
@@ -322,9 +402,9 @@
     }
     .so-sha-input:focus-visible { outline: none; border-color: var(--gold); }
     .so-sha-out { margin-top: var(--space-3); }
-    .so-sha-out .so-sha-hl { color: var(--so-warn); font-weight: 600; }
+    .so-sha-out .so-sha-hl { color: var(--so-cs); font-weight: 600; }
 
-    /* Geomancy CSS retired 2026-07-08 — see dev/retired/geomancy/geomancy.css.frag */
+    /* Geomancy CSS retired 2026-07-08 : see dev/retired/geomancy/geomancy.css.frag */
 
 
     /* "A curiosity, not a wallet" notice */
@@ -332,6 +412,10 @@
       background: var(--surface); border: 1px solid var(--rule-strong);
       border-radius: var(--r-md); padding: var(--space-3) var(--space-4);
       margin-bottom: var(--space-5);
+    }
+    .so-alert--top {
+      max-width: 720px;
+      margin: .7rem auto 1.2rem;
     }
     .so-alert .so-alert-h {
       display: block; font-family: var(--serif); font-size: var(--text-md);
@@ -352,9 +436,6 @@
       text-transform: uppercase; font-weight: 600; color: var(--gold-ink); padding: 0 0 var(--space-3);
     }
 
-    /* "By hand" explainer */
-    .so-howto p { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.7; margin: 0 0 var(--space-3); }
-    .so-howto .so-mono { font-family: var(--mono); color: var(--gold-ink); font-size: .82em; }
     .so-mono { font-family: var(--mono); color: var(--gold-ink); font-size: .88em; }
 
     .so-note { color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.6; }
@@ -398,7 +479,7 @@
       border-radius: var(--r-sm); padding: 5px 8px; font-family: var(--mono); font-size: var(--text-sm); }
     .so-addr-jump input:focus-visible { outline: none; border-color: var(--gold); }
 
-    /* Final-word (checksum) calculator — the seal chapter's word-tongue twin */
+    /* Final-word (checksum) calculator : the seal chapter's word-tongue twin */
     .so-fw-out { margin-top: var(--space-3); }
     .so-fw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
     .so-fw-chip {
@@ -411,7 +492,7 @@
     /* stat / counter lines */
     .so-geo-stat { margin-top: var(--space-2); font-family: var(--mono); font-size: var(--text-xs); color: var(--ink-muted); }
 
-    /* Hexagram detail popup — page-level bits site.css leaves to each page */
+    /* Hexagram detail popup : page-level bits site.css leaves to each page */
     .hx-overlay {
       display: none; position: fixed; inset: 0; z-index: 300;
       background: rgba(22,16,41,.52);
@@ -425,10 +506,10 @@
     .hx-body { flex: 1; overflow-y: auto; min-height: 0; padding: 2px 28px 22px; }
     .hx-judgment { font-family: var(--serif); font-size: 1.12rem; line-height: 1.7; color: var(--text); margin: 0; }
 
-    /* ── Geomancy (the sixteen figures) — reference row at the foot of the
+    /* ── Geomancy (the sixteen figures) : reference row at the foot of the
        page, mirroring the I Ching trigram row. Logic: js/seedoracle-geomancy.js.
        Figures are drawn as dot-glyphs (solid dot = single point, hollow ring =
-       double point) — no image files. Added 2026-07-12. */
+       double point) : no image files. Added 2026-07-12. */
     .so-geo-block { max-width: var(--max-w); margin: 0 auto; padding: .4rem 0 0; }
     .so-geo-row {
       display: flex; flex-wrap: nowrap; justify-content: center; align-items: center;

@@ -179,19 +179,24 @@ function buildAnnualGrid(age) {
 }
 
 let currentAge = 0;
+let quadAge = 0;
 function setAge(age) {
   age = Math.max(0, Math.min(89, Math.round(+age) || 0));
   currentAge = age;
+  if (typeof window.refreshInTime === 'function') window.refreshInTime();
+}
+function setQuadAge(age) {
+  age = Math.max(0, Math.min(89, Math.round(+age) || 0));
+  quadAge = age;
   const inp = document.getElementById('ageInput');
   if (inp) inp.value = age;
   buildAnnualGrid(age + 1);
-  if (typeof window.refreshInTime === 'function') window.refreshInTime();
 }
 function changeAge(d) {
-  let a = currentAge + d;
+  let a = quadAge + d;
   if (a > 89) a = 0;
   if (a < 0)  a = 89;
-  setAge(a);
+  setQuadAge(a);
 }
 
 function wireAgeScrollStep(input) {
@@ -264,8 +269,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (down) down.addEventListener('click', () => changeAge(-1));
   if (up)   up.addEventListener('click',   () => changeAge(+1));
   if (inp) {
-    inp.addEventListener('input',  function () { if (this.value !== '') setAge(this.value); });
-    inp.addEventListener('change', function () { setAge(this.value); });
+    inp.addEventListener('input',  function () { if (this.value !== '') setQuadAge(this.value); });
+    inp.addEventListener('change', function () { setQuadAge(this.value); });
     inp.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowUp')   { e.preventDefault(); changeAge(+1); }
       if (e.key === 'ArrowDown') { e.preventDefault(); changeAge(-1); }

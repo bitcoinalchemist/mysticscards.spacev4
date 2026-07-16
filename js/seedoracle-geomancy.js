@@ -1,4 +1,4 @@
-// seedoracle-geomancy.js — the sixteen geomantic figures: their data,
+// seedoracle-geomancy.js : the sixteen geomantic figures: their data,
 // the two SVG glyph renderers (compact dot-and-ring for the reference
 // row; classical dot-pair for the detail popup), and the reference row
 // itself with its click-to-open detail popup.
@@ -9,31 +9,31 @@
 // public API on window (GEO_FIGURES + GEO_FIG_SVG) and its callback to
 // the journey IIFE (window._soGeoReady) are unchanged.
 //
-// Load order: after js/seedoracle.js in seedoracle.html — the
+// Load order: after js/seedoracle.js in seedoracle.html : the
 // journey IIFE registers window._soGeoReady before this file runs, and
 // GEO_FIGURES/GEO_FIG_SVG are only read inside the journey's
 // renderEntropy() (a post-boot event handler), so being LATER is fine.
 //
 // (Comment block below carries the original notes on the encoding
 // convention + why the compact glyphs use fill/stroke instead of two
-// dots — historical context that shouldn't be lost.)
+// dots : historical context that shouldn't be lost.)
 
-// ── Geomancy — the sixteen figures. In v2.0 the row lives in the PROOF chapter
+// ── Geomancy : the sixteen figures. In v2.0 the row lives in the PROOF chapter
 // (it is the legend for the entropy readout: four lines, four bits, one hex
-// digit per figure) rather than at the top of the page — same markup, same
+// digit per figure) rather than at the top of the page : same markup, same
 // behaviour, relocated to where it is used.
 // Each figure is 4 lines read Fire·Air·Water·Earth top to bottom (the
 // classical top-down reading order); a single point is active (1), a double
-// point is passive (0) — the classical Agrippa/Golden Dawn table. hex = the
+// point is passive (0) : the classical Agrippa/Golden Dawn table. hex = the
 // 4 bits read Earth-high..Fire-low as one nibble (bottom line = the biggest
 // bit), so the row doubles as this page's entropy alphabet (each figure =
 // one hex digit of raw seed entropy) without saying "hex" anywhere in the UI
-// itself — that correspondence surfaces only in the detail panel once a
+// itself : that correspondence surfaces only in the detail panel once a
 // figure is picked. Bottom-line-is-high deliberately MATCHES this site's own
-// I Ching convention (js/iching.js: "bit0(LSB) = top, bit5(MSB) = bottom") —
+// I Ching convention (js/iching.js: "bit0(LSB) = top, bit5(MSB) = bottom") :
 // an earlier pass had this backwards (Fire/top = high bit), which put every
 // figure at a different hex value than it has now; flipped 2026-07-01 once
-// that mismatch was flagged. None of this numbering is historical geomancy —
+// that mismatch was flagged. None of this numbering is historical geomancy :
 // the figures themselves, their line patterns, and their planetary rulers
 // are the traditional Agrippa/Golden Dawn table; assigning them a 0-15 order
 // at all is a bridge this project built for the entropy-alphabet framing.
@@ -106,7 +106,7 @@
       keynote: 'The ground keeps moving. Plan for change rather than permanence.' }
   ];
   // index in GEO_FIGURES already equals its hex value (0-f); keep a hex string per entry.
-  // (order above is bottom-line-is-high binary counting: Earth=bit3, Water=bit2, Air=bit1, Fire=bit0 — see the comment block above this IIFE.)
+  // (order above is bottom-line-is-high binary counting: Earth=bit3, Water=bit2, Air=bit1, Fire=bit0 : see the comment block above this IIFE.)
   GEO_FIGURES.forEach(function (f, i) { f.hex = i.toString(16); });
   window.GEO_FIGURES = GEO_FIGURES;
   // Exposed for the proof chapter's entropy readout (each hex digit drawn as its
@@ -116,7 +116,7 @@
 
   // Each figure drawn as 4 stacked rows, one dot per row: a single point
   // reads as a SOLID dot, a double point (passive line) reads as a HOLLOW
-  // ring at the same spot — the classical geomantic single-vs-double point
+  // ring at the same spot : the classical geomantic single-vs-double point
   // distinction, kept legible at any size. An earlier version drew passive
   // lines as two dots spaced side by side (closer to the historical mark),
   // but that needs real width to read; once compressed to fit all sixteen
@@ -125,7 +125,7 @@
   // handful of px (like a radio button), so the glyph now needs only ONE
   // dot's worth of width per row instead of two, and the whole row fits at
   // full, uncompressed size even on a 375px-wide phone (verified via the
-  // page's live gap/padding values — spare room at every common breakpoint,
+  // page's live gap/padding values : spare room at every common breakpoint,
   // no shrinking needed). Distinct from the trigram/hexagram solid-vs-broken
   // BAR language used elsewhere on the site, so this still reads as its own
   // system at a glance.
@@ -151,7 +151,7 @@
   }
 
   // The original glyph: a single point drawn as one centred dot, a double
-  // point as two dots side by side — the traditional geomantic mark, spatial
+  // point as two dots side by side : the traditional geomantic mark, spatial
   // rather than fill/stroke. Only used for the large detail-panel figure,
   // which is a single glyph with plenty of room, not sixteen packed into a
   // row, so the width this needs is never a constraint there.
@@ -221,7 +221,7 @@
     cell.setAttribute('role', 'button');
     cell.setAttribute('tabindex', '0');
     cell.setAttribute('aria-pressed', 'false');
-    cell.setAttribute('aria-label', f.name + ' — show meaning');
+    cell.setAttribute('aria-label', f.name + ' : show meaning');
     cell.addEventListener('click', function () { pick(idx); });
     cell.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(idx); return; }

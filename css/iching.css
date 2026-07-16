@@ -149,7 +149,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     }
     .hist-foot button:hover { background: var(--gold-light); color: var(--text); }
     .hist-foot-msg { font-size: .66rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
-    .cast-stage { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; width: 100%; }
+    .cast-stage { display: flex; flex-direction: column; gap: .9rem; align-items: center; width: 100%; }
     .cards-row {
       display: flex; flex-direction: row; gap: clamp(3px, 1.4vw, 0.5rem); flex-wrap: nowrap;
       align-items: flex-start; min-height: 0; justify-content: center;
@@ -284,10 +284,10 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       text-transform: uppercase; color: var(--muted); transition: color var(--ease);
     }
     .fig-col:has(.hex-tile.active) .fig-label { color: var(--gold); }
-    /* Changing-lines tile: ghost the still lines so the moving (gold) lines stand out */
-    .hex-changing { --yang: rgba(26,25,22,.16); }
+    /* Changing-lines tile: ghost the still cast-lines so the moving gold lines stand out. */
+    .hex-changing { --yang: rgba(255,255,255,.24); }
     .oracle-text-placeholder {
-      max-width: 65ch; margin: 2rem auto 0; padding: 1.6rem 1.9rem;
+      max-width: 65ch; margin: .75rem auto 0; padding: .8rem 1.9rem 1.6rem;
       background: none; border: none;
       text-align: center;
     }
@@ -506,35 +506,32 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       color: var(--iching-paper-bits);
     }
 
-    /* ── Cast result tiles — white, matching the grid hexagrams ── */
+    /* ── Cast result tiles — transparent, matching the cast line markers ── */
     .hex-tile {
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
       width: 48px; height: 64px; flex-shrink: 0;
-      background:
-        linear-gradient(165deg, rgba(255,255,255,.55), rgba(255,255,255,0) 42%),
-        linear-gradient(165deg, transparent 62%, var(--iching-paper-warm)),
-        var(--card-paper);
-      border: 1px solid var(--iching-paper-border); border-radius: var(--r-md); padding: 0;
-      box-shadow: var(--iching-paper-shadow);
-      --yang: var(--card-dark); cursor: pointer;
-      transition: transform var(--iching-motion-fast) ease, box-shadow var(--iching-motion-fast) ease, border-color var(--iching-motion-fast) ease;
+      background: transparent;
+      border: 1px solid transparent; border-radius: var(--r-md); padding: 0;
+      box-shadow: none;
+      --yang: rgba(255,255,255,.78); cursor: pointer;
+      transition: transform var(--iching-motion-fast) ease, border-color var(--iching-motion-fast) ease, background var(--iching-motion-fast) ease;
     }
     .hex-tile:hover {
       border-color: var(--gold); transform: translateY(var(--iching-lift));
-      box-shadow: var(--iching-paper-shadow-hover);
+      background: color-mix(in srgb, var(--surface-alt) 32%, transparent);
     }
     .hex-tile:active { transform: scale(var(--iching-press)); }
     .hex-tile.active {
       border-color: var(--gold);
-      box-shadow: 0 0 0 2px var(--gold), inset 0 1px 0 rgba(255,255,255,.5);
+      background: color-mix(in srgb, var(--gold) 10%, transparent);
     }
     @media (prefers-reduced-motion: reduce) {
-      .hex-tile { transition: box-shadow var(--ease), border-color var(--ease); }
+      .hex-tile { transition: border-color var(--ease), background var(--ease); }
       .hex-tile:hover, .hex-tile:active { transform: none; }
     }
-    .hex-tile .kw { font-family: var(--serif); font-size: .82rem; color: var(--card-dark); line-height: 1; margin-bottom: .4rem; }
+    .hex-tile .kw { font-family: var(--serif); font-size: .82rem; color: var(--secondary); line-height: 1; margin-bottom: .4rem; }
     .hex-tile svg { margin-bottom: 0; display: block; }
-.hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--iching-paper-bits); margin-top: .3rem; letter-spacing: .05em; }
+.hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--gold); margin-top: .3rem; letter-spacing: .05em; }
 
     .asked {
       font-family: var(--serif); font-style: italic; font-size: 1.1rem;

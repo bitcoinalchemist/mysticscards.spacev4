@@ -1,38 +1,38 @@
-// seedoracle-hexagrams.js — the Seed Oracle's own hexagram + suit
+// seedoracle-hexagrams.js : the Seed Oracle's own hexagram + suit
 // renderers. Distinct from iching-hexagrams.js (that file owns the
 // I Ching page's reference grid + popup + trigrams). This one is just
 // the SVG figures + the four-suit mapping used by the seed oracle's
 // journey chapters.
 //
 // Two SVG figures that both mirror iching.html's geometry (thin
-// compact bars: lineH 5, gap 4, w 36, segW 14, rx 1.5 — all × size):
-//   • hexagramSVG(val, size)  — draws a full 6-bit value
-//   • slotHexSVG(spec, size)  — draws a partial figure from a spec
+// compact bars: lineH 5, gap 4, w 36, segW 14, rx 1.5 : all × size):
+//   • hexagramSVG(val, size)  : draws a full 6-bit value
+//   • slotHexSVG(spec, size)  : draws a partial figure from a spec
 //                               array (BOTTOM-UP: { bit, cls }),
 //                               used by the chapter I line-by-line
 //                               build and the seal diagram
 //
 // The four card suits are mapped from a hexagram's BOTTOM TWO lines
 // (bottom = MSB in this project's convention). Kept the mystic ↔
-// bitcoin bridge tight: hearts/diamonds red, clubs/spades dark — same
+// bitcoin bridge tight: hearts/diamonds red, clubs/spades dark : same
 // as the rest of the site.
 //
 // Pure math + SVG string builders, zero DOM state.
 //
 // Public API on window.SeedOracleHex:
-//   VAL_TO_KW      — 64-entry binary → King Wen bijection (mirrors iching.html)
-//   SUITS          — { hearts, clubs, diamonds, spades } → { name, sym, cls }
-//   SUIT_ORDER     — ['hearts','clubs','diamonds','spades'] (fixed display order)
-//   SUIT_PIP_SVG   — ♠/♣ inline SVGs (♥/♦ render as Unicode)
+//   VAL_TO_KW      : 64-entry binary → King Wen bijection (mirrors iching.html)
+//   SUITS          : { hearts, clubs, diamonds, spades } → { name, sym, cls }
+//   SUIT_ORDER     : ['hearts','clubs','diamonds','spades'] (fixed display order)
+//   SUIT_PIP_SVG   : ♠/♣ inline SVGs (♥/♦ render as Unicode)
 //   hexagramSVG(val, size)
 //   slotHexSVG(spec, size)
-//   suitOf(val)    — 'hearts' | 'clubs' | 'diamonds' | 'spades'
-//   suitPip(sym)   — HTML string: SVG for ♠/♣, styled span for ♥/♦
+//   suitOf(val)    : 'hearts' | 'clubs' | 'diamonds' | 'spades'
+//   suitPip(sym)   : HTML string: SVG for ♠/♣, styled span for ♥/♦
 
 (function () {
   'use strict';
 
-  // Binary value (bit5=line1/bottom … bit0=line6/top) → King Wen — same
+  // Binary value (bit5=line1/bottom … bit0=line6/top) → King Wen : same
   // constant used by iching.html; captured in the golden test so any
   // accidental divergence between the two pages trips.
   var VAL_TO_KW = [
@@ -42,7 +42,7 @@
     19,41,60,61,54,38,58,10,11,26,5,9,34,14,43,1
   ];
 
-  // Hexagram SVG from a 6-bit value — same renderer/bit-order as
+  // Hexagram SVG from a 6-bit value : same renderer/bit-order as
   // iching.html so both pages draw the same figures.
   function hexagramSVG(val, size) {
     size = size || 1;
@@ -61,7 +61,7 @@
     return '<svg width="'+w+'" height="'+svgH+'" viewBox="0 0 '+w+' '+svgH+'" aria-hidden="true">'+paths.join('')+'</svg>';
   }
 
-  // A hexagram drawn from a SPEC rather than a value — for figures that
+  // A hexagram drawn from a SPEC rather than a value : for figures that
   // are partly cast (chapter I line-by-line) or partly unknowable (the
   // seal diagram, the locked 22nd slot). spec = array of up to 6 entries,
   // BOTTOM-UP: { bit: 0|1|null, cls: ''|'free'|'cs' }. null bits draw as
@@ -91,7 +91,7 @@
   // suits (the suits are the four elements in the classic tarot link, so
   // this keeps the page's card-and-I-Ching theme). Read bottom-first:
   // yin-yin → Hearts, yin-yang → Clubs, yang-yin → Diamonds, yang-yang
-  // → Spades. Hearts/Diamonds are red, Clubs/Spades dark — the same
+  // → Spades. Hearts/Diamonds are red, Clubs/Spades dark : the same
   // suit colours as the rest of the site.
   var SUITS = {
     hearts:   { name:'Hearts',   sym:'♥', cls:'suit-red'  },

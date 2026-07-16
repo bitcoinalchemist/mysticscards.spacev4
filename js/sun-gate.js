@@ -15,7 +15,9 @@
 // the birth AstroTime it already computed for Solar Time.
 //
 // PUBLIC on window.SunGate:
-//   html(t)        -> HTML string for the three-zodiac Sun gate block
+//   html(t, centerHTML?) -> HTML string for the Sun gate block; when
+//                    centerHTML is provided the gates flank that center
+//                    block (used by Solar Time for the birth card).
 //   gateOf(lon)    -> { gate, line }
 //   sunLonAt(t)    -> tropical ecliptic longitude of the Sun (degrees)
 
@@ -84,19 +86,23 @@
     var name = HEX_NAMES[kw - 1] || '';
     return '<div class="sun-gate-tile">' +
       '<div class="sun-gate-z">' + esc(label) + '</div>' +
-      '<div class="sun-gate-fig">' + hexFigSVG(val, 0.9) + '</div>' +
+      '<div class="sun-gate-fig">' + hexFigSVG(val, 0.64) + '</div>' +
       '<div class="sun-gate-id">Gate ' + g.gate + '.' + g.line + '</div>' +
       '<div class="sun-gate-name">' + esc(kw) + ' · ' + esc(name) + '</div>' +
     '</div>';
   }
 
-  function html(t) {
+  function html(t, centerHTML) {
     if (!t || !window.Astronomy) return '';
     var lon = sunLonAt(t);
+    var center = centerHTML
+      ? '<div class="sun-gate-center">' + centerHTML + '</div>'
+      : '';
     return '<div class="sun-gate">' +
       '<div class="sun-gate-head">Personality Sun</div>' +
       '<div class="sun-gate-row">' +
         gateTile('Tropical', lon) +
+        center +
         gateTile('Sidereal', lon - ayanamsa('lahiri', t)) +
       '</div>' +
     '</div>';

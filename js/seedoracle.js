@@ -1,33 +1,33 @@
-// seedoracle.js — the Seed Oracle's journey shell. After the 2026-07-08
+// seedoracle.js : the Seed Oracle's journey shell. After the 2026-07-08
 // module split this file owns:
 //   • Chapter gating (CHAPTERS array, applyGates, raiseUnlock,
 //     renderRail, scrollToChapter)
-//   • Chapter I  — the line-by-line first hexagram build
-//   • Chapter II — the 22-slot stack (renderStack, hexCastOne/All)
-//   • Chapter III — the live bit ribbon (renderWeave, litHex, tamper toy)
-//   • Chapter IV — the seal (renderSealFig, tamper output, finalWords)
-//   • Chapter V  — the suit-seal chooser (renderSuitSeals, sealWith)
-//   • Chapter VI — the proof: entropy readout + SHA instrument
-//   • Chapter VII — under-the-hood derived addresses (lazy)
+//   • Chapter I  : the line-by-line first hexagram build
+//   • Chapter II : the 22-slot stack (renderStack, hexCastOne/All)
+//   • Chapter III : the live bit ribbon (renderWeave, litHex, tamper toy)
+//   • Chapter IV : the seal (renderSealFig, tamper output)
+//   • Chapter V  : the suit-seal chooser (renderSuitSeals, sealWith)
+//   • Chapter VI : the proof: entropy readout + SHA instrument
+//   • Chapter VII : under-the-hood derived addresses (lazy)
 //   • The hexagram detail popup (shared chrome for "read this hexagram")
 //   • Copy button, phrase input debouncer, threshold actions,
 //     deep-link + init
-// (The former 24-word reading path was retired 2026-07-08 — twelve words
+// (The former 24-word reading path was retired 2026-07-08 : twelve words
 // is now the only length this page casts. state.len stays as a variable
 // so cs / hexCount / castFree still read cleanly.)
 //
 // Reads from window (loaded in this order in seedoracle.html):
-//   window.BIP39_WORDS    — bip39-words.js  (2048-word list)
-//   window.BTC            — bip84.js       (address derivation)
-//   window.ICHING_JUDGMENTS — ichingjudgments.js
-//   window.SeedStore      — seedoracle-store.js   (unlock persistence)
-//   window.SeedOracleBitcoin — seedoracle-bitcoin.js (aliased at IIFE top)
-//   window.SeedOracleHex     — seedoracle-hexagrams.js (aliased at IIFE top)
+//   window.BIP39_WORDS    : bip39-words.js  (2048-word list)
+//   window.BTC            : bip84.js       (address derivation)
+//   window.ICHING_JUDGMENTS : ichingjudgments.js
+//   window.SeedStore      : seedoracle-store.js   (unlock persistence)
+//   window.SeedOracleBitcoin : seedoracle-bitcoin.js (aliased at IIFE top)
+//   window.SeedOracleHex     : seedoracle-hexagrams.js (aliased at IIFE top)
 
 (function () {
   'use strict';
   // Bitcoin math (BIP39, SHA-256, PBKDF2 seed) lives in
-  // js/seedoracle-bitcoin.js — window.SeedOracleBitcoin. Aliased
+  // js/seedoracle-bitcoin.js : window.SeedOracleBitcoin. Aliased
   // here so the many call sites downstream read unchanged.
   var _btc = window.SeedOracleBitcoin || {};
   var WL = _btc.WL || (window.BIP39_WORDS || []);
@@ -44,7 +44,7 @@
   function deriveSeed(mnemonic) { _btc.deriveSeed(mnemonic, document.getElementById('soSeed')); }
 
   // Hexagram SVG renderers + suit mapping live in
-  // js/seedoracle-hexagrams.js — window.SeedOracleHex. Aliased
+  // js/seedoracle-hexagrams.js : window.SeedOracleHex. Aliased
   // here so hexagramSVG / slotHexSVG / suitOf / suitPip / VAL_TO_KW
   // / SUITS / SUIT_ORDER etc. read unchanged from every call site.
   var _hex = window.SeedOracleHex || {};
@@ -66,11 +66,11 @@
 
   // ══════════════════════════════════════════════════════════════════
   // Journey state
-  //   state       — the COMMITTED (sealed) reading, as before.
-  //   _lineBits   — chapter I's first hexagram, built line by line (bottom-up).
-  //   _hexVals    — the cast in progress (hexagram 1 arrives from chapter I).
-  //   _sealed     — a valid phrase is committed (suit chosen / oracle / pasted).
-  //   _tamperOn/_tamperIdx — the chapter-IV "test the seal" toy (sandboxed:
+  //   state       : the COMMITTED (sealed) reading, as before.
+  //   _lineBits   : chapter I's first hexagram, built line by line (bottom-up).
+  //   _hexVals    : the cast in progress (hexagram 1 arrives from chapter I).
+  //   _sealed     : a valid phrase is committed (suit chosen / oracle / pasted).
+  //   _tamperOn/_tamperIdx : the chapter-IV "test the seal" toy (sandboxed:
   //                 it flips bits at DISPLAY time only, never in the state).
   // ══════════════════════════════════════════════════════════════════
   var state={ len:12, vals:[], focus:0 };
@@ -82,13 +82,13 @@
   function setStatus(ok, msg){ elStatus.className='so-status '+(ok?'valid':'invalid'); elStatus.querySelector('.msg').textContent=msg; }
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-  function hexCount(){ return state.len*11/6; }          // 22 — the reading's own count
+  function hexCount(){ return state.len*11/6; }          // 22 : the reading's own count
   function cardNeed(){ return state.len/3*32; }          // 128 entropy bits
   // How many hexagrams the visitor casts FREELY. The 22nd belongs to the seal
-  // (2 free lines + 4 checksum lines — chapters IV–V).
+  // (2 free lines + 4 checksum lines : chapters IV–V).
   function castFree(){ return state.len===12 ? hexCount()-1 : hexCount(); }
 
-  // Casts REQUIRE crypto.getRandomValues — no Math.random fallback. This page
+  // Casts REQUIRE crypto.getRandomValues : no Math.random fallback. This page
   // derives real keys from what it casts; a browser too old to have Web Crypto
   // gets a plain refusal (see init) rather than silently predictable entropy.
   var CRYPTO_OK = !!(window.crypto && window.crypto.getRandomValues);
@@ -99,20 +99,18 @@
   function castBits(){ return _hexVals.map(function(v){ return bits(v,6); }).join(''); }
   function currentWords(){ return elPhrase.value.trim().toLowerCase().split(/\s+/).filter(Boolean); }
 
-  // ══ Gating — the chapters and their unlock tiers ══
+  // ══ Gating : the chapters and their unlock tiers ══
   var CHAPTERS=[
-    { id:'threshold', label:'Threshold',      lvl:0 },
-    { id:'firstline', label:'One line',       lvl:1 },
-    { id:'mnemonic',  label:'The cast',       lvl:2 },
-    { id:'weave',     label:'The weave',      lvl:3 },
+    { id:'firstline', label:'Cast',           lvl:0 },
+    { id:'weave',     label:'The weave',      lvl:0 },
     { id:'seal',      label:'The seal',       lvl:3 },
     { id:'suitseal',  label:'The suit',       lvl:3 },
     { id:'proof',     label:'The proof',      lvl:4 },
     { id:'underhood', label:'Under the hood', lvl:4 },
-    { id:'learn',     label:'By hand',        lvl:4 }
+    { id:'learn',     label:'Credits',        lvl:4 }
   ];
   // Chapter unlock tier (0..4). Persistence lives in js/seedoracle-store.js;
-  // this file never touches localStorage directly (search for `localStorage` —
+  // this file never touches browser storage directly (storage lives in SeedStore :
   // it should have zero hits after all the extractions land).
   var _unlock = window.SeedStore ? window.SeedStore.getUnlock() : 0;
 
@@ -121,8 +119,16 @@
 
   function applyGates(openNew){
     CHAPTERS.forEach(function(c){
-      if(c.lvl===0) return;                          // the threshold is never gated
       var sec=chapterEl(c); if(!sec) return;
+      if(c.lvl===0){
+        var openBtn=sec.querySelector(':scope > .section-toggle');
+        var openBody=sec.querySelector('.section-bodymin');
+        sec.classList.remove('so-locked');
+        sec.classList.add('section-open');
+        if(openBtn){ openBtn.disabled=false; openBtn.setAttribute('aria-expanded','true'); }
+        if(openBody) openBody.inert=false;
+        return;
+      }
       var locked = c.lvl>_unlock;
       var btn=sec.querySelector(':scope > .section-toggle');
       var body=sec.querySelector('.section-bodymin');
@@ -137,7 +143,6 @@
         if(btn) btn.setAttribute('aria-expanded','true');
       }
     });
-    renderRail();
   }
   function raiseUnlock(n, msg){
     if(n<=_unlock) return;
@@ -154,21 +159,7 @@
     }
     sec.scrollIntoView({ behavior: RM?'auto':'smooth', block:'start' });
   }
-  function renderRail(){
-    var rail=document.getElementById('soRail'); if(!rail) return;
-    rail.innerHTML=CHAPTERS.map(function(c,i){
-      var locked=c.lvl>_unlock;
-      return (i?'<span class="so-rail-sep" aria-hidden="true">·</span>':'')+
-        '<button type="button" class="so-rail-item" data-ch="'+c.id+'"'+(locked?' disabled':'')+
-        ' aria-label="'+c.label+(locked?' — locked':'')+'">'+c.label+'</button>';
-    }).join('');
-  }
-  document.getElementById('soRail').addEventListener('click', function(e){
-    var b=e.target.closest('.so-rail-item'); if(!b||b.disabled) return;
-    scrollToChapter(b.getAttribute('data-ch'));
-  });
-
-  // ══ Chapter I — one line, one coin ══
+  // ══ Chapter I : the cast ══
   var elLineFig=document.getElementById('soLineFig'), elLineBits=document.getElementById('soLineBits'),
       elLineStat=document.getElementById('soLineStat'), elLineDone=document.getElementById('soLineDone'),
       elLineCast=document.getElementById('soLineCast');
@@ -181,48 +172,46 @@
       var has=i<_lineBits.length;
       return '<span class="so-line-bit'+(has?'':' is-empty')+'">'+(has?_lineBits[i]:'0')+'</span>';
     }).join('');
-    if(_lineBits.length===0){ elLineStat.textContent='no lines yet — six to throw'; }
+    if(_lineBits.length===0){ elLineStat.textContent='hexagram '+(_hexVals.length+1)+' · no lines yet'; }
     else if(_lineBits.length<6){
       var last=_lineBits[_lineBits.length-1];
-      elLineStat.textContent='line '+_lineBits.length+' of 6 — '+(last?'solid yang · 1':'broken yin · 0');
+      elLineStat.textContent='line '+_lineBits.length+' of 6: '+(last?'solid yang · 1':'broken yin · 0');
     }
     var done=_lineBits.length>=6;
-    elLineCast.disabled = done || !CRYPTO_OK;
+    elLineCast.disabled = _sealed || _hexVals.length>=castFree() || !CRYPTO_OK;
     elLineDone.hidden = !done;
     if(done){
       var val=parseInt(_lineBits.join(''),2), kw=VAL_TO_KW[val], d=JD[kw]||{};
-      elLineStat.textContent='six lines — a hexagram';
+      elLineStat.textContent='hexagram '+_hexVals.length+' complete';
       document.getElementById('soLineDoneText').innerHTML=
-        'Your six throws, read bottom-up, are <span class="so-mono">'+_lineBits.join('')+'</span> — the number '+val+
-        ' — and the figure <strong>'+escapeHtml(d.name||'')+'</strong>, hexagram '+kw+' of the King Wen sequence. '+
-        'One event, three scripts. It stands first in your reading.';
+        '<span class="so-mono">'+_lineBits.join('')+'</span> gives <strong>'+escapeHtml(d.name||'')+
+        '</strong>, King Wen '+kw+'.';
     }
   }
   elLineCast.addEventListener('click', function(){
-    if(_lineBits.length>=6) return;
+    if(_sealed || _hexVals.length>=castFree()) return;
+    if(_lineBits.length>=6) _lineBits=[];
     _lineBits.push(bitRand());
     if(_lineBits.length>=6){
       var val=parseInt(_lineBits.join(''),2);
-      _hexVals[0]=val;
-      renderAll();
-      raiseUnlock(2, 'Chapter unlocked — the cast of twenty-one');
+      _hexVals.push(val);
+      afterCastProgress();
     }
     renderLine();
   });
   document.getElementById('soLineRead').addEventListener('click', function(){
     if(_lineBits.length>=6) openHexPopup(parseInt(_lineBits.join(''),2));
   });
-  document.getElementById('soLineNext').addEventListener('click', function(){ scrollToChapter('mnemonic'); });
-
-  // ══ Chapter II — the cast of twenty-one (stack of 22 slots) ══
+  // Stack of 22 slots.
   var elHexStat=document.getElementById('soHexStat');
 
   function renderHexStat(){
     var free=castFree(), n=Math.min(_hexVals.length, free);
-    if(_sealed){ elHexStat.textContent=hexCount()+' / '+hexCount()+' hexagrams · sealed — the reading coheres'; return; }
-    if(state.len===12 && n>=free){ elHexStat.textContent='twenty-one cast · 126 lines · the twenty-second waits for the seal ↓'; return; }
+    if(_sealed){ elHexStat.textContent=hexCount()+' / '+hexCount()+' hexagrams · sealed'; return; }
+    if(n===0){ elHexStat.textContent='no hexagrams yet · line 0 of '+(state.len*11); return; }
+    if(state.len===12 && n>=free){ elHexStat.textContent='twenty-one cast · 126 lines · seal waits below'; return; }
     elHexStat.textContent='hexagram '+n+' of '+hexCount()+' · line '+(n*6)+' of '+(state.len*11);
-    if(n===0 && _lineBits.length>0 && _lineBits.length<6) elHexStat.textContent='finishing hexagram 1 above — line '+_lineBits.length+' of 6';
+    if(n===0 && _lineBits.length>0 && _lineBits.length<6) elHexStat.textContent='finishing hexagram 1 above : line '+_lineBits.length+' of 6';
   }
 
   function renderStack(){
@@ -246,8 +235,8 @@
         inner=slotHexSVG([{bit:null,cls:'free'},{bit:null,cls:'free'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'}],0.72)+
               '<div class="so-hex-kw">seal</div>';
         attrs=ready
-          ? ' role="button" tabindex="0" data-act="to-seal" aria-label="The twenty-second hexagram — the seal. Opens chapter four."'
-          : ' aria-label="The twenty-second hexagram — the seal. Cast the first twenty-one to reach it." title="the seal — cast the first twenty-one"';
+          ? ' role="button" tabindex="0" data-act="to-seal" aria-label="The twenty-second hexagram, the seal. Opens chapter four."'
+          : ' aria-label="The twenty-second hexagram, the seal. Cast the first twenty-one to reach it." title="the seal, cast the first twenty-one"';
       } else {
         cls+=' is-slot';
         inner='';
@@ -275,9 +264,16 @@
     e.preventDefault(); stackActivate(el);
   });
 
+  function adoptFirstHex(v){
+    if(_hexVals.length) return;
+    _hexVals[0]=v;
+    _lineBits=bits(v,6).split('').map(Number);
+  }
   function hexCastOne(){
     if(_sealed || _hexVals.length>=castFree()) return;
-    _hexVals.push(hexRand());
+    var v=hexRand();
+    if(_hexVals.length===0) adoptFirstHex(v);
+    else _hexVals.push(v);
     afterCastProgress();
   }
   function hexCastAll(){
@@ -286,18 +282,18 @@
     afterCastProgress();
   }
   function afterCastProgress(){
-    renderAll();
+    renderLine(); renderAll();
     if(_hexVals.length>=castFree()){
-      raiseUnlock(3, 'Chapters unlocked — the weave, the seal, and the suit');
+      raiseUnlock(3, 'Chapters unlocked: the weave, the seal, and the suit');
     }
   }
   document.getElementById('soHexOne').addEventListener('click', hexCastOne);
   document.getElementById('soHexAll').addEventListener('click', hexCastAll);
 
-  // ══ Chapter III — the weave (live ribbon, partial while casting) ══
+  // ══ Chapter III : the weave (live ribbon, partial while casting) ══
   function tamperView(bstr){
     // returns { bits, req, claim, ok } for the CURRENT display bits with the
-    // tampered cell flipped — display-only, never touches the state.
+    // tampered cell flipped : display-only, never touches the state.
     var ENT=cardNeed();
     var b=bstr.split(''); b[_tamperIdx]=(b[_tamperIdx]==='1'?'0':'1'); b=b.join('');
     var entBits=b.slice(0,ENT), claim=b.slice(ENT), bytes=[];
@@ -328,14 +324,14 @@
       }
       var label;
       if(complete){ label=(w+1)+' · '+WL[parseInt(have.slice(w*11,w*11+11),2)]; }
-      else if(have.length>w*11){ label='<span class="is-starving">'+(w+1)+' · starving — '+(11-(have.length-w*11))+' short</span>'; }
-      else { label=(w+1)+' · —'; }
+      else if(have.length>w*11){ label='<span class="is-starving">'+(w+1)+' · '+(11-(have.length-w*11))+' short</span>'; }
+      else { label=(w+1)+' · -'; }
       html+='<span class="so-word-group"><span class="so-word-label">'+label+'</span><span class="so-bit-row">'+cells+'</span></span>';
     }
     html+='<p class="so-note so-ribbon-key">'+
       (isTwelve
-        ? 'Each band of shading is one hexagram. The <span class="so-key-free">gold-edged cells</span> are the two free lines you seal with a suit; the <span class="so-key-cs">amber tail</span> is the checksum'+(_sealed?'.':' — both still waiting.')
-        : 'Each band of shading is one hexagram. The <span class="so-key-cs">amber tail</span> is the checksum — at this length it claims the final hexagram whole, so there is no element seal.')+
+        ? '<span class="so-key-free">Gold</span>: your suit. <span class="so-key-cs">Amber</span>: checksum'+(_sealed?'.':'.')
+        : '<span class="so-key-cs">Amber</span>: checksum.')+
       '</p>';
     box.innerHTML=html;
     box.classList.toggle('is-tamper', _sealed && _tamperOn);
@@ -363,7 +359,7 @@
     });
   })();
 
-  // ══ Chapter IV — the seal ══
+  // ══ Chapter IV : the seal ══
   function renderSealFig(){
     var box=document.getElementById('soSealFig'), cap=document.getElementById('soSealFigCap');
     if(!box) return;
@@ -372,12 +368,12 @@
       var spec=[];
       for(var i=0;i<6;i++) spec.push({ bit:(v>>(5-i))&1, cls:(i<2?'free':'cs') });
       box.innerHTML=slotHexSVG(spec, 2);
-      cap.innerHTML='Your final hexagram — <strong>'+escapeHtml(d.name||'')+'</strong>, King Wen '+kw+'. The '+
-        '<span class="so-key-free">two gold lines</span> are yours ('+SUITS[suitOf(v)].name+'); the '+
-        '<span class="so-key-cs">four amber</span> are the mathematics’ — the first four bits of SHA-256 over everything you cast.';
+      cap.innerHTML='Your final hexagram: <strong>'+escapeHtml(d.name||'')+'</strong>, King Wen '+kw+'. '+
+        '<span class="so-key-free">Gold</span>: '+SUITS[suitOf(v)].name+'. '+
+        '<span class="so-key-cs">Amber</span>: SHA-256 checksum.';
     } else {
       box.innerHTML=slotHexSVG([{bit:null,cls:'free'},{bit:null,cls:'free'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'},{bit:null,cls:'cs'}], 2);
-      cap.innerHTML='The twenty-second hexagram: its <span class="so-key-cs">top four lines</span> are the seal — the mathematics’ hand. Its <span class="so-key-free">bottom two</span> are the last free lines. They are covered next.';
+      cap.innerHTML='The twenty-second hexagram: <span class="so-key-free">bottom two</span> yours, <span class="so-key-cs">top four</span> checksum.';
     }
   }
   function updateTamperVis(){
@@ -388,67 +384,21 @@
   function renderTamperOut(){
     var out=document.getElementById('soTamperOut'); if(!out) return;
     if(!(_sealed && _tamperOn)){ out.textContent=''; return; }
-    if(_tamperIdx<0){ out.textContent='the true cast — valid · tap any cell to flip one line'; return; }
+    if(_tamperIdx<0){ out.textContent='true cast · valid · tap any cell to flip one line'; return; }
     var t=tamperView(phraseToBits(currentWords()));
     out.textContent = t.ok
-      ? 'still coheres — you flipped a checksum-and-entropy pair that happens to agree (rare — 1 in 16)'
-      : 'does not cohere — the seal demands '+t.req+' but the reading claims '+t.claim;
+      ? 'still coheres. Rare, 1 in 16.'
+      : 'does not cohere. Seal wants '+t.req+', reading claims '+t.claim;
   }
   document.getElementById('soTamper').addEventListener('click', function(){
     if(!_sealed) return;
     _tamperOn=!_tamperOn; _tamperIdx=-1;
     this.setAttribute('aria-pressed', _tamperOn?'true':'false');
-    this.textContent=_tamperOn?'Leave the test — restore the true cast':'Test the seal — flip a line';
+    this.textContent=_tamperOn?'Leave the test, restore the true cast':'Test the seal: flip a line';
     renderWeave(); renderTamperOut();
   });
 
-  // ── final-word (checksum) calculator — the seal chapter's word-tongue twin ──
-  // The last word of a BIP39 12-word seed is partly free entropy, partly
-  // checksum, so only 128 of the 2048 words validly complete any given
-  // 11-word prefix (7 free + 4 checksum bits).
-  function finalWords(prefix){
-    var n = prefix.length + 1;
-    if (n !== 12) return { error: 'Enter exactly ' + (state.len-1) + ' words (all but the final one) — for a ' + state.len + '-word seed.' };
-    var bad = prefix.filter(function(w){ return !(w in IDX); });
-    if (bad.length) return { error: 'Not in the BIP39 word list: ' + bad.slice(0,4).join(', ') + (bad.length>4?'…':'') };
-    var pbits = prefix.map(function(w){ return bits(IDX[w],11); }).join('');
-    var ENT = n*11*32/33, CS = ENT/32, kFree = ENT - pbits.length;
-    var out = [];
-    for (var x=0; x < (1<<kFree); x++){
-      var entBits = pbits + bits(x, kFree), bytes = [];
-      for (var i=0; i<ENT; i+=8) bytes.push(parseInt(entBits.slice(i, i+8), 2));
-      var h = sha256Bytes(new Uint8Array(bytes));
-      out.push(WL[parseInt(bits(x, kFree) + bits(h[0],8).slice(0, CS), 2)]);
-    }
-    return { words: out };
-  }
-  var elFwIn=document.getElementById('soFwIn'), elFwOut=document.getElementById('soFwOut'), elFwN=document.getElementById('soFwN');
-  function seedFinalWordDemo(){            // prefill the demo with the current cast's first n-1 words
-    if(!elFwIn) return;
-    var ws=elPhrase.value.trim().split(/\s+/).filter(Boolean);
-    if(ws.length>=2){ elFwIn.value=ws.slice(0, ws.length-1).join(' '); elFwN.textContent=(ws.length-1); }
-    elFwOut.innerHTML='';
-  }
-  function runFinalWords(){
-    var prefix=elFwIn.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    var r=finalWords(prefix);
-    if(r.error){ elFwOut.innerHTML='<p class="so-fw-count warn">'+r.error+'</p>'; return; }
-    var chips=r.words.map(function(w){ return '<button type="button" class="so-fw-chip">'+w+'</button>'; }).join('');
-    elFwOut.innerHTML='<p class="so-fw-count">'+r.words.length+' words complete this into a valid '+(prefix.length+1)+'-word seed — choose one:</p>'+
-      '<div class="so-fw-chips">'+chips+'</div>';
-  }
-  if(elFwIn){
-    document.getElementById('soFwGo').addEventListener('click', runFinalWords);
-    elFwOut.addEventListener('click', function(e){
-      var chip=e.target.closest('.so-fw-chip'); if(!chip) return;
-      var prefix=elFwIn.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      elPhrase.value=prefix.concat(chip.textContent).join(' ');
-      state.focus=0; syncFromPhrase(); seedFinalWordDemo();
-      elPhrase.scrollIntoView({ behavior:RM?'auto':'smooth', block:'center' });
-    });
-  }
-
-  // ── final-hexagram (checksum) calculator — the hexagram-native sibling ──
+  // ── final-hexagram (checksum) calculator : the hexagram-native sibling ──
   // Brute-force all 64 possible last hexagrams; keep those whose full bit-string
   // (prefix + this hexagram) carries a valid BIP39 checksum. Twelve-word
   // reading only.
@@ -467,7 +417,7 @@
     return { vals: out };
   }
 
-  // ══ Chapter V — the suit seal (the climax) ══
+  // ══ Chapter V : the suit seal (the climax) ══
   var elFhOut=document.getElementById('soFhOut');
   function suitLinesHTML(v){
     // the two lines this seal sets, drawn as the hexagram will carry them:
@@ -479,7 +429,7 @@
   function renderSuitSeals(){
     if(!elFhOut) return;
     if(state.len!==12){
-      elFhOut.innerHTML='<p class="so-fw-count">At this length the seal claims the final hexagram whole — the oracle casts and seals all forty-four itself. No suit to choose; switch back to 12 · 22 for the choice.</p>';
+      elFhOut.innerHTML='<p class="so-fw-count">No suit choice at this length.</p>';
       document.getElementById('soOracle').hidden=true;
       return;
     }
@@ -490,7 +440,7 @@
     }
     var r=finalHexagrams(_hexVals.slice(0,castFree()));
     if(r.error || !r.vals || r.vals.length!==4){
-      elFhOut.innerHTML='<p class="so-fw-count warn">'+(r.error||'The cast does not resolve to four seals — re-cast and try again.')+'</p>';
+      elFhOut.innerHTML='<p class="so-fw-count warn">'+(r.error||'No four-seal result. Re-cast and try again.')+'</p>';
       return;
     }
     var cur=_sealed ? state.vals[state.vals.length-1] : null;
@@ -498,10 +448,11 @@
     var opts=vals.map(function(v){
       var kw=VAL_TO_KW[v], d=JD[kw]||{}, key=suitOf(v), s=SUITS[key];
       return '<button type="button" class="so-hex so-fh-opt '+s.cls+(v===cur?' is-cur':'')+'" data-v="'+v+'" '+
-        'aria-label="Seal with '+s.name+' — '+(d.name||'')+', hexagram '+kw+(v===cur?', your chosen seal':'')+'">'+
+        'aria-label="Seal with '+s.name+': '+(d.name||'')+', hexagram '+kw+(v===cur?', your chosen seal':'')+'">'+
+        '<span class="so-signature-label">Sign with</span>'+
         '<div class="so-suit">'+suitLinesHTML(v)+'<span class="so-suit-pip">'+suitPip(s.sym)+'</span><span class="so-suit-name">'+s.name+'</span></div>'+
-        hexagramSVG(v,1.25)+'<div class="so-hex-name">'+(d.name||'—')+'</div>'+
-        '<div class="so-hex-kw">'+kw+'</div></button>';
+        '<div class="so-fh-hex">'+hexagramSVG(v,1.35)+'</div><div class="so-hex-name">'+(d.name||'-')+'</div>'+
+        '<div class="so-hex-kw">King Wen '+kw+'</div></button>';
     }).join('');
     elFhOut.innerHTML='<div class="so-fh-opts">'+opts+'</div>';
   }
@@ -524,7 +475,7 @@
     state.vals=_hexVals.slice(0,castFree()).concat(v);
     _sealed=true;
     syncFromVals();
-    raiseUnlock(4, 'Sealed — the reading coheres. The proof and the machinery are open.');
+    raiseUnlock(4, 'Sealed. Proof is open.');
     // the payoff cascade: 22nd hexagram assembles → seal cells fill → twelfth
     // word resolves → the phrase breathes in (pure CSS, skipped under reduced motion)
     if(!RM){
@@ -532,13 +483,13 @@
       setTimeout(function(){ document.body.classList.remove('so-just-sealed'); }, 1600);
     }
     announce(byOracle
-      ? 'The oracle threw '+SUITS[suitOf(v)].name+' — the reading is sealed.'
-      : 'Sealed with '+SUITS[suitOf(v)].name+' — the reading coheres.');
+      ? 'The oracle threw '+SUITS[suitOf(v)].name+'. Sealed.'
+      : 'Sealed with '+SUITS[suitOf(v)].name+'.');
     elPhrase.scrollIntoView({ behavior:RM?'auto':'smooth', block:'center' });
   }
 
   // (commitOracle + hexBitsToSeed retired 2026-07-08 alongside the
-  // 24-word path — the twelve-word reading always leaves the seal to
+  // 24-word path : the twelve-word reading always leaves the seal to
   // sealWith() via the suit chooser.)
 
   // ══ Sync (words ↔ hexagrams) ══
@@ -546,7 +497,7 @@
     var words=valsToWords(state.vals);
     elPhrase.value=words.join(' ');
     var r=checkPhrase(words);
-    setStatus(r.ok, r.ok?'Valid checksum — a coherent reading':'Lines do not yet cohere (checksum) — keep adjusting');
+    setStatus(r.ok, r.ok?'Valid checksum':'Checksum mismatch');
     refreshDisplays(r);
   }
   function syncFromPhrase(){        // words → hexagrams (forward direction)
@@ -556,24 +507,24 @@
       state.len=words.length; state.vals=phraseToVals(words); syncLenButtons();
       // sync the cast surface to the phrase either way: a VALID phrase is a
       // sealed reading (open the journey); an invalid one becomes a cast in
-      // progress — the suit chooser then offers the seals that would repair it.
+      // progress : the suit chooser then offers the seals that would repair it.
       _hexVals=state.vals.slice(0, castFree());
       _lineBits=state.vals.length ? bits(state.vals[0],6).split('').map(Number) : [];
       _sealed=r.ok;
-      if(r.ok) raiseUnlock(4, 'A coherent reading — every chapter is open.');
+      if(r.ok) raiseUnlock(4, 'Valid reading. Every chapter is open.');
     } else if(words.length){ _sealed=false; }
-    setStatus(r.ok, r.ok?'Valid checksum — a coherent reading':('Invalid: '+r.reason));
+    setStatus(r.ok, r.ok?'Valid checksum':('Invalid: '+r.reason));
     refreshDisplays(r);
   }
   function refreshDisplays(r){
     renderLine(); renderStack(); renderHexStat(); renderWeave(); renderSealFig(); renderSuitSeals();
     updateTamperVis(); renderTamperOut(); renderEntropy(); renderAddresses();
-    if(r && r.ok){ deriveSeed(elPhrase.value.trim()); seedFinalWordDemo(); }
-    else document.getElementById('soSeed').textContent='—';
+    if(r && r.ok){ deriveSeed(elPhrase.value.trim()); }
+    else document.getElementById('soSeed').textContent='-';
   }
   function renderAll(){ renderStack(); renderHexStat(); renderWeave(); renderSealFig(); renderSuitSeals(); updateTamperVis(); }
 
-  // ══ Chapter VI — the proof ══
+  // ══ Chapter VI : the proof ══
   // The bits under the words: raw entropy (hex + binary) and the checksum,
   // split so entropy + checksum = words × 11. Mirrors iancoleman's entropy view.
   function renderEntropy(){
@@ -584,16 +535,16 @@
     var eb=r.entBytes, hex=''; for(var i=0;i<eb.length;i++) hex+=('0'+eb[i].toString(16)).slice(-2);
     var all=phraseToBits(words), entLen=eb.length*8, entBin=all.slice(0,entLen), csBin=all.slice(entLen);
     function grp(s,n){ return s.replace(new RegExp('(.{'+n+'})','g'),'$1 ').trim(); }
-    var geo=''; // geomancy row retired 2026-07-08 — see dev/retired/geomancy/
+    var geo=''; // geomancy row retired 2026-07-08 : see dev/retired/geomancy/
     box.innerHTML=
       '<div class="so-ent-row"><span class="so-ent-k">Entropy · hex</span><span class="so-ent-v">'+hex+'</span></div>'+
       '<div class="so-ent-row"><span class="so-ent-k">Entropy · '+entLen+' bits</span><span class="so-ent-v">'+grp(entBin,8)+'</span></div>'+
       '<div class="so-ent-row"><span class="so-ent-k">Checksum · '+csBin.length+' bits</span><span class="so-ent-v so-ent-cs">'+csBin+'</span></div>'+
-      '<p class="so-note" style="margin-top:var(--space-2)">'+entLen+' entropy + '+csBin.length+' checksum = '+(entLen+csBin.length)+' bits = '+words.length+' words × 11. The checksum is the leading '+csBin.length+' bits of SHA-256(entropy).</p>'+
+      '<p class="so-note" style="margin-top:var(--space-2)">'+entLen+' entropy + '+csBin.length+' checksum = '+(entLen+csBin.length)+' bits.</p>'+
       geo;
   }
 
-  // The SHA instrument — hash any hex bytes; highlight the first CS bits so the
+  // The SHA instrument : hash any hex bytes; highlight the first CS bits so the
   // seal can be checked by hand against the final hexagram's amber lines.
   (function(){
     var inp=document.getElementById('soShaIn'), err=document.getElementById('soShaErr'),
@@ -607,11 +558,11 @@
     }
     document.getElementById('soShaFrom').addEventListener('click', function(){
       var h=entropyHex();
-      if(h){ inp.value=h; err.textContent=''; } else err.textContent='seal a reading first — then its entropy lands here';
+      if(h){ inp.value=h; err.textContent=''; } else err.textContent='seal a reading first';
     });
     document.getElementById('soShaGo').addEventListener('click', function(){
       var v=inp.value.trim().toLowerCase().replace(/\s+/g,'');
-      if(!v || !/^[0-9a-f]+$/.test(v) || v.length%2){ err.textContent='hex bytes only — an even count of 0-9 a-f'; out.hidden=true; return; }
+      if(!v || !/^[0-9a-f]+$/.test(v) || v.length%2){ err.textContent='hex bytes only, even count of 0-9 a-f'; out.hidden=true; return; }
       err.textContent='';
       var bytes=new Uint8Array(v.length/2);
       for(var i=0;i<v.length;i+=2) bytes[i/2]=parseInt(v.slice(i,i+2),16);
@@ -623,7 +574,7 @@
       document.getElementById('soShaBits').innerHTML='<span class="so-sha-hl">'+b8.slice(0,cs)+'</span>'+b8.slice(cs);
       var match=document.getElementById('soShaMatch');
       if(_sealed && v===entropyHex()){
-        match.innerHTML='And <span class="so-sha-hl">'+b8.slice(0,cs)+'</span> is exactly your seal — the top four lines of hexagram twenty-two. You made both halves of that match.';
+        match.innerHTML='<span class="so-sha-hl">'+b8.slice(0,cs)+'</span> matches the seal.';
       } else {
         match.textContent='The highlighted bits are the seal any 128-bit entropy demands of its final lines.';
       }
@@ -631,7 +582,7 @@
     });
   })();
 
-  // ══ Chapter VII — under the hood: derived addresses (lazy) ══
+  // ══ Chapter VII : under the hood: derived addresses (lazy) ══
   // Progressive: show the first receiving address; "See more" lists the first 10
   // (index + truncated address); selecting one loads its full keys into the detail
   // panel. The 64-byte seed is PBKDF2'd once and cached, so the 10 children are
@@ -643,7 +594,7 @@
   function addrRow(k,v){ return '<div class="so-addr-row"><span class="so-addr-k">'+k+'</span><span class="so-addr-v">'+v+'</span></div>'; }
   function addrTrunc(s){ return s.length > 30 ? s.slice(0,16)+'…'+s.slice(-8) : s; }
   function addrDetailHTML(a, idx){
-    return '<p class="so-note">Receiving address #'+idx+' · '+a.label+' — <code>'+a.path+'</code>. The private key is shown in full; this is a toy, never fund it.</p>'+
+    return '<p class="so-note">Receiving address #'+idx+' · '+a.label+' · <code>'+a.path+'</code>. Never fund it.</p>'+
       addrRow('Address', a.address)+addrRow('Public key', a.pubkey)+addrRow('Private key (WIF)', a.wif);
   }
   function paintAddr(box){
@@ -660,7 +611,7 @@
         rows+='<button type="button" class="so-addr-item'+(i===_addr.sel?' is-sel':'')+'" data-i="'+i+'" aria-pressed="'+(i===_addr.sel?'true':'false')+'">'+
           '<span class="so-addr-idx">'+i+'</span><span class="so-addr-mono">'+addrTrunc(ai.address)+'</span></button>';
       }
-      html+='<div class="so-addr-listhead">Receiving addresses — select one to load its keys</div>'+
+      html+='<div class="so-addr-listhead">Receiving addresses. Select one to load its keys.</div>'+
             '<div class="so-addr-list">'+rows+'</div>'+
             '<div class="so-addr-nav">'+
               '<button type="button" class="so-addr-pg" data-d="-10" aria-label="Previous 10"'+(off<=0?' disabled':'')+'>‹ 10</button>'+
@@ -682,7 +633,7 @@
     var phrase=words.join(' '), key=phrase+'|'+scheme;
     if(_addr.key!==key){ _addr.key=key; _addr.sel=0; _addr.shown=false; _addr.buf=null; _addr.off=0; }   // reset on phrase/type change
     if(_addr.buf){ paintAddr(box); return; }                                                  // seed cached → repaint sync
-    box.innerHTML='<p class="so-note">Deriving…</p>';
+    box.innerHTML='<p class="so-note">Deriving...</p>';
     var token=++_addrToken, enc=new TextEncoder();
     crypto.subtle.importKey('raw', enc.encode(phrase.normalize('NFKD')), {name:'PBKDF2'}, false, ['deriveBits'])
       .then(function(k){ return crypto.subtle.deriveBits({name:'PBKDF2', salt:enc.encode('mnemonic'), iterations:2048, hash:'SHA-512'}, k, 512); })
@@ -731,34 +682,23 @@
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && document.getElementById('hxOverlay').classList.contains('open')) closeHexPopup(); });
 
   // ══ controls ══
-  // (Length switcher retired 2026-07-08 — twelve words is the only reading now.
+  // (Length switcher retired 2026-07-08 : twelve words is the only reading now.
   // syncLenButtons kept as a no-op so the sync-from-phrase path still calls
   // through cleanly; it also lets any future length-toggle drop back in with
   // no other call-site changes.)
   function syncLenButtons(){}
-  document.getElementById('soCopy').addEventListener('click', function(){ if(navigator.clipboard) navigator.clipboard.writeText(elPhrase.value); });
   var t; elPhrase.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(syncFromPhrase, 250); });
 
-  // threshold actions
-  document.getElementById('soBegin').addEventListener('click', function(){
-    raiseUnlock(1, 'Chapter unlocked — one line, one coin');
-    scrollToChapter('firstline');
-  });
-  document.getElementById('soSkip').addEventListener('click', function(){
-    raiseUnlock(4, 'Every chapter is open.');
-  });
-  document.getElementById('soHavePhrase').addEventListener('click', function(){
-    raiseUnlock(4, 'Every chapter is open — paste your phrase.');
-    scrollToChapter('suitseal');
-    setTimeout(function(){ elPhrase.focus(); }, RM?0:450);
-  });
-  document.getElementById('soCaveatLink').addEventListener('click', function(e){
-    e.preventDefault();
-    raiseUnlock(4);   // the caution must always be reachable — safety outranks ceremony
-    var sec=document.getElementById('learn');
-    if(sec && !sec.classList.contains('section-open')) window.toggleSection && window.toggleSection('learn');
-    scrollToChapter('learn');
-  });
+  var caveatLink = document.getElementById('soCaveatLink');
+  if (caveatLink) {
+    caveatLink.addEventListener('click', function(e){
+      e.preventDefault();
+      raiseUnlock(4);   // the caution must always be reachable: safety outranks ceremony
+      var sec=document.getElementById('learn');
+      if(sec && !sec.classList.contains('section-open')) window.toggleSection && window.toggleSection('learn');
+      scrollToChapter('learn');
+    });
+  }
 
   // ══ init ══
   function init(){
@@ -770,7 +710,7 @@
     renderLine(); renderAll();
     if(WL.length!==2048){ setStatus(false,'word list failed to load'); }
     else if(!CRYPTO_OK){
-      setStatus(false,'Casting needs secure randomness (crypto.getRandomValues) — please use a current browser');
+      setStatus(false,'Casting needs secure randomness. Please use a current browser.');
       ['soLineCast','soHexOne','soHexAll','soOracle'].forEach(function(id){ var b=document.getElementById(id); if(b) b.disabled=true; });
     }
   }
@@ -780,7 +720,6 @@
   else init();
 })();
 
-// Geomancy (data + row + popup) retired 2026-07-08 — see
+// Geomancy (data + row + popup) retired 2026-07-08 : see
 // dev/retired/geomancy/ for the module, CSS/HTML fragments, and hook
 // stubs if we ever want it back.
-
