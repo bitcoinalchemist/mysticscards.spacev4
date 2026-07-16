@@ -121,7 +121,7 @@
     CHAPTERS.forEach(function(c){
       var sec=chapterEl(c); if(!sec) return;
       if(c.lvl===0){
-        var openBtn=sec.querySelector(':scope > .section-toggle');
+        var openBtn=sec.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
         var openBody=sec.querySelector('.section-bodymin');
         sec.classList.remove('so-locked');
         sec.classList.add('section-open');
@@ -130,7 +130,7 @@
         return;
       }
       var locked = c.lvl>_unlock;
-      var btn=sec.querySelector(':scope > .section-toggle');
+      var btn=sec.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
       var body=sec.querySelector('.section-bodymin');
       sec.classList.toggle('so-locked', locked);
       if(btn) btn.disabled=locked;
@@ -154,7 +154,7 @@
   }
   function scrollToChapter(id){
     var sec=document.getElementById(id); if(!sec) return;
-    if(!sec.classList.contains('section-open') && sec.querySelector(':scope > .section-toggle') && !sec.classList.contains('so-locked')){
+    if(!sec.classList.contains('section-open') && sec.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle') && !sec.classList.contains('so-locked')){
       window.toggleSection && window.toggleSection(id);
     }
     sec.scrollIntoView({ behavior: RM?'auto':'smooth', block:'start' });

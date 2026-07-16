@@ -191,20 +191,28 @@
     var section = document.getElementById(id);
     if (!section) return;
     var open = section.classList.toggle('section-open');
-    var b = section.querySelector(':scope > .section-toggle');
+    var b = section.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
+    var body = section.querySelector(':scope > .section-bodywrap > .section-bodymin');
     if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (body) body.inert = !open;
     try { localStorage.setItem('mc-section-' + id, open ? '1' : '0'); } catch (e) {}
   };
+  document.addEventListener('click', function (e) {
+    var toggle = e.target && e.target.closest && e.target.closest('.section-toggle[data-section]');
+    if (toggle) window.toggleSection(toggle.getAttribute('data-section'));
+  });
   function _restoreSections() {
     document.querySelectorAll('.page-section').forEach(function (section) {
-      if (!section.querySelector(':scope > .section-toggle')) return;
+      var b = section.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
+      if (!b) return;
       var saved = null;
       try { saved = localStorage.getItem('mc-section-' + section.id); } catch (e) {}
       var startClosed = section.classList.contains('section-start-closed');
       var open = saved !== null ? (saved !== '0') : !startClosed;
       section.classList.toggle('section-open', open);
-      var b = section.querySelector(':scope > .section-toggle');
       if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var body = section.querySelector(':scope > .section-bodywrap > .section-bodymin');
+      if (body) body.inert = !open;
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _restoreSections);

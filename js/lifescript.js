@@ -23,10 +23,12 @@
   'use strict';
 
   const SUIT_FROM_SYM = { '♥':'hearts', '♦':'diamonds', '♣':'clubs', '♠':'spades' };
+  // Primary sign rulers use modern outer-planet rulerships. The decan
+  // tables below intentionally retain their classical/traditional system.
   const ZODIAC = [
     { name: 'Capricorn', glyph: '♑', ruler: 'Saturn', start: [12, 22], end: [1, 19] },
-    { name: 'Aquarius', glyph: '♒', ruler: 'Saturn', start: [1, 20], end: [2, 18] },
-    { name: 'Pisces', glyph: '♓', ruler: 'Jupiter', start: [2, 19], end: [3, 20] },
+    { name: 'Aquarius', glyph: '♒', ruler: 'Uranus', start: [1, 20], end: [2, 18] },
+    { name: 'Pisces', glyph: '♓', ruler: 'Neptune', start: [2, 19], end: [3, 20] },
     { name: 'Aries', glyph: '♈', ruler: 'Mars', start: [3, 21], end: [4, 19] },
     { name: 'Taurus', glyph: '♉', ruler: 'Venus', start: [4, 20], end: [5, 20] },
     { name: 'Gemini', glyph: '♊', ruler: 'Mercury', start: [5, 21], end: [6, 20] },
@@ -417,7 +419,7 @@
     const elements = document.getElementById('elements');
     if (elements) {
       elements.classList.add('section-open');
-      const toggle = elements.querySelector(':scope > .section-toggle');
+      const toggle = elements.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
       if (toggle) toggle.setAttribute('aria-expanded', 'true');
     }
     if (typeof window.showPlanet === 'function') window.showPlanet(planet);

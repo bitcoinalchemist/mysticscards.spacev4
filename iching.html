@@ -13,17 +13,26 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="canonical" href="https://mysticscards.space/iching.html" />
   <meta name="theme-color" content="#100c1e" />
-  <meta name="version" content="2026-07-11" />
+  <meta name="version" content="2026-07-16b" />
   <meta name="description" content="Cast an I Ching reading with playing cards and explore all 64 hexagrams." />
-  <link rel="stylesheet" href="css/site.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mysticscards.space/iching.html" />
+  <meta property="og:title" content="I Ching Oracle — mysticscards.space" />
+  <meta property="og:description" content="Cast an I Ching reading with playing cards and explore all 64 hexagrams." />
+  <meta property="og:image" content="https://mysticscards.space/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="I Ching Oracle — mysticscards.space" />
+  <meta name="twitter:description" content="Cast an I Ching reading with playing cards and explore all 64 hexagrams." />
+  <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
+  <link rel="stylesheet" href="css/site.css?v=20260716d" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/iching.css?v=20260715a" />
+  <link rel="stylesheet" href="css/iching.css?v=20260716a" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
 <script src="js/stars.js"></script>
-<script src="js/site.js"></script>
+<script src="js/site.js?v=20260716d"></script>
 
 <main>
 <h1 class="vh">I Ching Oracle</h1>
@@ -31,13 +40,15 @@
 <div class="page-content page-section iching-page-content">
 
 <!-- ── Oracle ── -->
-<section class="oracle page-section section-open" id="oracle">
+<section class="oracle page-section section-open" id="oracle" aria-labelledby="oracleHeading">
+  <h2 class="section-heading" id="oracleHeading">
   <button class="section-toggle" type="button"
           aria-expanded="true" aria-controls="oracleBody"
           data-section="oracle">
     <span class="section-label">Inquiry</span>
     <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
+  </h2>
   <div class="section-bodywrap">
     <div class="section-bodymin" id="oracleBody">
   <div class="inquiry-top">
@@ -92,13 +103,15 @@
 </div><!-- /.page-content -->
 
 <!-- ── Reference grid (full-bleed) ── -->
-<section class="hex-ref-wrap page-section section-open" id="hexagrams">
+<section class="hex-ref-wrap page-section section-open" id="hexagrams" aria-labelledby="hexagramsHeading">
+  <h2 class="section-heading" id="hexagramsHeading">
   <button class="section-toggle" type="button"
           aria-expanded="true" aria-controls="hexagramsBody"
           data-section="hexagrams">
     <span class="hex-ref-label">Hexagrams</span>
     <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
+  </h2>
   <div class="section-bodywrap">
     <div class="section-bodymin" id="hexagramsBody">
   <div class="hex-ref-panel">
@@ -118,13 +131,15 @@
 </section>
 
 <!-- ── Trigrams (the eight building blocks) ── -->
-<section class="page-section section-open" id="trigrams">
+<section class="page-section section-open" id="trigrams" aria-labelledby="trigramsHeading">
+  <h2 class="section-heading" id="trigramsHeading">
   <button class="section-toggle" type="button"
           aria-expanded="true" aria-controls="trigramsBody"
           data-section="trigrams">
     <span class="section-label">Trigrams</span>
     <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
+  </h2>
   <div class="section-bodywrap">
     <div class="section-bodymin" id="trigramsBody">
       <div class="section-shell">
@@ -185,13 +200,6 @@
 <!-- 64 hexagram oracle answers + 384 moving-line texts -->
 <script src="js/ichingdata.js"></script>
 <script src="js/linedata.js"></script>
-
-<!-- Delegated section-toggle listener — every [data-section] header
-     becomes a window.toggleSection() call. -->
-<script>document.addEventListener('click', ev => {
-  const el = ev.target.closest('[data-section]');
-  if (el) window.toggleSection(el.dataset.section);
-});</script>
 
 <!-- Hexagrams reference (grid + SVG renderers + popup). Loads BEFORE
      iching-oracle.js — the oracle uses hexagramSVG / VAL_TO_KW / window

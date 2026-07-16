@@ -32,13 +32,13 @@
        nothing else; the body is collapsed + inert (set by JS). Unlocking
        removes .so-locked and adds .section-open : the shared grid-rows
        unfurl in site.css does the reveal. */
-    .so-chapter.so-locked > .section-toggle { opacity: .35; cursor: default; }
-    .so-chapter.so-locked > .section-toggle .section-chev { visibility: hidden; }
+    .so-chapter.so-locked > .section-heading > .section-toggle { opacity: .35; cursor: default; }
+    .so-chapter.so-locked > .section-heading > .section-toggle .section-chev { visibility: hidden; }
     .so-lockdot {
       width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto;
       background: var(--so-warn); opacity: .8; display: none;
     }
-    .so-chapter.so-locked > .section-toggle .so-lockdot { display: inline-block; }
+    .so-chapter.so-locked > .section-heading > .section-toggle .so-lockdot { display: inline-block; }
 
     /* ── I · One line, one coin ── */
     .so-line-stage {

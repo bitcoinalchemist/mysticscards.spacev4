@@ -61,7 +61,7 @@
   // hosts the triggers — these buttons do).
   row.innerHTML = ORDER.map(function (name) {
     const d = (window.PLANET_DATA && window.PLANET_DATA[name]) || {};
-    return '<button type="button" class="el-planet" role="listitem" data-planet="' + name +
+    return '<button type="button" class="el-planet" data-planet="' + name +
       '" aria-pressed="false" aria-label="' + name + (d.epithet ? ' — ' + d.epithet : '') + '">' +
       (d.glyph || name) + '</button>';
   }).join('');
@@ -217,13 +217,13 @@
       e.suitRow.innerHTML = SUIT_ORDER.map(function (s, i) {
         var m = window.SUIT_MEANINGS[s];
         var glyph = elSuitGlyph(m.sym);
-        return '<button type="button" class="el-suit" role="listitem" data-suit="' + s +
+        return '<button type="button" class="el-suit" data-suit="' + s +
           '" data-i="' + i + '" aria-label="' + m.label + '">' + glyph + '</button>';
       }).join('');
     }
     if (typeof window.NUMEROLOGY !== 'undefined') {
       e.numRow.innerHTML = RANK_ORDER.map(function (r, i) {
-        return '<button type="button" class="el-num" role="listitem" data-rank="' + r +
+        return '<button type="button" class="el-num" data-rank="' + r +
           '" data-i="' + i + '" aria-label="' + (window.NUMEROLOGY[r] ? window.NUMEROLOGY[r].label : r) + '">' + r + '</button>';
       }).join('');
     }

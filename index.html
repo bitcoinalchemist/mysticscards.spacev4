@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="canonical" href="https://mysticscards.space/" />
   <meta name="theme-color" content="#100c1e" />
-  <meta name="version" content="2026-07-16c" />
+  <meta name="version" content="2026-07-16d" />
   <meta name="description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <!-- OpenGraph / Twitter link previews. og-image is 1200×630. -->
   <meta property="og:type" content="website" />
@@ -25,15 +25,15 @@
   <meta name="twitter:title" content="Cards of Life — mysticscards.space" />
   <meta name="twitter:description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
-  <link rel="stylesheet" href="css/site.css?v=20260714b" />
+  <link rel="stylesheet" href="css/site.css?v=20260716d" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/cardsoflife.css?v=20260716c" />
+  <link rel="stylesheet" href="css/cardsoflife.css?v=20260716d" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
 <script src="js/stars.js?v=20260714a"></script>
-<script src="js/site.js?v=20260714b"></script>
+<script src="js/site.js?v=20260716d"></script>
 <script src="js/castfield.js?v=20260711c" defer></script>
 <script src="js/store.js?v=20260714a"></script>
 <script src="js/cardsdata.js?v=20260710d"></script>
@@ -43,7 +43,7 @@
 <script src="js/quadrations.js?v=20260714a"></script>
 <script src="js/finder.js?v=20260714d"></script>
 <script src="js/olney.js?v=20260710c"></script>
-<script src="js/lifescript.js?v=20260716a"></script>
+<script src="js/lifescript.js?v=20260716c"></script>
 <!-- The 5 period-reading data files (dailycarddata, periodcarddata,
      yearcarddata, sevenyearcarddata, thirteenyearcarddata — ~500 KB
      total) are LAZY-loaded by js/in-time.js on first Cycles-tab open.
@@ -56,19 +56,21 @@
 <script src="js/finder-trays.js?v=20260716a"></script>
 <script src="js/planetdata.js?v=20260711a"></script>
 <script src="js/elementsdata.js?v=20260711a"></script>
-<script src="js/elements.js?v=20260714a"></script>
+<script src="js/elements.js?v=20260716a"></script>
 
 <main>
   <h1 class="vh">Cards of Life — Cardology</h1>
   <datalist id="solZoneList"></datalist>
 
-  <section class="finder page-section section-open" id="finder">
+  <section class="finder page-section section-open" id="finder" aria-labelledby="finderHeading">
+    <h2 class="section-heading" id="finderHeading">
     <button class="section-toggle" type="button"
             aria-expanded="true" aria-controls="finderBody"
             data-section="finder">
       <span class="section-label">Finder</span>
       <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
+    </h2>
     <div class="section-bodywrap">
         <div class="section-bodymin" id="finderBody">
           <div class="section-shell">
@@ -305,13 +307,15 @@
     </div>
   </section>
 
-  <section class="quadrations page-section section-open" id="quadrations">
+  <section class="quadrations page-section section-open" id="quadrations" aria-labelledby="quadrationsHeading">
+    <h2 class="section-heading" id="quadrationsHeading">
     <button class="section-toggle" type="button"
             aria-expanded="true" aria-controls="quadrationsBody"
             data-section="quadrations">
       <span class="section-label">Quadrations</span>
       <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
+    </h2>
     <div class="section-bodywrap">
       <div class="section-bodymin" id="quadrationsBody">
         <div class="section-shell">
@@ -337,22 +341,24 @@
     </div>
   </section>
 
-  <section class="elements page-section section-open" id="elements" aria-label="The suits, numbers, and planets of the deck">
+  <section class="elements page-section section-open" id="elements" aria-labelledby="elementsHeading">
+    <h2 class="section-heading" id="elementsHeading">
     <button class="section-toggle" type="button"
             aria-expanded="true" aria-controls="elementsBody"
             data-section="elements">
       <span class="section-label">Elements</span>
       <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
+    </h2>
     <div class="section-bodywrap">
       <div class="section-bodymin" id="elementsBody">
         <div class="section-shell">
           <div class="el-inner">
             <div class="el-topline">
-              <div class="suit-row" id="suitRow" role="list" aria-label="The four suits"></div>
+              <div class="suit-row" id="suitRow" role="group" aria-label="The four suits"></div>
             </div>
-            <div class="num-row" id="numRow" role="list" aria-label="The thirteen numbers" hidden></div>
-            <div class="planet-row" id="planetRow" role="list" aria-label="The seven planets and the Crown" hidden></div>
+            <div class="num-row" id="numRow" role="group" aria-label="The thirteen numbers" hidden></div>
+            <div class="planet-row" id="planetRow" role="group" aria-label="The seven planets and the Crown" hidden></div>
             <div class="el-detailwrap">
               <div class="el-detailmin">
                 <div class="el-detail" id="elDetail" aria-live="polite">

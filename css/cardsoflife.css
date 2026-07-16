@@ -5,9 +5,9 @@
   --ctl-pill-pad-x: 1rem;
   --ctl-pill-font: .64rem;
   --ctl-pill-track: .08em;
-  --ctl-round-size: 30px;
+  --ctl-round-size: var(--tap-target);
   --ctl-round-font: 1rem;
-  --finder-tool-size: 32px;
+  --finder-tool-size: var(--tap-target);
   --ctl-date-font: .95rem;
   --ctl-date-pad-y: .35rem;
   --ctl-date-pad-x: .9rem;
@@ -45,7 +45,7 @@
 }
 .age-controls { display: flex; align-items: center; gap: .5rem; }
 .age-btn {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: var(--tap-target); height: var(--tap-target); border-radius: 50%;
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
   font-size: 1.1rem; color: rgba(255,255,255,.7);
   display: flex; align-items: center; justify-content: center;
@@ -53,7 +53,7 @@
 }
 .age-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
 .age-input {
-  width: 60px; height: 32px;
+  width: 60px; height: var(--tap-target);
   border: 1px solid rgba(255,255,255,.12); border-radius: var(--r-sm);
   background: rgba(255,255,255,.08); color: rgba(255,255,255,.9);
   font-family: var(--sans); font-size: .9rem; font-weight: 500;
@@ -66,7 +66,7 @@
 .age-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .age-input:focus { outline: none; border-color: var(--gold); }
 
-.age-controls-wrap { min-height: 32px; }
+.age-controls-wrap { min-height: var(--tap-target); }
 .q-mode-current {
   /* Detached from the age stepper's centred flow and pinned to the
      left edge of #annualGrid (the Neptune column) instead of hugging
@@ -454,7 +454,7 @@
   color: var(--ink-muted);
   border: 1px solid transparent;
   border-radius: 999px;
-  min-height: 34px;
+  min-height: var(--tap-target);
   padding: var(--ctl-pill-pad-y) var(--ctl-pill-pad-x);
   font-family: var(--sans);
   font-size: var(--ctl-pill-font);
@@ -495,9 +495,9 @@
     --ctl-pill-pad-x: .72rem;
     --ctl-pill-font: .58rem;
     --ctl-pill-track: .05em;
-    --ctl-round-size: 28px;
+    --ctl-round-size: var(--tap-target);
     --ctl-round-font: .92rem;
-    --finder-tool-size: 32px;
+    --finder-tool-size: var(--tap-target);
     --ctl-date-font: .82rem;
     --ctl-date-pad-y: .32rem;
     --ctl-date-pad-x: .65rem;
@@ -509,9 +509,7 @@
   .ns-picker {
     padding: .22rem;
   }
-  .ns-chip {
-    min-height: 31px;
-  }
+  .ns-chip { min-height: var(--tap-target); }
 }
 /* The four panel divs each hide behind the active-tab attribute.
    Individual panels can still opt out by adding `.is-empty` to signal
@@ -2182,6 +2180,7 @@
   line-height: 1; padding: .15rem .35rem; border-radius: var(--r-sm);
   font-family: var(--serif);
   display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--tap-target); min-height: var(--tap-target);
   transition: opacity var(--ease), transform var(--ease), text-shadow var(--ease);
 }
 .el-suit { font-size: clamp(1.9rem, 6vw, 2.7rem); opacity: 1; }
@@ -2203,6 +2202,7 @@
   font-family: var(--serif); line-height: 1; padding: .15rem .35rem;
   border-radius: var(--r-sm); font-size: clamp(1.5rem, 5vw, 2.1rem); opacity: .8;
   display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--tap-target); min-height: var(--tap-target);
   transition: opacity var(--ease), transform var(--ease), text-shadow var(--ease);
 }
 .el-planet:hover, .el-planet:focus-visible { opacity: 1; transform: translateY(-1px); text-shadow: 0 0 14px rgba(199,154,84,.5); }
@@ -2221,6 +2221,7 @@
   flex: none; background: none; border: none; cursor: pointer; color: var(--gold-ink);
   font-size: 1.8rem; line-height: 1; padding: .2rem .5rem; border-radius: var(--r-sm);
   opacity: .6; transition: opacity var(--ease);
+  min-width: var(--tap-target); min-height: var(--tap-target);
 }
 .el-nav:hover, .el-nav:focus-visible { opacity: 1; }
 .el-card { flex: 1; min-width: 0; text-align: center; }
