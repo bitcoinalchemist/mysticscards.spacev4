@@ -9,7 +9,7 @@
 // precache list: js/in-time.js lazy-loads them on first Cycles-tab open.
 // The fetch handler's write-through still caches them after that first
 // fetch, so offline works once the user has opened Cycles once online.
-const CACHE = 'mysticscards-18';
+const CACHE = 'mysticscards-19';
 const PRECACHE = [
   './',
   'index.html',

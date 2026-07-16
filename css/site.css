@@ -200,6 +200,19 @@ main { padding: 1.5rem 0 1.5rem; }
 }
 .section-bodymin { overflow: hidden; min-height: 0; padding-top: 0; transition: padding-top .4s ease; }
 .page-section.section-open .section-bodymin { padding-top: 8px; }
+
+/* Keep collapsed panel contents out of the paint tree for one frame while
+   their height wrappers change state. site.js adds .collapse-paint-ready on
+   the next animation frame after an open transition starts. */
+.section-bodymin,
+.finder-tray-min,
+.el-detailmin,
+.pl-detailmin,
+.tg-detailmin,
+.so-geo-detailmin,
+.gl-linesmin { visibility: hidden; }
+.collapse-paint-ready { visibility: visible; }
+
 @media (prefers-reduced-motion: reduce) {
   .section-bodywrap, .section-bodymin { transition: none; }
 }

@@ -219,6 +219,90 @@
   else _restoreSections();
 })();
 
+/* ── Collapsible paint guard ───────────────────────────────────────
+   Mobile browsers can paint the contents of a grid-row 0fr panel for one
+   frame during the touch → focus → click sequence. Keep the existing height
+   animations, but reveal each inner panel only on the frame after its owner
+   enters the open state. Closing removes the paint class immediately. */
+(function () {
+  'use strict';
+
+  var MIN_SELECTOR = [
+    '.section-bodymin',
+    '.finder-tray-min',
+    '.el-detailmin',
+    '.pl-detailmin',
+    '.tg-detailmin',
+    '.so-geo-detailmin',
+    '.gl-linesmin'
+  ].join(',');
+  var states = new WeakMap();
+
+  function isOpen(min) {
+    if (min.matches('.section-bodymin')) {
+      var section = min.closest('.page-section');
+      return !!(section && section.classList.contains('section-open'));
+    }
+    if (min.matches('.finder-tray-min')) {
+      var tray = min.closest('.finder-tray-wrap');
+      return !!(tray && tray.classList.contains('open'));
+    }
+    if (min.matches('.el-detailmin')) {
+      var elements = min.closest('#elements');
+      return !!(elements && elements.classList.contains('el-open'));
+    }
+    if (min.matches('.pl-detailmin')) {
+      var planet = min.closest('.pl-pop');
+      return !!(planet && planet.classList.contains('open'));
+    }
+    if (min.matches('.tg-detailmin')) {
+      var trigram = min.closest('.tg-pop');
+      return !!(trigram && trigram.classList.contains('open'));
+    }
+    if (min.matches('.so-geo-detailmin')) {
+      var geomancy = min.closest('.so-geo-pop');
+      return !!(geomancy && geomancy.classList.contains('open'));
+    }
+    if (min.matches('.gl-linesmin')) {
+      var lines = min.closest('.gl-more');
+      return !!(lines && lines.classList.contains('open'));
+    }
+    return false;
+  }
+
+  function sync(min) {
+    var open = isOpen(min);
+    if (states.get(min) === open) return;
+    states.set(min, open);
+    min.classList.remove('collapse-paint-ready');
+    if (open) {
+      requestAnimationFrame(function () {
+        if (isOpen(min)) min.classList.add('collapse-paint-ready');
+      });
+    }
+  }
+
+  function scan(root) {
+    if (!root || !root.querySelectorAll) return;
+    root.querySelectorAll(MIN_SELECTOR).forEach(sync);
+  }
+
+  function init() {
+    scan(document);
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.target && mutation.target.nodeType === 1) {
+          scan(mutation.target.parentElement || mutation.target);
+        }
+      });
+    });
+    observer.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
 (function () {
   'use strict';
   var mm = window.matchMedia;
