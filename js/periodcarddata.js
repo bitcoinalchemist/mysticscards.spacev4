@@ -1,6 +1,6 @@
 // periodcarddata.js — original Sage-voice 52-day-period readings for mysticscards.space.
 //
-// The Cards of Life year divides into seven 52-day PLANETARY PERIODS (Mercury
+// The Mystics Cards year divides into seven 52-day PLANETARY PERIODS (Mercury
 // through Neptune); your 52-Day card is the card ruling the current period. Each
 // card therefore carries one reading per planet, written for the ~7.5-week arc
 // rather than a single day (compare js/dailycarddata.js, the same card+planet

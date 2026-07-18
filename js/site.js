@@ -4,7 +4,8 @@
   var page = window.location.pathname.split('/').pop() || 'index.html';
   var isCardsPage = page === 'index.html' || page === '';
   var BG_KEY = 'mc-castfield-enabled';
-  var VOICE_KEY = 'cardsoflife_voice';
+  var VOICE_KEY = 'mysticscards_voice';
+  var LEGACY_VOICE_KEY = 'cardsoflife_voice';
 
   var ICHING_MARK =
     '<svg viewBox="0 0 18 20" aria-hidden="true">' +
@@ -27,12 +28,13 @@
       '</g>' +
     '</svg>';
 
-  var rightSlot = '';
-  if (isCardsPage) {
-    rightSlot = '<a class="sh-hex" href="iching.html" aria-label="I Ching Oracle" title="I Ching Oracle">' + ICHING_MARK + '</a>';
-  } else if (page === 'iching.html') {
-    rightSlot = '<a class="sh-hex" href="index.html" aria-label="Cards of Life" title="Cards of Life">' + CARDS_MARK + '</a>';
-  }
+  var pageLinks =
+    '<a class="sh-menu-link' + (isCardsPage ? ' is-current' : '') + '" href="index.html"' + (isCardsPage ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-menu-link-mark">' + CARDS_MARK + '</span><span>Mystics Cards</span>' +
+    '</a>' +
+    '<a class="sh-menu-link' + (page === 'iching.html' ? ' is-current' : '') + '" href="iching.html"' + (page === 'iching.html' ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-menu-link-mark">' + ICHING_MARK + '</span><span>I Ching Oracle</span>' +
+    '</a>';
 
   var settingsRows =
     '<div class="sh-setting-row">' +
@@ -75,14 +77,25 @@
   var headerHtml =
     '<header class="site-header" id="siteHeader">' +
       '<div class="sh-inner">' +
-        '<div class="sh-settings">' +
-          '<button type="button" class="sh-settings-btn" id="shSettingsBtn" aria-haspopup="true" aria-expanded="false" aria-controls="shSettingsPanel" aria-label="Site settings" title="Settings">⚙</button>' +
-          '<div class="sh-settings-panel" id="shSettingsPanel">' +
-            settingsRows +
+        '<div class="sh-menu">' +
+          '<button type="button" class="sh-menu-btn" id="shMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="shMenuPanel" aria-label="Open site menu" title="Menu">' +
+            '<svg class="sh-menu-cardmark" viewBox="0 0 22 22" aria-hidden="true">' +
+              '<g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round">' +
+                '<rect x="3.1" y="4.1" width="9.2" height="13.8" rx="1.3" transform="rotate(-12 7.7 11)" opacity=".58" />' +
+                '<rect x="6.2" y="2.8" width="9.2" height="13.8" rx="1.3" transform="rotate(4 10.8 9.7)" opacity=".78" />' +
+                '<rect x="9.4" y="4.1" width="9.2" height="13.8" rx="1.3" transform="rotate(15 14 11)" />' +
+              '</g>' +
+              '<path d="M13.9 8.1c.35 1.05 1.02 1.72 2.07 2.07-1.05.35-1.72 1.02-2.07 2.07-.35-1.05-1.02-1.72-2.07-2.07 1.05-.35 1.72-1.02 2.07-2.07Z" fill="currentColor" />' +
+            '</svg>' +
+          '</button>' +
+          '<div class="sh-menu-panel" id="shMenuPanel">' +
+            '<nav class="sh-menu-nav" aria-label="Site pages">' + pageLinks + '</nav>' +
+            '<div class="sh-menu-divider" aria-hidden="true"></div>' +
+            '<div class="sh-menu-head">Settings</div>' +
+            '<div class="sh-menu-settings">' + settingsRows + '</div>' +
           '</div>' +
         '</div>' +
         '<a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>' +
-        rightSlot +
       '</div>' +
     '</header>';
 
@@ -112,7 +125,14 @@
     window.dispatchEvent(new CustomEvent('mc-bg-toggle', { detail: { enabled: !!on } }));
   }
   function readVoicePref() {
-    try { return localStorage.getItem(VOICE_KEY) === 'olney' ? 'olney' : 'modern'; } catch (e) { return 'modern'; }
+    try {
+      var value = localStorage.getItem(VOICE_KEY);
+      if (value === null) {
+        value = localStorage.getItem(LEGACY_VOICE_KEY);
+        if (value !== null) localStorage.setItem(VOICE_KEY, value);
+      }
+      return value === 'olney' ? 'olney' : 'modern';
+    } catch (e) { return 'modern'; }
   }
   function applyVoicePref(voice) {
     var next = voice === 'olney' ? 'olney' : 'modern';
@@ -128,18 +148,19 @@
     window.dispatchEvent(new CustomEvent('mc-voice-toggle', { detail: { voice: next } }));
   }
   function togglePanel(force) {
-    var btn = document.getElementById('shSettingsBtn');
-    var panel = document.getElementById('shSettingsPanel');
+    var btn = document.getElementById('shMenuBtn');
+    var panel = document.getElementById('shMenuPanel');
     if (!btn || !panel) return;
     var open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
     panel.classList.toggle('open', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close site menu' : 'Open site menu');
   }
   function initBgToggle() {
     var input = document.getElementById('bgToggle');
     var voiceBtn = document.getElementById('voiceToggle');
-    var settingsBtn = document.getElementById('shSettingsBtn');
-    var panel = document.getElementById('shSettingsPanel');
+    var settingsBtn = document.getElementById('shMenuBtn');
+    var panel = document.getElementById('shMenuPanel');
     applyBgPref(readBgPref());
     if (voiceBtn) applyVoicePref(readVoicePref());
     if (input) {
@@ -159,7 +180,7 @@
     }
     document.addEventListener('click', function (e) {
       if (!panel || !panel.classList.contains('open')) return;
-      if (e.target.closest('#shSettingsBtn') || e.target.closest('#shSettingsPanel')) return;
+      if (e.target.closest('#shMenuBtn') || e.target.closest('#shMenuPanel')) return;
       togglePanel(false);
     });
     document.addEventListener('keydown', function (e) {

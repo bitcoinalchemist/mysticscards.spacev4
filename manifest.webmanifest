@@ -1,7 +1,7 @@
 {
   "name": "mysticscards.space",
   "short_name": "mysticscards",
-  "description": "Cards of Life, I Ching, and other esoteric tools.",
+  "description": "Mystics Cards, I Ching, and other esoteric tools.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

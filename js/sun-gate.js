@@ -1,5 +1,5 @@
 // sun-gate.js — the "personality Sun" hexagram (Human Design gate) shown
-// under the Solar Time output in the In Time section.
+// under the Solar Time output in the Cycles section.
 //
 // Added 2026-07-11, adapting the earlier astrology page's Gates section. The Sun's
 // geocentric ecliptic longitude at the birth instant maps onto the Human

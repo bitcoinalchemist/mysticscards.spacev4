@@ -7,7 +7,7 @@
 // First pass (2026-07-09) — a deliberately simple Finder tray (no
 // age-driven year prefill, no "For" toggle inside the deck browse — see
 // js/finder-trays.js's header comment for why). Placement, visual design,
-// and the In Time-panel's contextual add/list buttons are deferred until
+// and the Cycles panel's contextual add/list buttons are deferred until
 // that lane opens; this is the functional first cut asked for in chat.
 //
 // Loaded as a classic script AFTER spread-grid.js (bare `setAge` global —
@@ -26,6 +26,7 @@
   'use strict';
 
   const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const BIRTH_PAGE_SIZE = 10;
 
   function escHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -50,6 +51,8 @@
   // sets it through the window accessors below.
   let _bdayTarget = 'self';
   let _editingBirthId = null;
+  let _birthQuery = '';
+  let _birthPage = 1;
 
   function loadBirth(entry, target, options) {
     options = options || {};
@@ -89,6 +92,9 @@
     const panel = document.getElementById('birthPanel');
     const badge = document.getElementById('finderBdayBadge');
     const count = document.getElementById('bdayCount');
+    const searchWrap = document.getElementById('bdaySearchWrap');
+    const search = document.getElementById('bdaySearch');
+    const pager = document.getElementById('bdayPager');
     if (!panel) return;
     const list = loadBirths();
     if (badge) {
@@ -96,11 +102,23 @@
       else { badge.textContent = ''; badge.classList.remove('visible'); }
     }
     if (count) count.textContent = list.length ? String(list.length) : '';
+    if (searchWrap) searchWrap.hidden = !list.length;
+    if (search && search.value !== _birthQuery) search.value = _birthQuery;
     if (!list.length) {
       panel.innerHTML = '<div class="birth-empty">No saved birthdays yet.</div>';
+      if (pager) { pager.hidden = true; pager.innerHTML = ''; }
       return;
     }
-    panel.innerHTML = list.map(e =>
+    const query = _birthQuery.toLocaleLowerCase();
+    const matches = query ? list.filter(e => [e.name, MONTHS_SHORT[e.month - 1], e.day, e.month, e.year, e.time, e.place]
+      .filter(v => v != null).join(' ').toLocaleLowerCase().includes(query)) : list;
+    const pageCount = Math.max(1, Math.ceil(matches.length / BIRTH_PAGE_SIZE));
+    _birthPage = Math.min(_birthPage, pageCount);
+    const start = (_birthPage - 1) * BIRTH_PAGE_SIZE;
+    const visible = matches.slice(start, start + BIRTH_PAGE_SIZE);
+    if (!matches.length) {
+      panel.innerHTML = '<div class="birth-empty">No saved birthdays match that search.</div>';
+    } else panel.innerHTML = visible.map(e =>
       '<div class="birth-item" data-id="' + e.id + '">' +
         birthChip(e) +
         '<div class="birth-item-body">' +
@@ -137,6 +155,17 @@
         renderBirthPanel();
       });
     });
+    if (pager) {
+      pager.hidden = pageCount < 2;
+      pager.innerHTML = pageCount < 2 ? '' :
+        '<button type="button" class="bday-page-btn" data-page="prev">Previous</button>' +
+        '<span class="bday-page-status">Page ' + _birthPage + ' of ' + pageCount + '</span>' +
+        '<button type="button" class="bday-page-btn" data-page="next">Next</button>';
+      const prev = pager.querySelector('[data-page="prev"]');
+      const next = pager.querySelector('[data-page="next"]');
+      if (prev) { prev.disabled = _birthPage === 1; prev.addEventListener('click', () => { _birthPage--; renderBirthPanel(); }); }
+      if (next) { next.disabled = _birthPage === pageCount; next.addEventListener('click', () => { _birthPage++; renderBirthPanel(); }); }
+    }
   }
 
   // Start pickers on the first empty slot when relationship mode is on:
@@ -417,6 +446,12 @@
     const importFile = document.getElementById('bdayImportFile');
     if (importBtn) importBtn.addEventListener('click', () => importFile.click());
     if (importFile) importFile.addEventListener('change', importBirthsFromFile);
+    const search = document.getElementById('bdaySearch');
+    if (search) search.addEventListener('input', () => {
+      _birthQuery = search.value.trim();
+      _birthPage = 1;
+      renderBirthPanel();
+    });
     ['bdayTargetSelf', 'bdayTargetPartner', 'deckTargetSelf', 'deckTargetPartner'].forEach(id => {
       const b = document.getElementById(id);
       if (b) b.addEventListener('click', () => setBdayTarget(b.dataset.target));

@@ -1,5 +1,5 @@
 // richmonddata.js — Olney H. Richmond, Mystic Test Book (1893, public domain).
-// Per-card data for the "Olney view" in cardsoflife.html.
+// Per-card data for the "Olney view" in mysticscards.html.
 //
 // • solar/spirit/astral: from Richmond's delineation table.
 // • spread: his engraved "Grand Spread" plate for that card, transcribed from

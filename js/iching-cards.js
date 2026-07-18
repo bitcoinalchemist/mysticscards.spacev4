@@ -9,7 +9,7 @@
 // loaded before this file, so `spreadCardPips` + `pipMark` are available
 // as classic-script globals. The card face internals (corners, pips,
 // court art + court pips) still come from css/site.css — the same cqw-
-// based layout Cards of Life uses — and the 3D flip-deal wrapper stays
+// based layout Mystics Cards uses — and the 3D flip-deal wrapper stays
 // in css/iching.css.
 //
 // Loaded as a classic script BEFORE iching-oracle.js so the oracle IIFE

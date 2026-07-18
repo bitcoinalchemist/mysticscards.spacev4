@@ -139,58 +139,85 @@
     }
     renderInTime(_lastCard);
   }
-  function shiftActiveHorizon(dir) {
-    if (!dir) return;
-    const active = (_activeCards || []).find(function (pc) { return pc.slug === _activeLabel; });
-    if (!active) return;
+  function birthBoundaryMs() {
+    const birth = readFinderDate();
+    if (!birth) return null;
+    const anchorAge = (typeof currentAge === 'number' && currentAge >= 0) ? currentAge : 0;
+    const realLbYear = lastBdayYearOf(Date.now(), birth.m, birth.d);
+    return localMidnight(new Date(realLbYear - anchorAge, birth.m - 1, birth.d));
+  }
+
+  function shiftedHorizonMs(active, dir) {
     const startMs = typeof active.startMs === 'number' ? active.startMs : viewDate;
     if (_activeLabel === 'daily') {
-      setViewDate(startMs + (dir * 86400000));
-      return;
+      return startMs + (dir * 86400000);
     }
     if (_activeLabel === '52-day') {
       const birth = readFinderDate();
       const match = /period\s+(\d+)\/7/i.exec(active.sub || '');
       const periodNum = match ? parseInt(match[1], 10) : 0;
       if (!birth || !periodNum) {
-        setViewDate(startMs + (dir * 52 * 86400000));
-        return;
+        return startMs + (dir * 52 * 86400000);
       }
       const cycleYear = lastBdayYearOf(startMs, birth.m, birth.d);
-      const cycleStart = localMidnight(new Date(cycleYear, birth.m - 1, birth.d));
       if (dir > 0) {
         if (periodNum >= 7) {
-          setViewDate(localMidnight(new Date(cycleYear + 1, birth.m - 1, birth.d)));
+          return localMidnight(new Date(cycleYear + 1, birth.m - 1, birth.d));
         } else {
-          setViewDate(startMs + (52 * 86400000));
+          return startMs + (52 * 86400000);
         }
-        return;
       }
       if (periodNum <= 1) {
         const previousCycleStart = localMidnight(new Date(cycleYear - 1, birth.m - 1, birth.d));
-        setViewDate(localMidnight(new Date(previousCycleStart + (6 * 52 * 86400000))));
+        return localMidnight(new Date(previousCycleStart + (6 * 52 * 86400000)));
       } else {
-        setViewDate(startMs - (52 * 86400000));
+        return startMs - (52 * 86400000);
       }
-      return;
     }
     if (_activeLabel === 'yearly' || _activeLabel === '7-year' || _activeLabel === '13-year') {
       const years = _activeLabel === 'yearly' ? 1 : (_activeLabel === '7-year' ? 7 : 13);
       const d = new Date(startMs);
       d.setFullYear(d.getFullYear() + (dir * years));
       d.setHours(0, 0, 0, 0);
-      setViewDate(d.getTime());
+      return d.getTime();
     }
+    return null;
+  }
+
+  function canShiftActiveHorizon(active, dir) {
+    const nextMs = shiftedHorizonMs(active, dir);
+    const boundary = birthBoundaryMs();
+    return typeof nextMs === 'number' && (dir >= 0 || boundary == null || nextMs >= boundary);
+  }
+
+  function shiftActiveHorizon(dir) {
+    if (!dir) return;
+    const active = (_activeCards || []).find(function (pc) { return pc.slug === _activeLabel; });
+    if (!active || !canShiftActiveHorizon(active, dir)) return;
+    const nextMs = shiftedHorizonMs(active, dir);
+    if (typeof nextMs === 'number') setViewDate(nextMs);
   }
   function dateNavHTML(age) {
-    const ageText = typeof age === 'number' && age >= 0 ? `Age ${age}` : 'Pick a date';
+    const selectedAge = typeof age === 'number' && age >= 0
+      ? age
+      : (typeof currentAge === 'number' && currentAge >= 0 ? currentAge : 0);
     return `<div class="it-date-shell">
       <div class="it-date-head">
-        <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">
-          <span class="it-date-age">${ageText}</span>
-          <span class="it-date-value">${formatViewDate(viewDate)}</span>
-        </button>
-        <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>
+        <div class="it-age-control">
+          <span class="it-age-label">Age</span>
+          <div class="age-controls">
+            <button class="age-btn it-age-btn" type="button" data-it-age="-1" aria-label="Previous age">−</button>
+            <input class="age-input it-age-input" type="number" min="0" max="89" step="1" value="${selectedAge}" aria-label="Cycles age" title="Set Cycles age" />
+            <button class="age-btn it-age-btn" type="button" data-it-age="1" aria-label="Next age">+</button>
+          </div>
+        </div>
+        <div class="it-date-row">
+          <button class="it-date-label" type="button" title="Pick a date" aria-label="Pick a date">
+            <span class="it-date-age">Cycles</span>
+            <span class="it-date-value">${formatViewDate(viewDate)}</span>
+          </button>
+          <button class="it-date-today${isViewingToday() ? '' : ' visible'}" type="button" title="Reset to today">↻ Today</button>
+        </div>
       </div>
       <input class="it-date-input" type="date" tabindex="-1" aria-hidden="true" value="${isoFromMs(viewDate)}" />
     </div>`;
@@ -199,10 +226,21 @@
     const root = document.getElementById('fInTime');
     if (!root) return;
     let swipeStart = null;
+    function commitAgeInput(ageInput) {
+      const age = parseInt(ageInput.value, 10);
+      if (Number.isInteger(age)) setAge(age);
+      else ageInput.value = String(typeof currentAge === 'number' ? currentAge : 0);
+    }
     root.addEventListener('click', function (ev) {
       const focusBtn = ev.target.closest('[data-it-focus]');
       if (focusBtn) {
         setActiveFocus(focusBtn.getAttribute('data-it-focus') || IT_DEFAULT_FOCUS, { syncToStart: true });
+        return;
+      }
+      const ageBtn = ev.target.closest('[data-it-age]');
+      if (ageBtn) {
+        const delta = parseInt(ageBtn.getAttribute('data-it-age') || '0', 10);
+        if (delta) setAge((typeof currentAge === 'number' ? currentAge : 0) + delta);
         return;
       }
       const cycleBtn = ev.target.closest('[data-it-cycle]');
@@ -214,6 +252,8 @@
       }
       const todayBtn = ev.target.closest('.it-date-today');
       if (todayBtn) { setViewDate(Date.now()); return; }
+      const ageInput = ev.target.closest('.it-age-input');
+      if (ageInput) return;
       const label = ev.target.closest('.it-date-label');
       if (label) {
         const input = root.querySelector('.it-date-input');
@@ -243,10 +283,19 @@
       shiftActiveHorizon(dx < 0 ? 1 : -1);
     }, { passive: true });
     root.addEventListener('change', function (ev) {
+      const ageInput = ev.target.closest('.it-age-input');
+      if (ageInput) {
+        commitAgeInput(ageInput);
+        return;
+      }
       const input = ev.target.closest('.it-date-input');
       if (!input || !input.value) return;
       const [y, m, d] = input.value.split('-').map(Number);
       setViewDate(new Date(y, m - 1, d).getTime());
+    });
+    root.addEventListener('focusout', function (ev) {
+      const ageInput = ev.target.closest('.it-age-input');
+      if (ageInput) commitAgeInput(ageInput);
     });
   }
 
@@ -312,7 +361,7 @@
       : '<p>This card has no saved Cycles text for this horizon yet.</p>';
   }
 
-  function inTimeReadingHTML(pc) {
+  function inTimeReadingHTML(pc, canGoBack) {
     const c = CARDS[pc.idx];
     if (!c) return '';
     const src = readingSourceFor(pc.label);
@@ -320,7 +369,7 @@
     const entry = src && key ? src[key] : null;
     const text = entry && entry.planets && pc.planet ? entry.planets[pc.planet] : '';
     const headStart = `<div class="it-reading-head">
-      <button type="button" class="it-reading-shift" data-it-cycle="-1" aria-label="Previous ${pc.label} card" title="Previous ${pc.label} card">‹</button>
+      <button type="button" class="it-reading-shift${canGoBack ? '' : ' is-disabled'}" data-it-cycle="-1" aria-label="Previous ${pc.label} card" title="${canGoBack ? 'Previous ' + pc.label + ' card' : 'Already at birthday'}"${canGoBack ? '' : ' disabled'}>‹</button>
       <div class="it-reading-head-copy">
       <div class="it-reading-kicker">${pc.label}</div>
       <h4 class="it-reading-title">${c.name}</h4>
@@ -425,7 +474,7 @@
     <div class="it-row-wrap">
       <div class="it-row">${rowHTML}</div>
     </div>
-    <div class="it-reading">${inTimeReadingHTML(active)}</div>
+    <div class="it-reading">${inTimeReadingHTML(active, canShiftActiveHorizon(active, -1))}</div>
     `;
   }
 

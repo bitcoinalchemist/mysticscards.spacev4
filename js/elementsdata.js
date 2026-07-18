@@ -68,7 +68,7 @@ const SUIT_MEANINGS = {
 window.SUIT_MEANINGS = SUIT_MEANINGS;
 
 // ── Olney (1893) readings — the alternate "voice" for the Card Elements toggle
-// on cardsoflife.html, paired with the modern SUIT_MEANINGS / NUMEROLOGY text
+// on mysticscards.html, paired with the modern SUIT_MEANINGS / NUMEROLOGY text
 // above. Olney H. Richmond's own words from The Mystic Test Book (1893); each
 // entry attaches as `.olney = {keywords, text, keynote}`. Sources + provenance:
 // dev/Book of Life/olney-element-drafts.md.

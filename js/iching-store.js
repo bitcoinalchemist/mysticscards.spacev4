@@ -1,6 +1,6 @@
 // iching-store.js — the ONE source of truth for I Ching localStorage.
 //
-// Same seam pattern as js/store.js (Cards of Life). Everything on this
+// Same seam pattern as js/store.js (Mystics Cards). Everything on this
 // page reads/writes history through window.IChingStore. Search
 // js/iching*.js for `localStorage` and there should be zero hits outside
 // this file.

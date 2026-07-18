@@ -2,7 +2,7 @@
 // sessionStorage. Currently holds only the unlock level (0-4), which
 // gates which chapters the reader can open during the current tab visit.
 //
-// Same seam pattern as js/store.js (Cards of Life) and
+// Same seam pattern as js/store.js (Mystics Cards) and
 // js/iching-store.js (I Ching). Everything else in the Seed Oracle
 // reads/writes through window.SeedStore.
 //

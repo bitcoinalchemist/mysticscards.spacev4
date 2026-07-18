@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cards of Life — mysticscards.space</title>
+  <title>Mystics Cards — mysticscards.space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
@@ -18,22 +18,22 @@
   <!-- OpenGraph / Twitter link previews. og-image is 1200×630. -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mysticscards.space/" />
-  <meta property="og:title" content="Cards of Life — mysticscards.space" />
+  <meta property="og:title" content="Mystics Cards — mysticscards.space" />
   <meta property="og:description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <meta property="og:image" content="https://mysticscards.space/assets/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Cards of Life — mysticscards.space" />
+  <meta name="twitter:title" content="Mystics Cards — mysticscards.space" />
   <meta name="twitter:description" content="Cardology tools — birth cards, planetary periods, and readings." />
   <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
-  <link rel="stylesheet" href="css/site.css?v=20260716e" />
+  <link rel="stylesheet" href="css/site.css?v=20260718a" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/cardsoflife.css?v=20260716d" />
+  <link rel="stylesheet" href="css/mysticscards.css?v=20260718f" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
 <script src="js/stars.js?v=20260714a"></script>
-<script src="js/site.js?v=20260716d"></script>
+<script src="js/site.js?v=20260718a"></script>
 <script src="js/castfield.js?v=20260711c" defer></script>
 <script src="js/store.js?v=20260714a"></script>
 <script src="js/cardsdata.js?v=20260710d"></script>
@@ -51,7 +51,7 @@
 <script src="js/tzcoords.js?v=20260711a"></script>
 <script src="js/solar-time.js?v=20260716a"></script>
 <script src="js/sun-gate.js?v=20260711b"></script>
-<script src="js/in-time.js?v=20260716e"></script>
+<script src="js/in-time.js?v=20260718h"></script>
 <script src="js/birthdays.js?v=20260716a"></script>
 <script src="js/finder-trays.js?v=20260716a"></script>
 <script src="js/planetdata.js?v=20260711a"></script>
@@ -59,7 +59,7 @@
 <script src="js/elements.js?v=20260716a"></script>
 
 <main>
-  <h1 class="vh">Cards of Life — Cardology</h1>
+  <h1 class="vh">Mystics Cards — Cardology</h1>
   <datalist id="solZoneList"></datalist>
 
   <section class="finder page-section section-open" id="finder" aria-labelledby="finderHeading">
@@ -163,6 +163,10 @@
                     <input type="file" id="bdayImportFile" accept="application/json" hidden>
                   </div>
                 </div>
+                <div class="bday-search" id="bdaySearchWrap" hidden>
+                  <label for="bdaySearch">Search saved birthdays</label>
+                  <input type="search" id="bdaySearch" placeholder="Name, date, or place" autocomplete="off">
+                </div>
                 <div class="birth-add-panel" id="birthAddPanel">
                   <div class="birth-add-row">
                     <input type="text" id="baDay" class="ba-field ba-num" maxlength="2" inputmode="numeric" placeholder="DD" aria-label="Day">
@@ -186,6 +190,7 @@
                   <p class="birth-add-error" id="birthAddError" aria-live="polite"></p>
                 </div>
                 <div class="bday-list" id="birthPanel"></div>
+                <div class="bday-pager" id="bdayPager" hidden aria-label="Saved birthdays pages"></div>
                 <p class="bday-note">Saved in this browser only. Export to back up or move to another device.</p>
               </div>
             </div>

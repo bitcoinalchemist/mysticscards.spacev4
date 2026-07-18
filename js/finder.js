@@ -455,10 +455,10 @@
 
   function shareFinderLink() {
     const url = finderShareUrl();
-    const title = 'Cards of Life Finder';
+    const title = 'Mystics Cards Finder';
     const text = _selectedCard && _selectedCard.name
       ? `${_selectedCard.name} on mysticscards.space`
-      : 'Cards of Life Finder on mysticscards.space';
+      : 'Mystics Cards Finder on mysticscards.space';
     if (navigator.share) {
       navigator.share({ title, text, url }).catch(function () {});
       return;

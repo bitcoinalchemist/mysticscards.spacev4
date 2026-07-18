@@ -6,7 +6,7 @@
 // wealth, Saturn from death and limit, Uranus from labor, land and
 // psychic force, Neptune from the sea, travel and distance.
 // Oracle text in the locked Sage voice (see sage-voice skill).
-// Shared data: used by the Planets tool on cardsoflife.html and
+// Shared data: used by the Planets tool on mysticscards.html and
 // available to astrology.html and any future page.
 
 window.PLANET_ORDER = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
@@ -120,7 +120,7 @@ window.PLANET_DATA = {
 };
 
 // ── Olney (1893) readings — the alternate "voice" for the Card Elements toggle
-// on cardsoflife.html. Richmond's own words from The Mystic Test Book, with his
+// on mysticscards.html. Richmond's own words from The Mystic Test Book, with his
 // ruling STONE (the "Ruling Stones Under the Planets" plate, p.283) and the
 // head-region "FORCE" (the Astro-Phrenological chart, p.304) as attrs. The
 // modern Sage reading above is the toggle's other side. Crown = Richmond's SUN

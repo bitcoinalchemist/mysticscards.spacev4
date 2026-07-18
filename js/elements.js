@@ -3,11 +3,11 @@
 // Modern vs Olney·1893 voice state, and the trigram-style expander that fills the
 // suit/number/planet reading panels below the rows.
 //
-// First ES-module extraction from the page's original cardsoflife.js
+// First ES-module extraction from the page's original mysticscards.js
 // monolith.
 //
 // Contains two coordinated controllers that used to live in two IIFEs at
-// different points in cardsoflife.js:
+// different points in mysticscards.js:
 //   • planet expander (was at line ~549) — the planet glyphs row + the
 //     #plPop reading panel below it. Owns opening/closing planets.
 //   • suit/number expander (was at line ~2869) — the suit + number rows +
@@ -16,7 +16,7 @@
 // so keeping them in one module keeps that coordination local while
 // preserving the same window API.
 //
-// Loaded as a classic script AFTER cardsoflife.js in index.html — a
+// Loaded as a classic script AFTER mysticscards.js in index.html — a
 // physical extraction that keeps the same runtime characteristics as
 // the old inline IIFEs. Real ES-module conversion (import/export from
 // store.js and elsewhere) is planned but deferred: jsdom v29, which
@@ -26,7 +26,7 @@
 // this flips to type="module" plus an `import { store } from
 // './store.js'` — and the window.* API below can shrink.
 //
-// Public API — kept on window.* because cardsoflife.js (still a classic
+// Public API — kept on window.* because mysticscards.js (still a classic
 // script for now) calls into it:
 //   window.elementsVoice()          — current voice: 'modern' | 'olney'
 //   window.closeElementsDetail()    — close suit/number panel, keep rows
@@ -37,7 +37,7 @@
 //   window.rerenderPlanet()         — re-render the open planet (voice swap)
 //
 // Storage: goes through window.CardsStore (js/store.js). Previously two
-// direct localStorage calls at the tail of cardsoflife.js escaped step 3
+// direct localStorage calls at the tail of mysticscards.js escaped step 3
 // (getItem at old line 2895, setItem at 3034) — routed here instead.
 
 // ── Planet expander ────────────────────────────────────────────────

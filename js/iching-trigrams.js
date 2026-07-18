@@ -30,7 +30,7 @@
   // Route every active-cell update through one helper that explicitly
   // clears ALL cells first, then sets the active one — defensive against
   // any stale .active state that a toggle pattern could miss (the same
-  // fix applied to the cardsoflife planet popup).
+  // fix applied to the Mystics Cards planet popup).
   function setActiveCell(idx) {
     cells.forEach(function (c) {
       c.classList.remove('active');

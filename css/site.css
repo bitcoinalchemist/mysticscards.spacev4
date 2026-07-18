@@ -228,59 +228,85 @@ body.starry .site-header.scrolled {
   max-width: var(--max-w); margin: 0 auto;
   padding: 0 2rem; position: relative;
 }
-.sh-settings {
+.sh-menu {
   position: absolute;
-  left: 2rem;
+  right: 2rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
 }
-.sh-settings-btn {
+.sh-menu-btn {
+  position: relative;
   width: var(--tap-target);
   height: var(--tap-target);
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.22);
+  border: 0;
+  border-radius: 8px;
   background: transparent;
   color: rgba(255,255,255,.68);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--ease), color var(--ease), border-color var(--ease);
+  transition: background var(--ease), color var(--ease), transform .22s ease;
 }
-.sh-settings-btn:hover,
-.sh-settings-btn:focus-visible,
-.sh-settings-btn[aria-expanded="true"] {
+.sh-menu-cardmark { width: 21px; height: 21px; display: block; transition: transform .22s ease; }
+.sh-menu-btn:hover,
+.sh-menu-btn:focus-visible,
+.sh-menu-btn[aria-expanded="true"] {
   color: var(--gold);
-  border-color: rgba(221,187,120,.55);
   background: rgba(255,255,255,.05);
 }
-.sh-settings-panel {
+.sh-menu-btn[aria-expanded="true"] .sh-menu-cardmark { transform: rotate(-5deg) scale(1.06); }
+.sh-menu-panel {
   position: absolute;
   top: calc(100% + .55rem);
-  left: 0;
-  width: min(260px, 88vw);
+  right: 0;
+  width: min(280px, 88vw);
   padding: .4rem .8rem;
-  border: 1px solid var(--rule-strong);
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: 12px;
-  background: rgba(24, 18, 45, .94);
-  box-shadow: var(--sh-lg);
+  background: rgba(13, 9, 25, .78);
+  box-shadow: 0 12px 32px rgba(0,0,0,.34), 0 0 22px rgba(199,154,84,.09);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-6px) scale(.98);
-  transform-origin: top left;
+  transform: translateY(-8px) scale(.97);
+  transform-origin: top right;
   transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
 }
-.sh-settings-panel.open {
+.sh-menu-panel.open {
   opacity: 1;
   visibility: visible;
   transform: none;
   pointer-events: auto;
   transition: opacity .18s ease, transform .18s ease;
 }
+.sh-menu-nav { display: flex; flex-direction: column; gap: .15rem; }
+.sh-menu-link {
+  display: flex; align-items: center; gap: .65rem; min-height: 2.55rem;
+  padding: .35rem .45rem; border-radius: 8px; color: var(--secondary);
+  font-family: var(--sans); font-size: .78rem; text-decoration: none;
+  transition: color var(--ease), background var(--ease);
+}
+.sh-menu-link:hover, .sh-menu-link:focus-visible, .sh-menu-link.is-current {
+  color: var(--gold); background: rgba(255,255,255,.06);
+}
+.sh-menu-link.is-current { color: var(--text); }
+.sh-menu-link-mark { display: inline-flex; width: 1.25rem; height: 1.35rem; align-items: center; justify-content: center; }
+.sh-menu-link-mark svg { width: 16px; height: 18px; }
+.sh-menu-divider { height: 1px; margin: .35rem 0; background: rgba(255,255,255,.1); }
+.sh-menu-head {
+  margin: .5rem .45rem .15rem;
+  color: var(--gold-ink);
+  font-family: var(--sans);
+  font-size: .62rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.sh-menu-settings { padding: 0 .45rem; }
 .sh-setting-row {
   display: flex;
   align-items: center;
@@ -473,7 +499,7 @@ body.starry .site-header.scrolled {
 @media (max-width: 560px) {
   .sh-inner { padding: 0 1rem; }
   .sh-logo { font-size: 1.15rem; }
-  .sh-settings { left: 1rem; }
+  .sh-menu { right: 1rem; }
 }
 
 .btn {
