@@ -869,6 +869,13 @@
   margin: 0 auto 1.45rem;
   max-width: calc(var(--ls-card-w) * 7 + (.3rem * 6));
 }
+/* Single-seat connections (Pluto, zodiac ruler) hold one .ls-col instead
+   of seven — collapse the row to one column so justify-content: center
+   centers the lone card instead of leaving it pinned to the left edge
+   of the unused 7-column track. */
+.ls-row--single {
+  grid-template-columns: minmax(0, var(--ls-card-w));
+}
 .ls-stats {
   --ls-card-w: min(
     var(--quad-card-w, calc(560px * var(--quad-scale, 1) / 7)),
@@ -1166,6 +1173,14 @@
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: .18rem;
     max-width: 100%;
+  }
+  /* Re-assert the single-column override at the same specificity as the
+     rule above it (same selector shape, later in source) so single-seat
+     rows stay centered on mobile instead of falling back to the 7-column
+     track. */
+  .ls-row--single {
+    grid-template-columns: minmax(0, var(--ls-card-w));
+    max-width: var(--ls-card-w);
   }
   .ls-planet-name { font-size: .52rem; }
   .ls-connection-title { font-size: .9rem; }

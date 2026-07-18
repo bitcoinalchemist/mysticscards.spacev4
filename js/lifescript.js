@@ -124,14 +124,24 @@
     return { month: dt.getUTCMonth() + 1, day: dt.getUTCDate() };
   }
 
-  function selectedBirthDateForCard(card) {
-    const mEl = document.getElementById('fMonth');
-    const dEl = document.getElementById('fDay');
+  function dateFromInputs(monthElId, dayElId, card) {
+    const mEl = document.getElementById(monthElId);
+    const dEl = document.getElementById(dayElId);
     const month = mEl ? parseInt(mEl.value, 10) : NaN;
     const day = dEl ? parseInt(dEl.value, 10) : NaN;
     if (!month || !day || typeof window.solarValue !== 'function') return null;
     if (window.solarValue(month, day) !== card.sv) return null;
     return { month, day };
+  }
+  function selectedBirthDateForCard(card) {
+    return dateFromInputs('fMonth', 'fDay', card);
+  }
+  // Same as selectedBirthDateForCard, but reads the Finder's partner
+  // date fields — used by the relationship Connections' zodiac-ruler
+  // check, which (unlike the other connection types) needs an actual
+  // calendar date, not just a card.
+  function selectedPartnerDateForCard(card) {
+    return dateFromInputs('fpMonth', 'fpDay', card);
   }
 
   // Moon / Sun / Pluto cards, derived from the Life Spread (not in the
@@ -176,6 +186,44 @@
     const targetIdx = life[targetPos];
     const sc = SPREAD_CARDS[targetIdx];
     return sc ? { rank: sc.rank, suit: sc.suit, sym: sc.sym } : null;
+  }
+
+  // Moon / Pluto relationship connection: does `toCard` equal `fromCard`'s
+  // single derived Moon or Pluto card (see derivedCardFor above)? Unlike
+  // lifeScriptConnection / spiritSpreadConnection, this resolves to at most
+  // one card rather than a seat among seven, so the result carries no idx.
+  function derivedConnection(planet, fromCard, toCard) {
+    const key = `${fromCard.rank}_${fromCard.suit}`;
+    const script = (typeof LIFE_SCRIPTS !== 'undefined' ? LIFE_SCRIPTS : {})[key];
+    const cc = derivedCardFor(planet, fromCard, script);
+    if (!cc || cc.rank !== toCard.rank || cc.suit !== toCard.suit) return null;
+    return { planet };
+  }
+
+  // Does `toCard` match `fromCard`'s tropical (or sidereal) zodiac ruling
+  // card, given `fromDate` — an actual birthdate, since (unlike every
+  // other connection check) a zodiac sign needs a real calendar date, not
+  // just a card. Cancer's ruler (Moon) is skipped: its ruling card is
+  // computed with the same formula as the standalone Moon connection we
+  // dropped, so it would always just duplicate the reverse Life Script
+  // Mercury match. Leo's ruler (Sun) resolves to the birth card itself
+  // (see derivedCardFor), so it only ever fires when both people share
+  // the exact same card.
+  function zodiacKindConnection(fromCard, fromDate, toCard, kind) {
+    if (!fromDate) return null;
+    let sign;
+    if (kind === 'sidereal') {
+      const sd = shiftedDate(fromDate.month, fromDate.day, SIDEREAL_LAHIRI_DAY_SHIFT);
+      sign = zodiacForDate(sd.month, sd.day);
+    } else {
+      sign = zodiacForDate(fromDate.month, fromDate.day);
+    }
+    if (!sign || sign.ruler === 'Moon') return null;
+    const key = `${fromCard.rank}_${fromCard.suit}`;
+    const script = (typeof LIFE_SCRIPTS !== 'undefined' ? LIFE_SCRIPTS : {})[key];
+    const cc = cardForRuler(sign.ruler, script, fromCard);
+    if (!cc || cc.rank !== toCard.rank || cc.suit !== toCard.suit) return null;
+    return { planet: sign.ruler, sign: sign.name, glyph: sign.glyph, kind };
   }
 
   // Days in a zodiac sign's date range, handling the year-wrap for
@@ -239,13 +287,21 @@
     return `<div class="spread-card ls-card ls-stat-card ${cc.suit}${extra}" data-idx="${idx}" role="button" tabindex="0" aria-label="Load ${fullCardName(cc)} in finder" title="${title}">${face}</div>`;
   }
 
+  // A card's seat for any of the seven Life Script planets (via the
+  // LIFE_SCRIPTS table) or Sun/Moon/Pluto (via derivedCardFor's Life
+  // Spread extension). Shared by the Zodiac stats row and the
+  // relationship Connections' zodiac-ruler check.
+  function cardForRuler(ruler, script, birthCard) {
+    const planetIdx = SPREAD_PLANETS.indexOf(ruler);
+    if (planetIdx >= 0 && script && script[planetIdx]) return parseCard(script[planetIdx]);
+    if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') return derivedCardFor(ruler, birthCard, script);
+    return null;
+  }
+
   function zodiacCardSlotHTML(label, ruler, script, birthCard, title, extraCls) {
     const glyph = SPREAD_PLANET_SYM[ruler] || '';
     const rulerText = glyph ? `${glyph} ${ruler}` : ruler;
-    const planetIdx = SPREAD_PLANETS.indexOf(ruler);
-    let cc = null;
-    if (planetIdx >= 0 && script && script[planetIdx]) cc = parseCard(script[planetIdx]);
-    else if (ruler === 'Moon' || ruler === 'Sun' || ruler === 'Pluto') cc = derivedCardFor(ruler, birthCard, script);
+    const cc = cardForRuler(ruler, script, birthCard);
     const cardHTML = cc ? statsCardHTML(cc, { title: `${ruler} ruling card` }) : '';
     return `<div class="ls-zodiac-card-slot${extraCls ? ' ' + extraCls : ''}">
       <span class="ls-zodiac-card-label">${label}</span>
@@ -493,6 +549,65 @@
     }).join('');
   }
 
+  // Same shape as scriptRowHTML, but the 7-card row is the seven cards
+  // that immediately follow `card` in the standard 52-card cycle
+  // (SPREAD_CARDS order, wrapping past the King of Spades back to the
+  // Ace of Hearts) rather than its fixed LIFE_SCRIPTS entry, so it stays
+  // in sync with spiritSpreadConnection.
+  function spiritRowHTML(card, highlight) {
+    if (typeof SPREAD_CARDS === 'undefined') return '';
+    const idx = SPREAD_CARDS.findIndex(function (c) { return c.rank === card.rank && c.suit === card.suit; });
+    if (idx < 0) return '';
+    const rowCards = [];
+    for (let i = 1; i <= 7; i++) rowCards.push(SPREAD_CARDS[(idx + i) % 52]);
+    const ltr = readsLeftToRight();
+    const displayScript = ltr ? rowCards : [...rowCards].reverse();
+    const planetOrder = ltr ? [0,1,2,3,4,5,6] : [6,5,4,3,2,1,0];
+    return displayScript.map((cc, i) => {
+      const planet = SPREAD_PLANETS[planetOrder[i]];
+      const label = planet.slice(0, 3).toUpperCase();
+      const sym = SPREAD_PLANET_SYM[planet];
+      const isPick = highlight && cc.rank === highlight.rank && cc.suit === highlight.suit;
+      const face = typeof spreadCardPips === 'function'
+        ? spreadCardPips(cc)
+        : `<span class="ls-token">${cc.rank}${cc.sym}</span>`;
+      const cardIdx = (typeof CARDS !== 'undefined')
+        ? CARDS.findIndex(function (x) { return x.rank === cc.rank && x.suit === cc.suit; })
+        : -1;
+      return `<div class="ls-col" data-planet="${planet}">
+        <span class="ls-planet-glyph" title="${planet}">${sym}</span>
+        <span class="ls-planet-name" title="${planet}">${label}</span>
+        <div class="spread-card ls-card ${cc.suit}${isPick ? ' ls-conn-pick' : ''}" data-idx="${cardIdx}" role="button" tabindex="0" aria-label="Load ${fullCardName(cc)} in finder">${face}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Single-card counterpart to scriptRowHTML/spiritRowHTML: same `.ls-col`
+  // markup (planet glyph + label + card face) but just one card, not a
+  // 7-card row. Used for Pluto (always a single seat, see derivedCardFor)
+  // and for the zodiac-ruler connection (a single ruling card for
+  // whichever planet governs the person's sign, via cardForRuler).
+  function derivedSeatHTML(planet, card, highlight) {
+    const key = `${card.rank}_${card.suit}`;
+    const script = (typeof LIFE_SCRIPTS !== 'undefined' ? LIFE_SCRIPTS : {})[key];
+    const cc = cardForRuler(planet, script, card);
+    if (!cc) return '';
+    const label = planet.slice(0, 3).toUpperCase();
+    const sym = SPREAD_PLANET_SYM[planet];
+    const isPick = highlight && cc.rank === highlight.rank && cc.suit === highlight.suit;
+    const face = typeof spreadCardPips === 'function'
+      ? spreadCardPips(cc)
+      : `<span class="ls-token">${cc.rank}${cc.sym}</span>`;
+    const cardIdx = (typeof CARDS !== 'undefined')
+      ? CARDS.findIndex(function (x) { return x.rank === cc.rank && x.suit === cc.suit; })
+      : -1;
+    return `<div class="ls-col" data-planet="${planet}">
+      <span class="ls-planet-glyph" title="${planet}">${sym}</span>
+      <span class="ls-planet-name" title="${planet}">${label}</span>
+      <div class="spread-card ls-card ${cc.suit}${isPick ? ' ls-conn-pick' : ''}" data-idx="${cardIdx}" role="button" tabindex="0" aria-label="Load ${fullCardName(cc)} in finder">${face}</div>
+    </div>`;
+  }
+
   function panelHTML(card) {
     if (card.suit === 'joker') {
       return `<div class="ls-header">
@@ -591,42 +706,85 @@
     });
   }
 
+  // One "X sits in Y's Z seat" block. `rowHTML` is either scriptRowHTML's
+  // or spiritRowHTML's output; `spreadLabel` names which spread the seat
+  // was found in, since the same planet name can turn up in both.
+  function connectionSectionHTML(spreadLabel, fromCard, toCard, result, rowHTML, single) {
+    return `<section class="ls-connection">
+      <p class="ls-connection-title"><b>${fullCardName(toCard)}</b> sits in <b>${fullCardName(fromCard)}</b>'s <b>${result.planet}</b> seat of the ${spreadLabel}.</p>
+      <div class="ls-row${single ? ' ls-row--single' : ''}">${rowHTML}</div>
+      <p class="ls-connection-gloss">${(window.PLANET_CONN_TEXT || {})[result.planet] || ''}</p>
+    </section>`;
+  }
+
+  // Zodiac-ruler connection section — phrased around rulership rather
+  // than a Life Script "seat", since the match comes from an actual
+  // birthdate's sign rather than the card cycle.
+  function zodiacConnectionSectionHTML(fromCard, toCard, result, rowHTML) {
+    const kindLabel = result.kind === 'sidereal' ? 'Sidereal' : 'Tropical';
+    return `<section class="ls-connection">
+      <p class="ls-connection-title"><b>${fullCardName(toCard)}</b> is <b>${fullCardName(fromCard)}</b>'s <b>${result.planet}</b> ruling card &mdash; ${kindLabel} ${result.glyph} ${result.sign}.</p>
+      <div class="ls-row ls-row--single">${rowHTML}</div>
+      <p class="ls-connection-gloss">${(window.PLANET_CONN_TEXT || {})[result.planet] || ''}</p>
+    </section>`;
+  }
+
   function renderRelationshipConnections(card, partner) {
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
     const inner = root.querySelector('.ls-inner') || root;
     detachSolarPanel();
     root.classList.remove('is-empty');
-    if (!card || !partner || card.suit === 'joker' || partner.suit === 'joker' ||
-        typeof window.lifeScriptConnection !== 'function') {
+    if (!card || !partner || card.suit === 'joker' || partner.suit === 'joker') {
       root.classList.add('is-empty');
       inner.innerHTML = '';
       return false;
     }
 
-    const forward = window.lifeScriptConnection(card, partner);
-    const backward = window.lifeScriptConnection(partner, card);
-    if (!forward && !backward) {
+    // Note: Moon is deliberately not checked here — Moon(A) === B is
+    // mathematically identical to Mercury(B) === A (Moon is defined as
+    // the seat one before the birth card, the exact mirror of Mercury's
+    // one-after), so it would always duplicate a Life Script Mercury
+    // match already shown from the other direction. Pluto has no such
+    // overlap (it's the seat one past Neptune, offset +8, which never
+    // collides with anyone's own +1..+7 Life Script seats) and stays.
+    const lsForward     = typeof window.lifeScriptConnection === 'function' ? window.lifeScriptConnection(card, partner) : null;
+    const lsBackward    = typeof window.lifeScriptConnection === 'function' ? window.lifeScriptConnection(partner, card) : null;
+    const plutoForward  = derivedConnection('Pluto', card, partner);
+    const plutoBackward = derivedConnection('Pluto', partner, card);
+    const spForward     = typeof window.spiritSpreadConnection === 'function' ? window.spiritSpreadConnection(card, partner) : null;
+    const spBackward     = typeof window.spiritSpreadConnection === 'function' ? window.spiritSpreadConnection(partner, card) : null;
+
+    // Zodiac-ruler connections only run once BOTH people have a real
+    // birthdate entered (not just a directly-picked card) — a zodiac
+    // sign needs an actual calendar date. Tropical and sidereal are
+    // checked independently in both directions, same as the other types.
+    const yourDate    = selectedBirthDateForCard(card);
+    const partnerDate = selectedPartnerDateForCard(partner);
+    const zodDatesOK  = !!yourDate && !!partnerDate;
+    const zodTropForward  = zodDatesOK ? zodiacKindConnection(card, yourDate, partner, 'tropical') : null;
+    const zodSidForward   = zodDatesOK ? zodiacKindConnection(card, yourDate, partner, 'sidereal') : null;
+    const zodTropBackward = zodDatesOK ? zodiacKindConnection(partner, partnerDate, card, 'tropical') : null;
+    const zodSidBackward  = zodDatesOK ? zodiacKindConnection(partner, partnerDate, card, 'sidereal') : null;
+
+    if (!lsForward && !lsBackward && !plutoForward && !plutoBackward && !spForward && !spBackward &&
+        !zodTropForward && !zodSidForward && !zodTropBackward && !zodSidBackward) {
       root.classList.add('is-empty');
       inner.innerHTML = '';
       return false;
     }
 
     const sections = [];
-    if (forward) {
-      sections.push(`<section class="ls-connection">
-        <p class="ls-connection-title"><b>${fullCardName(partner)}</b> sits in <b>${fullCardName(card)}</b>'s <b>${forward.planet}</b> seat.</p>
-        <div class="ls-row">${scriptRowHTML(card, partner)}</div>
-        <p class="ls-connection-gloss">${(window.PLANET_CONN_TEXT || {})[forward.planet] || ''}</p>
-      </section>`);
-    }
-    if (backward) {
-      sections.push(`<section class="ls-connection">
-        <p class="ls-connection-title"><b>${fullCardName(card)}</b> sits in <b>${fullCardName(partner)}</b>'s <b>${backward.planet}</b> seat.</p>
-        <div class="ls-row">${scriptRowHTML(partner, card)}</div>
-        <p class="ls-connection-gloss">${(window.PLANET_CONN_TEXT || {})[backward.planet] || ''}</p>
-      </section>`);
-    }
+    if (lsForward)     sections.push(connectionSectionHTML('Earthly Spread', card, partner, lsForward, scriptRowHTML(card, partner)));
+    if (lsBackward)    sections.push(connectionSectionHTML('Earthly Spread', partner, card, lsBackward, scriptRowHTML(partner, card)));
+    if (plutoForward)  sections.push(connectionSectionHTML('Earthly Spread', card, partner, plutoForward, derivedSeatHTML('Pluto', card, partner), true));
+    if (plutoBackward) sections.push(connectionSectionHTML('Earthly Spread', partner, card, plutoBackward, derivedSeatHTML('Pluto', partner, card), true));
+    if (spForward)     sections.push(connectionSectionHTML('Spiritual Spread', card, partner, spForward, spiritRowHTML(card, partner)));
+    if (spBackward)    sections.push(connectionSectionHTML('Spiritual Spread', partner, card, spBackward, spiritRowHTML(partner, card)));
+    if (zodTropForward)  sections.push(zodiacConnectionSectionHTML(card, partner, zodTropForward, derivedSeatHTML(zodTropForward.planet, card, partner)));
+    if (zodSidForward)   sections.push(zodiacConnectionSectionHTML(card, partner, zodSidForward, derivedSeatHTML(zodSidForward.planet, card, partner)));
+    if (zodTropBackward) sections.push(zodiacConnectionSectionHTML(partner, card, zodTropBackward, derivedSeatHTML(zodTropBackward.planet, partner, card)));
+    if (zodSidBackward)  sections.push(zodiacConnectionSectionHTML(partner, card, zodSidBackward, derivedSeatHTML(zodSidBackward.planet, partner, card)));
 
     inner.innerHTML = `<div class="ls-connections-wrap">
       <div class="ls-connections-head">

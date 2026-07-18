@@ -636,6 +636,8 @@ const PLANET_CONN_TEXT = {
   Saturn:  "The heavy seat, and the truest teacher. One of you carries the other's lessons, and the love in it is real but asks to be earned in patience.",
   Uranus:  "An odd, electric current, free and hard to predict. You meet best as equals who hand each other room and ask for none of the usual promises.",
   Neptune: "A dream colours this bond, tender and far-seeing. Hold to what is actually before you, and let the other be a person rather than a wish.",
+  Pluto:   "The seat past the edge of the known. What this bond touches, it changes for good; let the transformation do its work rather than holding the old shape steady.",
+  Sun:     "The same card, worn by two lives. What one of you knows in the marrow, the other already carries; you are reading the same page from opposite sides of the room.",
 };
 window.PLANET_CONN_TEXT = PLANET_CONN_TEXT;
 
@@ -653,3 +655,21 @@ function lifeScriptConnection(fromCard, toCard) {
   return null;
 }
 window.lifeScriptConnection = lifeScriptConnection;
+
+// Same shape as lifeScriptConnection — { idx, planet } or null — but the
+// Spiritual Spread seats are the seven cards that immediately follow
+// `fromCard` in the standard 52-card cycle (SPREAD_CARDS order: Hearts,
+// Clubs, Diamonds, Spades, each A-K, wrapping past the King of Spades
+// back to the Ace of Hearts), mapped in order to Mercury..Neptune. E.g.
+// the Jack of Clubs' Mercury seat is the Queen of Clubs, its Venus seat
+// the King of Clubs, ... through the Five of Diamonds at Neptune.
+function spiritSpreadConnection(fromCard, toCard) {
+  const fromIdx = SPREAD_CARDS.findIndex(c => c.rank === fromCard.rank && c.suit === fromCard.suit);
+  const toIdx   = SPREAD_CARDS.findIndex(c => c.rank === toCard.rank && c.suit === toCard.suit);
+  if (fromIdx < 0 || toIdx < 0) return null;
+  for (let i = 1; i <= 7; i++) {
+    if ((fromIdx + i) % 52 === toIdx) return { idx: i - 1, planet: SPREAD_PLANETS[i - 1] };
+  }
+  return null;
+}
+window.spiritSpreadConnection = spiritSpreadConnection;
