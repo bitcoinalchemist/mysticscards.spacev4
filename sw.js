@@ -9,7 +9,7 @@
 // precache list: js/in-time.js lazy-loads them on first Cycles-tab open.
 // The fetch handler's write-through still caches them after that first
 // fetch, so offline works once the user has opened Cycles once online.
-const CACHE = 'mysticscards-39';
+const CACHE = 'mysticscards-44';
 const PRECACHE = [
   './',
   'index.html',
@@ -71,6 +71,7 @@ const PRECACHE = [
   'assets/icon-512.png',
   'assets/icon-512-maskable.png',
   'assets/og-image.png',
+  'assets/card-back-square-mini.webp',
   'assets/cards/JC.webp',
   'assets/cards/JD.webp',
   'assets/cards/JH.webp',

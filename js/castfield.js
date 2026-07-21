@@ -28,6 +28,7 @@ var CASTFIELD_SUIT_SVG = {
 
     COUNT_DESKTOP: 52,
     COUNT_MOBILE:  52,
+    FRAME_INTERVAL: 1000 / 30,
     SWAP_INTERVAL: 3.5,
     R_MIN: 230,
     R_SPAN: 380,
@@ -63,12 +64,10 @@ var CASTFIELD_SUIT_SVG = {
     BAND_RECEDE: 90,
 
     DEPTH_SCALE: 0.2,
-    DEPTH_SAT: 0.25,
 
     BANK_VEL: 0,
     BANK_MAG: 0,
     BANK_MAX: 12,
-    EDGE_DIM: 0.22,
     DISTURB_PUSH: 45,
     DISTURB_DUR: 0.7,
     DISTURB_COOLDOWN: 2.5
@@ -260,7 +259,6 @@ var CASTFIELD_SUIT_SVG = {
   window.addEventListener('pagehide', writeSaved);
 
   function bump(f) { return f <= 0 || f >= 1 ? 0 : Math.sin(f * Math.PI); }
-
   function step(o, dt, t) {
 
     var target = o.wBase * shellDir(o.shell);
@@ -341,7 +339,6 @@ var CASTFIELD_SUIT_SVG = {
 
     var yRot = o.restBase + o.ySpinPhase + t * o.ySpinRate;
     var xRot = o.xSpinPhase + t * o.xSpinRate;
-    var cos = 1;
     o.flip.style.transform = 'rotateY(' + yRot.toFixed(1) + 'deg) rotateX(' + xRot.toFixed(1) + 'deg)';
 
     var vx = -Math.sin(o.a) * r * o.w;
@@ -360,10 +357,6 @@ var CASTFIELD_SUIT_SVG = {
 
     o.el.style.opacity = ((0.14 + depth * 0.22 + o.glow * 0.06) * dim).toFixed(3);
 
-    var edge = 1 - TUNE.EDGE_DIM * (1 - Math.abs(cos));
-    o.el.style.filter = 'brightness(' + ((0.7 + depth * 0.38 + o.glow * 0.25) * edge).toFixed(2) +
-      ') saturate(' + (0.9 + depth * TUNE.DEPTH_SAT).toFixed(2) + ')';
-    o.el.style.zIndex = String(100 + Math.round(z));
   }
 
   if (reduce) { minis.forEach(function (o) { paint(o, 0); }); return; }
@@ -400,6 +393,10 @@ var CASTFIELD_SUIT_SVG = {
   function frame(ts) {
     if (!document.body.classList.contains('bg-enabled')) {
       raf = null;
+      return;
+    }
+    if (last !== null && ts - last < TUNE.FRAME_INTERVAL) {
+      raf = requestAnimationFrame(frame);
       return;
     }
     if (last === null) last = ts;

@@ -112,7 +112,10 @@
   }, { passive: true });
 
   function readBgPref() {
-    try { return localStorage.getItem(BG_KEY) === '1'; } catch (e) { return false; }
+    try {
+      var saved = localStorage.getItem(BG_KEY);
+      return saved === null ? true : saved === '1';
+    } catch (e) { return true; }
   }
   function applyBgPref(on) {
     document.body.classList.toggle('bg-enabled', !!on);

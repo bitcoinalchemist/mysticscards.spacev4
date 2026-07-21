@@ -22,17 +22,27 @@
 }
 .castfield-stage .mini .flip {
   position: absolute; inset: 0;
-  transform-style: preserve-3d; will-change: transform;
+  transform-style: preserve-3d;
 }
 
 .castfield-stage .mini .side {
   position: absolute; inset: 0; border-radius: 4px; overflow: hidden;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  box-shadow: 0 7px 16px rgba(0,0,0,.5), 0 2px 5px rgba(0,0,0,.4);
+  box-shadow: 0 5px 12px rgba(0,0,0,.42);
 }
 .castfield-stage .mini .side.front { transform: translateZ(0.5px); }
 
 .castfield-stage .mini .card-back { transform: rotateY(180deg) translateZ(0.5px); }
+
+/* Floating cards use a small pre-rendered back texture. The full-size card
+   backs elsewhere on the site keep their CSS treatment; these cards are only
+   36–58px wide, so the 160×224 WebP is a better fit than rebuilding the
+   gradients and coin layers for every moving card. */
+.castfield-stage .mini .card-back {
+  background: #211735 url("../assets/card-back-square-mini.webp") center / 100% 100% no-repeat;
+}
+.castfield-stage .mini .card-back::before,
+.castfield-stage .mini .card-back .cb-coin { display: none; }
 
 .castfield-stage .mini .side .spread-card {
   width: 100%; height: 100%; border: 0; border-radius: inherit;

@@ -1,4 +1,13 @@
 button { cursor: pointer; border: none; background: none; font: inherit; }
+
+/* The dealt reading cards reuse the shared card-back shell. Use the small
+   raster texture here to avoid rebuilding the coin gradients during flips. */
+.ck-back .card-back {
+  background: #211735 url("../assets/card-back-square-mini.webp") center / 100% 100% no-repeat;
+}
+.ck-back .card-back::before,
+.ck-back .card-back .cb-coin { display: none; }
+
     body {
       --iching-paper-border: color-mix(in srgb, var(--card-paper) 84%, var(--card-dark) 16%);
       --iching-paper-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 color-mix(in srgb, var(--card-paper) 52%, transparent);

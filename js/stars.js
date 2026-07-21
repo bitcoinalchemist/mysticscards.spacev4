@@ -7,6 +7,7 @@
     if (!canvas || !canvas.getContext) return;
     var ctx = canvas.getContext('2d');
     var stars = [], shooters = [], dpr = 1, W = 0, H = 0, raf = null, t = 0;
+    var lastFrame = null, FRAME_INTERVAL = 1000 / 30;
 
     function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -44,8 +45,14 @@
       ctx.fill();
     }
 
-    function frame() {
-      t += 0.016;
+    function frame(ts) {
+      if (typeof ts !== 'number') ts = performance.now();
+      if (lastFrame !== null && ts - lastFrame < FRAME_INTERVAL) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastFrame = ts;
+      t += 1 / 30;
       ctx.clearRect(0, 0, W, H);
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
