@@ -105,21 +105,21 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     /* History row */
     .hist-wrap { position: relative; }
     .hist-panel {
-      position: absolute; top: calc(100% + 6px); right: 0;
+      position: absolute; top: calc(100% + 6px); left: 50%; right: auto;
       background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 10px;
       box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 300;
-      min-width: 300px; max-width: calc(100vw - 32px);
+      width: min(300px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
       max-height: 340px; overflow-y: auto;
       /* Fade/slide open like the header .sh-nav, rather than a display flip.
          visibility toggles instantly on open, deferred on close so the panel
          stays reachable through its fade-out. */
       opacity: 0; visibility: hidden; pointer-events: none;
-      transform: translateY(-6px);
+      transform: translate(-50%, -6px);
       transition: opacity var(--iching-motion-fast) ease, transform var(--iching-motion-med) var(--iching-ease-soft), visibility 0s linear var(--iching-motion-med);
     }
     .hist-panel.open {
       opacity: 1; visibility: visible; pointer-events: auto;
-      transform: none;
+      transform: translateX(-50%);
       transition: opacity var(--iching-motion-fast) ease, transform var(--iching-motion-med) var(--iching-ease-soft), visibility 0s linear 0s;
     }
     @media (prefers-reduced-motion: reduce) {
