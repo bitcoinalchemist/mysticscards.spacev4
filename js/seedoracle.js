@@ -160,7 +160,7 @@
   }
   // ══ Chapter I : the cast ══
   var elLineFig=document.getElementById('soLineFig'), elLineBits=document.getElementById('soLineBits'),
-      elLineStat=document.getElementById('soLineStat'), elLineDone=document.getElementById('soLineDone'),
+      elLineStat=document.getElementById('soLineStat'),
       elLineCast=document.getElementById('soLineCast');
 
   function renderLine(){
@@ -178,13 +178,8 @@
     }
     var done=_lineBits.length>=6;
     elLineCast.disabled = _sealed || _hexVals.length>=castFree() || !CRYPTO_OK;
-    elLineDone.hidden = !done;
     if(done){
-      var val=parseInt(_lineBits.join(''),2), kw=VAL_TO_KW[val], d=JD[kw]||{};
       elLineStat.textContent='hexagram '+_hexVals.length+' complete';
-      document.getElementById('soLineDoneText').innerHTML=
-        '<span class="so-mono">'+_lineBits.join('')+'</span> gives <strong>'+escapeHtml(d.name||'')+
-        '</strong>, King Wen '+kw+'.';
     }
   }
   elLineCast.addEventListener('click', function(){
@@ -197,9 +192,6 @@
       afterCastProgress();
     }
     renderLine();
-  });
-  document.getElementById('soLineRead').addEventListener('click', function(){
-    if(_lineBits.length>=6) openHexPopup(parseInt(_lineBits.join(''),2));
   });
   // Stack of 22 slots.
   var elHexStat=document.getElementById('soHexStat');

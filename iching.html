@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="canonical" href="https://mysticscards.space/iching.html" />
   <meta name="theme-color" content="#100c1e" />
-  <meta name="version" content="2026-07-16b" />
+  <meta name="version" content="2026-07-22e" />
   <meta name="description" content="Cast an I Ching reading with playing cards and explore all 64 hexagrams." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mysticscards.space/iching.html" />
@@ -24,113 +24,39 @@
   <meta name="twitter:title" content="I Ching Oracle — mysticscards.space" />
   <meta name="twitter:description" content="Cast an I Ching reading with playing cards and explore all 64 hexagrams." />
   <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
-  <link rel="stylesheet" href="css/site.css?v=20260718a" />
+  <link rel="stylesheet" href="css/site.css?v=20260722aa" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/iching.css?v=20260721a" />
+  <link rel="stylesheet" href="css/iching.css?v=20260722ah" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
-<script src="js/stars.js"></script>
-<script src="js/site.js?v=20260718a"></script>
+<script src="js/stars.js?v=20260722r"></script>
+<script src="js/site.js?v=20260722y"></script>
+<script src="js/section-rail.js?v=20260722c"></script>
 
 <main>
 <h1 class="vh">I Ching Oracle</h1>
 
-<div class="page-content page-section iching-page-content">
-
-<!-- ── Oracle ── -->
-<section class="oracle page-section section-open" id="oracle" aria-labelledby="oracleHeading">
-  <h2 class="section-heading" id="oracleHeading">
-  <button class="section-toggle" type="button"
-          aria-expanded="true" aria-controls="oracleBody"
-          data-section="oracle">
-    <span class="section-label">Inquiry</span>
-    <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  </h2>
-  <div class="section-bodywrap">
-    <div class="section-bodymin" id="oracleBody">
-  <div class="inquiry-top">
-    <div class="inquiry-wrap">
-      <div class="question-wrap">
-        <textarea class="question-input" id="questionInput" rows="2"
-          aria-label="Your question for the oracle" placeholder="What needs counsel?"></textarea>
-        <div class="cast-actions">
-          <span class="cast-ctl"><button class="cast-btn cast-btn-icon cast-number-btn" id="castOneBtn" title="Cast a line" aria-label="Cast a line"><span class="cast-number cast-spark" aria-hidden="true">1</span></button></span>
-          <span class="cast-ctl"><button class="cast-btn cast-btn-icon cast-number-btn" id="castAllBtn" title="Cast all six lines" aria-label="Cast all six lines"><span class="cast-number" aria-hidden="true">6</span></button></span>
-          <div class="hist-wrap">
-            <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings" aria-label="Past readings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;pointer-events:none"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 2"/></svg></button>
-            <div class="hist-panel" id="histPanel"></div>
-          </div>
-          <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="visibility:hidden;" title="Save reading" aria-label="Save reading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" style="display:block;pointer-events:none"><path fill="currentColor" fill-rule="evenodd" d="M1 1H10L14 5V15H1ZM3 2H8V6.5H3ZM3 10.5H13V14H3Z"/></svg></button>
-          <button class="cast-btn cast-btn-alt cast-btn-icon" id="shareBtn" style="visibility:hidden;" title="Copy link to this reading" aria-label="Copy link to this reading"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="display:block;pointer-events:none"><circle cx="5" cy="8" r="1.55" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="4" r="1.55" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="12" r="1.55" stroke="currentColor" stroke-width="1.4"/><path d="M6.35 7.2l3.75-2.3M6.35 8.8l3.75 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="asked" id="askedLine" style="display:none"></div>
-
-  <div class="cast-stage">
-    <div class="cards-row" id="cardsRow"></div>
-
-    <div class="pull-banner" id="pullBanner" style="display:none"></div>
-
-    <div class="cast-figs" id="resultWrap" style="display:none">
-      <div class="fig-col">
-        <button class="hex-result" id="hexPrimary" type="button" title="Show the Cast hexagram" aria-label="Show the Cast hexagram" aria-pressed="false"></button>
-        <span class="fig-label">Cast</span>
-      </div>
-      <div class="fig-col" id="changingCol" style="display:none">
-        <button class="hex-result hex-tile hex-changing" id="hexChanging" type="button" title="Show the changing lines" aria-label="Show the changing lines" aria-pressed="false"></button>
-        <span class="fig-label">Changing</span>
-      </div>
-      <div class="fig-col" id="becomesCol" style="display:none">
-        <button class="hex-result" id="hexSecondary" type="button" title="Show the Becomes hexagram" aria-label="Show the Becomes hexagram" aria-pressed="false"></button>
-        <span class="fig-label">Becomes</span>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="oracle-text-placeholder" id="oracleText"></div>
-  <div class="governing-line" id="governingLine"></div>
-    </div><!-- /.section-bodymin -->
-  </div><!-- /.section-bodywrap -->
-</section>
-
-</div><!-- /.page-content -->
-
-<!-- ── Reference grid (full-bleed) ── -->
-<section class="hex-ref-wrap page-section section-open" id="hexagrams" aria-labelledby="hexagramsHeading">
-  <h2 class="section-heading" id="hexagramsHeading">
-  <button class="section-toggle" type="button"
-          aria-expanded="true" aria-controls="hexagramsBody"
-          data-section="hexagrams">
-    <span class="hex-ref-label">Hexagrams</span>
-    <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  </h2>
-  <div class="section-bodywrap">
-    <div class="section-bodymin" id="hexagramsBody">
-  <div class="hex-ref-panel">
-    <div class="hex-ref-header">
-      <div class="hex-ref-controls">
-        <div class="hex-ref-toggle" id="seqToggle">
-          <button data-seq="fuxi" class="active">Fu Xi</button>
-          <button data-seq="kingwen">King Wen</button>
-        </div>
-        <button class="hex-ref-codes" id="codesToggle" aria-pressed="false" aria-label="Show 0–63 and binary values" title="Show 0–63 and binary">#</button>
-      </div>
-    </div>
-    <div class="hex-ref-grid open" id="hex-grid"></div>
-  </div>
-    </div><!-- /.section-bodymin -->
-  </div><!-- /.section-bodywrap -->
-</section>
-
+<!-- Section rail, driven by js/section-rail.js (shared with index.html).
+     Panels are authored inside .iching-track, so the page is a plain vertical
+     stack with no JS; the module adds .rail-ready to this shell, which is what
+     switches the rail CSS on. data-section-rail is both the module's hook and
+     the signal to js/site.js not to persist/restore collapse state inside. -->
+<div class="iching-primary" data-section-rail>
+<!-- Each tab's aria-controls names the .iching-panel that carries the
+     aria-hidden/inert state, so the controlled element and the hidden element
+     are the same node. Nav order (Trigrams | Inquiry | Hexagrams) matches
+     track order, so sliding direction agrees with tab position. -->
+<nav class="iching-section-nav" role="tablist" aria-label="I Ching sections">
+  <button type="button" class="iching-section-title" role="tab" id="ichTabTrigrams" aria-selected="false" aria-controls="ichPanelTrigrams" data-iching-tab="trigrams">Trigrams</button>
+  <button type="button" class="iching-section-title is-active" role="tab" id="ichTabOracle" aria-selected="true" aria-controls="ichPanelOracle" data-iching-tab="oracle">Inquiry</button>
+  <button type="button" class="iching-section-title" role="tab" id="ichTabHexagrams" aria-selected="false" aria-controls="ichPanelHexagrams" data-iching-tab="hexagrams">Hexagrams</button>
+</nav>
+<div class="iching-viewport">
+<div class="iching-track">
 <!-- ── Trigrams (the eight building blocks) ── -->
+<div class="iching-panel" id="ichPanelTrigrams" role="tabpanel" tabindex="0" aria-labelledby="ichTabTrigrams">
 <section class="page-section section-open" id="trigrams" aria-labelledby="trigramsHeading">
   <h2 class="section-heading" id="trigramsHeading">
   <button class="section-toggle" type="button"
@@ -169,6 +95,109 @@
   </div>
 </section>
 
+</div><!-- /.iching-panel trigrams -->
+
+<div class="iching-panel" id="ichPanelOracle" role="tabpanel" tabindex="0" aria-labelledby="ichTabOracle">
+<div class="page-content page-section iching-page-content">
+
+<!-- ── Oracle ── -->
+<section class="oracle page-section section-open" id="oracle" aria-labelledby="oracleHeading">
+  <h2 class="section-heading" id="oracleHeading">
+  <button class="section-toggle" type="button"
+          aria-expanded="true" aria-controls="oracleBody"
+          data-section="oracle">
+    <span class="section-label">Inquiry</span>
+    <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  </h2>
+  <div class="section-bodywrap">
+    <div class="section-bodymin" id="oracleBody">
+  <div class="inquiry-top">
+    <div class="inquiry-wrap">
+      <div class="question-wrap">
+        <textarea class="question-input" id="questionInput" rows="2"
+          aria-label="Your question for the oracle" placeholder="What needs counsel?"></textarea>
+        <div class="cast-actions">
+          <span class="cast-ctl"><button class="cast-btn cast-btn-icon cast-number-btn" id="castOneBtn" title="Cast a line" aria-label="Cast a line"><span class="cast-number cast-spark" aria-hidden="true">1</span></button></span>
+          <span class="cast-ctl"><button class="cast-btn cast-btn-icon cast-number-btn" id="castAllBtn" title="Cast all six lines" aria-label="Cast all six lines"><span class="cast-number" aria-hidden="true">6</span></button></span>
+          <div class="hist-wrap">
+            <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings" aria-label="Past readings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;pointer-events:none"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 2"/></svg></button>
+            <div class="hist-panel" id="histPanel"></div>
+          </div>
+          <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="visibility:hidden;" title="Save reading" aria-label="Save reading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" style="display:block;pointer-events:none"><path fill="currentColor" fill-rule="evenodd" d="M1 1H10L14 5V15H1ZM3 2H8V6.5H3ZM3 10.5H13V14H3Z"/></svg></button>
+          <button class="cast-btn cast-btn-alt cast-btn-icon" id="shareBtn" style="visibility:hidden;" title="Copy link to this reading" aria-label="Copy link to this reading"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="display:block;pointer-events:none"><circle cx="5" cy="8" r="1.55" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="4" r="1.55" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="12" r="1.55" stroke="currentColor" stroke-width="1.4"/><path d="M6.35 7.2l3.75-2.3M6.35 8.8l3.75 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cast-stage">
+    <div class="cards-row" id="cardsRow"></div>
+
+    <div class="pull-banner" id="pullBanner" style="display:none"></div>
+
+    <div class="cast-figs" id="resultWrap" style="display:none">
+      <div class="fig-col">
+        <button class="hex-result" id="hexPrimary" type="button" title="Show the Cast hexagram" aria-label="Show the Cast hexagram" aria-pressed="false"></button>
+        <span class="fig-label">Cast</span>
+      </div>
+      <div class="fig-col" id="changingCol" style="display:none">
+        <button class="hex-result hex-tile hex-changing" id="hexChanging" type="button" title="Show the changing lines" aria-label="Show the changing lines" aria-pressed="false"></button>
+        <span class="fig-label">Changing</span>
+      </div>
+      <div class="fig-col" id="becomesCol" style="display:none">
+        <button class="hex-result" id="hexSecondary" type="button" title="Show the Becomes hexagram" aria-label="Show the Becomes hexagram" aria-pressed="false"></button>
+        <span class="fig-label">Becomes</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="oracle-text-placeholder" id="oracleText"></div>
+  <div class="governing-line" id="governingLine"></div>
+    </div><!-- /.section-bodymin -->
+  </div><!-- /.section-bodywrap -->
+</section>
+
+</div><!-- /.page-content -->
+
+</div><!-- /.iching-panel inquiry -->
+
+<!-- ── Reference grid (full-bleed) ── -->
+<div class="iching-panel" id="ichPanelHexagrams" role="tabpanel" tabindex="0" aria-labelledby="ichTabHexagrams">
+<section class="hex-ref-wrap page-section section-open" id="hexagrams" aria-labelledby="hexagramsHeading">
+  <h2 class="section-heading" id="hexagramsHeading">
+  <button class="section-toggle" type="button"
+          aria-expanded="true" aria-controls="hexagramsBody"
+          data-section="hexagrams">
+    <span class="hex-ref-label">Hexagrams</span>
+    <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  </h2>
+  <div class="section-bodywrap">
+    <div class="section-bodymin" id="hexagramsBody">
+  <div class="hex-ref-panel">
+    <div class="hex-ref-header">
+      <div class="hex-ref-controls">
+        <div class="hex-ref-toggle" id="seqToggle">
+          <button data-seq="fuxi" class="active">Fu Xi</button>
+          <button data-seq="kingwen">King Wen</button>
+        </div>
+        <button class="hex-ref-codes" id="codesToggle" aria-pressed="false" aria-label="Show 0–63 and binary values" title="Show 0–63 and binary">#</button>
+      </div>
+    </div>
+    <div class="hex-ref-grid open" id="hex-grid"></div>
+  </div>
+    </div><!-- /.section-bodymin -->
+  </div><!-- /.section-bodywrap -->
+</section>
+
+</div><!-- /.iching-panel hexagrams -->
+
+</div><!-- /.iching-track -->
+</div><!-- /.iching-viewport -->
+</div><!-- /.iching-primary -->
+
 <!-- ── Hexagram popup ── -->
 <div class="hx-overlay" id="hxOverlay">
   <div class="hx-popup" id="hxPopup" role="dialog" aria-modal="true" aria-labelledby="hxName" tabindex="-1">
@@ -192,8 +221,6 @@
 </div>
 
 </main>
-<footer class="site-footer"><div class="sf-inner"></div></footer>
-
 <!-- Shared card data + storage -->
 <script src="js/iching-store.js"></script>
 <script src="js/cardsdata.js"></script>
@@ -209,12 +236,12 @@
      Distinct from cardsdata.js's copies — this page needs its own
      sizing + court-pip positioning. -->
 <script src="js/iching-cards.js?v=20260711a"></script>
-<script src="js/iching-oracle.js?v=20260710d"></script>
+<script src="js/iching-oracle.js?v=20260722b"></script>
 <!-- 8-trigram reference row + detail popup. LAST — reads
      window.TRIGRAMS_DATA from ichingdata.js and trigramSVG from
      iching-hexagrams.js. -->
 <script src="js/iching-trigrams.js"></script>
 <!-- Ambient castfield — same fixed z:-1 card drift as the Mystics Cards page. -->
-<script src="js/castfield.js?v=20260711c"></script>
+<script src="js/castfield.js?v=20260722b"></script>
 </body>
 </html>

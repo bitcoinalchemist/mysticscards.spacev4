@@ -25,26 +25,20 @@
     else el.textContent = '';
   }
 
-  // Pins #qModeCurrent's left edge to #annualGrid's left edge (the Neptune
-  // column — SPREAD_PLANETS[6], the first seat rendered in each row) instead
-  // of letting it hug the age stepper. .spreads-top's rail width (720px on
-  // desktop) and the grid's own width (560px * --quad-scale, clamped by
-  // viewport) are centred independently, so the gap between their left
-  // edges isn't a fixed number — it shifts with viewport width and the
-  // card-size slider. Recomputed on resize and whenever the card size
-  // changes; a static CSS offset would only be correct at one scale.
+  // Put the endpoint label in the empty two-column crown-side immediately
+  // before the first top-row card (the KS anchor), so it stays beside the
+  // spread when the card size or viewport changes.
   function alignSpreadLabel() {
-    const el   = document.getElementById('qModeCurrent');
-    const top  = document.querySelector('.spreads-top');
-    const grid = document.getElementById('annualGrid');
-    if (!el || !top || !grid) return;
-    const gridRect = grid.getBoundingClientRect();
-    const topRect  = top.getBoundingClientRect();
-    el.style.left = Math.round(gridRect.left - topRect.left) + 'px';
+    const el = document.getElementById('qModeCurrent');
+    const home = document.querySelector('#annualGrid .crown-joker');
+    if (el && home && el.parentElement !== home) home.appendChild(el);
   }
 
   function alignQuadControls() {
     alignSpreadLabel();
+    const controls = document.querySelector('.age-controls-wrap');
+    const home = document.querySelector('#annualGrid .crown-controls');
+    if (controls && home && controls.parentElement !== home) home.appendChild(controls);
   }
 
   function captureCardRects(ctl) {

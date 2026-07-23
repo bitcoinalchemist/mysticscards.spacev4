@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  // Chromium can reject an in-progress native document view transition when
+  // another navigation interrupts it. It is harmless, but otherwise appears
+  // as an unhandled rejection during rapid navigation.
+  window.addEventListener('unhandledrejection', function (e) {
+    var reason = e.reason;
+    if (reason && reason.name === 'AbortError' && /transition was skipped/i.test(String(reason.message || ''))) {
+      e.preventDefault();
+    }
+  });
+
   var page = window.location.pathname.split('/').pop() || 'index.html';
   var isCardsPage = page === 'index.html' || page === '';
   var BG_KEY = 'mc-castfield-enabled';
@@ -11,10 +21,10 @@
     '<svg viewBox="0 0 18 20" aria-hidden="true">' +
       '<g fill="#c79a54">' +
         '<rect x="0" y="0"    width="18" height="2" rx="1"/>' +
-        '<rect x="0" y="3.6"  width="18" height="2" rx="1"/>' +
-        '<rect x="0" y="7.2"  width="7"  height="2" rx="1"/><rect x="11" y="7.2"  width="7"  height="2" rx="1"/>' +
+        '<rect x="0" y="3.6"  width="7"  height="2" rx="1"/><rect x="11" y="3.6"  width="7"  height="2" rx="1"/>' +
+        '<rect x="0" y="7.2"  width="18" height="2" rx="1"/>' +
         '<rect x="0" y="10.8" width="7"  height="2" rx="1"/><rect x="11" y="10.8" width="7"  height="2" rx="1"/>' +
-        '<rect x="0" y="14.4" width="7"  height="2" rx="1"/><rect x="11" y="14.4" width="7"  height="2" rx="1"/>' +
+        '<rect x="0" y="14.4" width="18" height="2" rx="1"/>' +
         '<rect x="0" y="18"   width="7"  height="2" rx="1"/><rect x="11" y="18"   width="7"  height="2" rx="1"/>' +
       '</g>' +
     '</svg>';
@@ -28,12 +38,20 @@
       '</g>' +
     '</svg>';
 
-  var pageLinks =
-    '<a class="sh-menu-link' + (isCardsPage ? ' is-current' : '') + '" href="index.html"' + (isCardsPage ? ' aria-current="page"' : '') + '>' +
-      '<span class="sh-menu-link-mark">' + CARDS_MARK + '</span><span>Mystics Cards</span>' +
+  var menuPageLinks =
+    '<a class="sh-menu-link sh-menu-link--titled' + (isCardsPage ? ' is-current' : '') + '" href="index.html" aria-label="Mystics Cards" title="Mystics Cards"' + (isCardsPage ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-menu-link-mark sh-menu-link-mark--cards" aria-hidden="true">' + CARDS_MARK + '</span><span>Mystics Cards</span>' +
     '</a>' +
-    '<a class="sh-menu-link' + (page === 'iching.html' ? ' is-current' : '') + '" href="iching.html"' + (page === 'iching.html' ? ' aria-current="page"' : '') + '>' +
-      '<span class="sh-menu-link-mark">' + ICHING_MARK + '</span><span>I Ching Oracle</span>' +
+    '<a class="sh-menu-link sh-menu-link--titled' + (page === 'iching.html' ? ' is-current' : '') + '" href="iching.html" aria-label="I Ching Oracle" title="I Ching Oracle"' + (page === 'iching.html' ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-menu-link-mark" aria-hidden="true">' + ICHING_MARK + '</span><span>I Ching Oracle</span>' +
+    '</a>';
+
+  var headerPageLinks =
+    '<a class="sh-page-link' + (isCardsPage ? ' is-current' : '') + '" href="index.html" aria-label="Mystics Cards" title="Mystics Cards"' + (isCardsPage ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-page-link-mark sh-page-link-mark--cards" aria-hidden="true">' + CARDS_MARK + '</span>' +
+    '</a>' +
+    '<a class="sh-page-link' + (page === 'iching.html' ? ' is-current' : '') + '" href="iching.html" aria-label="I Ching Oracle" title="I Ching Oracle"' + (page === 'iching.html' ? ' aria-current="page"' : '') + '>' +
+      '<span class="sh-page-link-mark" aria-hidden="true">' + ICHING_MARK + '</span>' +
     '</a>';
 
   var settingsRows =
@@ -44,8 +62,8 @@
   if (isCardsPage) {
     settingsRows +=
       '<div class="sh-setting-row">' +
-        '<span class="sh-setting-label">Reading voice</span>' +
-        '<button type="button" class="sh-voice-btn" id="voiceToggle" aria-pressed="false" aria-label="Reading voice">modern</button>' +
+        '<span class="sh-setting-label">Olney mode</span>' +
+        '<button type="button" class="q-switch" id="voiceToggle" role="switch" aria-checked="false" aria-label="Olney mode"><span class="q-switch-knob"></span></button>' +
       '</div>' +
       '<div class="sh-setting-row">' +
         '<span class="sh-setting-label">Alternate court cards</span>' +
@@ -74,28 +92,33 @@
       '</div>';
   }
 
+  var contactLink =
+    '<a class="sh-menu-contact" href="mailto:mysticscards@proton.me" aria-label="Email mysticscards@proton.me" title="Email mysticscards@proton.me">' +
+      '<span aria-hidden="true">Email</span><span>mysticscards@proton.me</span>' +
+    '</a>';
+  var legalLink =
+    '<a class="sh-menu-contact sh-menu-legal" href="legal.html">Legal &amp; credits</a>';
+
   var headerHtml =
     '<header class="site-header" id="siteHeader">' +
       '<div class="sh-inner">' +
         '<div class="sh-menu">' +
           '<button type="button" class="sh-menu-btn" id="shMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="shMenuPanel" aria-label="Open site menu" title="Menu">' +
-            '<svg class="sh-menu-cardmark" viewBox="0 0 22 22" aria-hidden="true">' +
-              '<g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round">' +
-                '<rect x="3.1" y="4.1" width="9.2" height="13.8" rx="1.3" transform="rotate(-12 7.7 11)" opacity=".58" />' +
-                '<rect x="6.2" y="2.8" width="9.2" height="13.8" rx="1.3" transform="rotate(4 10.8 9.7)" opacity=".78" />' +
-                '<rect x="9.4" y="4.1" width="9.2" height="13.8" rx="1.3" transform="rotate(15 14 11)" />' +
-              '</g>' +
-              '<path d="M13.9 8.1c.35 1.05 1.02 1.72 2.07 2.07-1.05.35-1.72 1.02-2.07 2.07-.35-1.05-1.02-1.72-2.07-2.07 1.05-.35 1.72-1.02 2.07-2.07Z" fill="currentColor" />' +
+            '<svg class="sh-menu-bars" viewBox="0 0 22 22" aria-hidden="true">' +
+              '<path d="M3 5.5h16M3 11h16M3 16.5h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />' +
             '</svg>' +
           '</button>' +
           '<div class="sh-menu-panel" id="shMenuPanel">' +
-            '<nav class="sh-menu-nav" aria-label="Site pages">' + pageLinks + '</nav>' +
+            '<nav class="sh-menu-nav" aria-label="Site pages">' + menuPageLinks + '</nav>' +
             '<div class="sh-menu-divider" aria-hidden="true"></div>' +
             '<div class="sh-menu-head">Settings</div>' +
             '<div class="sh-menu-settings">' + settingsRows + '</div>' +
+            '<div class="sh-menu-divider" aria-hidden="true"></div>' +
+            legalLink + contactLink +
           '</div>' +
         '</div>' +
         '<a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>' +
+        '<nav class="sh-page-nav" aria-label="Site pages">' + headerPageLinks + '</nav>' +
       '</div>' +
     '</header>';
 
@@ -142,10 +165,10 @@
     var btn = document.getElementById('voiceToggle');
     if (btn) {
       var isOlney = next === 'olney';
-      btn.textContent = next;
-      btn.setAttribute('aria-pressed', isOlney ? 'true' : 'false');
-      btn.title = 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern');
-      btn.setAttribute('aria-label', 'Reading voice: ' + (isOlney ? 'Olney' : 'Modern') + '. Activate to switch.');
+      btn.classList.toggle('on', isOlney);
+      btn.setAttribute('aria-checked', isOlney ? 'true' : 'false');
+      btn.title = 'Olney mode: ' + (isOlney ? 'on' : 'off');
+      btn.setAttribute('aria-label', 'Olney mode: ' + (isOlney ? 'on' : 'off') + '. Activate to switch.');
     }
     try { localStorage.setItem(VOICE_KEY, next); } catch (e) {}
     window.dispatchEvent(new CustomEvent('mc-voice-toggle', { detail: { voice: next } }));
@@ -200,20 +223,11 @@
     });
   }
 
-  function buildFooter() {
-    var inner = document.querySelector('.site-footer .sf-inner');
-    if (!inner) return;
-    if (inner.children.length || inner.textContent.trim()) return;
-
-    inner.innerHTML =
-      '<a class="sf-email" href="mailto:mysticscards@proton.me" aria-label="Email mysticscards@proton.me" title="mysticscards@proton.me">mysticscards@proton.me</a>';
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildFooter);
-  else buildFooter();
-
   window.toggleSection = function (id) {
     var section = document.getElementById(id);
     if (!section) return;
+    // Rail sections don't collapse — see _restoreSections below.
+    if (section.closest('[data-section-rail]')) return;
     var open = section.classList.toggle('section-open');
     var b = section.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
     var body = section.querySelector(':scope > .section-bodywrap > .section-bodymin');
@@ -227,6 +241,20 @@
   });
   function _restoreSections() {
     document.querySelectorAll('.page-section').forEach(function (section) {
+      // Sections inside a section rail ([data-section-rail], see
+      // js/home-sections.js / js/iching-sections.js) are driven by tabs, not
+      // by collapse toggles. Their toggles are hidden, so a restored closed
+      // state would be unrecoverable — force them open and drop any key left
+      // over from before the rail landed.
+      if (section.closest('[data-section-rail]')) {
+        section.classList.add('section-open');
+        var railToggle = section.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
+        if (railToggle) railToggle.setAttribute('aria-expanded', 'true');
+        var railBody = section.querySelector(':scope > .section-bodywrap > .section-bodymin');
+        if (railBody) railBody.inert = false;
+        try { localStorage.removeItem('mc-section-' + section.id); } catch (e) {}
+        return;
+      }
       var b = section.querySelector(':scope > .section-heading > .section-toggle, :scope > .section-toggle');
       if (!b) return;
       var saved = null;

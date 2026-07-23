@@ -304,7 +304,7 @@
     const cc = cardForRuler(ruler, script, birthCard);
     const cardHTML = cc ? statsCardHTML(cc, { title: `${ruler} ruling card` }) : '';
     return `<div class="ls-zodiac-card-slot${extraCls ? ' ' + extraCls : ''}">
-      <span class="ls-zodiac-card-label">${label}</span>
+      ${label ? `<span class="ls-zodiac-card-label">${label}</span>` : ''}
       <span class="ls-stat-chip" title="${title}">${rulerText}</span>
       ${cardHTML}
     </div>`;
@@ -327,7 +327,7 @@
   function rulingCardSlotHTML(sign, script, birthCard) {
     if (!sign) return '';
     const ruler = sign.ruler;
-    return zodiacCardSlotHTML('Planetary Ruling Card', ruler, script, birthCard, `${ruler} planetary ruling card`, 'ls-prc-slot');
+    return zodiacCardSlotHTML('', ruler, script, birthCard, `${ruler} planetary ruling card`, 'ls-prc-slot');
   }
 
   function zodiacStatsHTML(card, script) {
@@ -369,33 +369,29 @@
     const rulingCardHTML = rulingCardSlotHTML(sign, script, card);
     const tropDecans = decanCardSlotsHTML(sign, tropDecan, script, card);
     const signText = `${sign.glyph} ${sign.name}`;
-    const rulerGlyph = SPREAD_PLANET_SYM[sign.ruler] || '';
-    const rulerText = rulerGlyph ? `${rulerGlyph} ${sign.ruler}` : sign.ruler;
-    const siderealRulerGlyph = siderealSign && SPREAD_PLANET_SYM[siderealSign.ruler] || '';
-    const siderealRulerText = siderealSign
-      ? (siderealRulerGlyph ? `${siderealRulerGlyph} ${siderealSign.ruler}` : siderealSign.ruler)
-      : '';
     const siderealDecans = siderealSign ? decanCardSlotsHTML(siderealSign, sidDecan, script, card) : null;
-    const siderealHTML = siderealSign ? `<div class="ls-zodiac-cardlet">
-        <div class="ls-zodiac-kind">Sidereal</div>
+    const siderealHTML = siderealSign ? `<div class="ls-zodiac-cardlet" data-zodiac-panel="sidereal"
+        id="lsZodiacPanelSidereal" role="tabpanel" tabindex="0" aria-labelledby="lsZodiacTabSidereal">
         <div class="ls-zodiac-line">
           <span class="ls-stat-chip" title="Sidereal sign, Lahiri-style birthday approximation">${siderealSign.glyph} ${siderealSign.name}</span>
-          <span class="ls-stat-chip" title="Sidereal classical sign ruler">${siderealRulerText}</span>
         </div>
         <div class="ls-zodiac-card-row">
           ${siderealDecans ? siderealDecans.ptolemaic : ''}
           ${rulingCardSlotHTML(siderealSign, script, card)}
           ${siderealDecans ? siderealDecans.chaldean : ''}
         </div>
-      </div>` : '';
-    return `<div class="ls-stat-block">
-      <div class="ls-stat-label">Zodiac</div>
+    </div>` : '';
+    return `<div class="ls-stat-block ls-zodiac-block" data-zodiac-group="astrology" data-zodiac-active="tropical">
+      <div class="astro-zodiac-rail" role="tablist" aria-label="Zodiac system">
+        <button type="button" class="astro-zodiac-tab is-active" id="lsZodiacTabTropical" role="tab" aria-selected="true" aria-controls="lsZodiacPanelTropical" data-zodiac-tab="tropical">Tropical</button>
+        <button type="button" class="astro-zodiac-tab" id="lsZodiacTabSidereal" role="tab" aria-selected="false" data-zodiac-tab="sidereal"${siderealSign ? ' aria-controls="lsZodiacPanelSidereal"' : ' disabled'}>Sidereal</button>
+      </div>
+      <div class="ls-stat-label">Planetary Ruling Cards</div>
       <div class="ls-zodiac-stack">
-        <div class="ls-zodiac-cardlet">
-          <div class="ls-zodiac-kind">Tropical</div>
+        <div class="ls-zodiac-cardlet" data-zodiac-panel="tropical"
+          id="lsZodiacPanelTropical" role="tabpanel" tabindex="0" aria-labelledby="lsZodiacTabTropical">
           <div class="ls-zodiac-line">
             <span class="ls-stat-chip" title="Tropical sun sign">${signText}</span>
-            <span class="ls-stat-chip" title="Classical sign ruler">${rulerText}</span>
           </div>
           <div class="ls-zodiac-card-row">
             ${tropDecans ? tropDecans.ptolemaic : ''}
@@ -655,9 +651,44 @@
     if (window.SolarTime && typeof window.SolarTime.refresh === 'function') window.SolarTime.refresh();
   }
 
+  // Keep the main Life Script story and Planet links with About, while
+  // leaving the selected card's zodiac correspondences and Solar controls
+  // in the Stats panel.
+  function clearAboutLifeScript() {
+    const target = document.getElementById('fAboutLifeScript');
+    if (target) target.innerHTML = '';
+    return target;
+  }
+
+  function splitAboutLifeScript(root) {
+    const target = document.getElementById('fAboutLifeScript');
+    const inner = root && root.querySelector('.ls-inner');
+    if (!target || !inner) return;
+    const header = inner.querySelector('.ls-header');
+    const row = inner.querySelector('.ls-row');
+    const stats = inner.querySelector('.ls-stats');
+    if (!row && !stats) {
+      while (inner.firstChild) target.appendChild(inner.firstChild);
+      return;
+    }
+    if (header) target.appendChild(header);
+    if (row) target.appendChild(row);
+    if (stats) {
+      const aboutStats = document.createElement('div');
+      aboutStats.className = 'ls-stats ls-stats--about';
+      Array.from(stats.children).forEach(function (block) {
+        const label = block.querySelector('.ls-stat-label');
+        const text = label ? label.textContent.trim() : '';
+        if (text === 'Dates' || text === 'Displacements' || text === 'Planets') aboutStats.appendChild(block);
+      });
+      if (aboutStats.children.length) target.appendChild(aboutStats);
+    }
+  }
+
   function renderLifeScript(card) {
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
+    clearAboutLifeScript();
     const inner = root.querySelector('.ls-inner') || root;
     parkSolarPanel(root);
     clearSolarPanel();
@@ -678,8 +709,11 @@
       return false;
     }
     inner.innerHTML = panelHTML(card);
+    splitAboutLifeScript(root);
     mountSolarPanel(inner);
     bindLifeScriptCardClicks(inner);
+    bindZodiacTabs(inner);
+    bindLifeScriptCardClicks(document.getElementById('fAboutLifeScript'));
     return true;
   }
 
@@ -704,6 +738,60 @@
         open();
       };
     });
+  }
+
+  function bindZodiacTabs(root) {
+    if (!root) return;
+    const scope = document.getElementById('fLifeScript') || root;
+    const groupBlocks = function () {
+      return Array.prototype.slice.call(scope.querySelectorAll('[data-zodiac-group="astrology"]'));
+    };
+    const primary = groupBlocks().find(function (block) { return block.querySelector('[data-zodiac-tab]'); });
+    if (!primary) return;
+
+    function sync(kind, focusTab) {
+      // The Natal Chart is injected later by Solar Time, so resolve the
+      // shared blocks at switch time rather than capturing only the initial
+      // ruling-card block.
+      groupBlocks().forEach(function (block) {
+        block.dataset.zodiacActive = kind;
+        block.querySelectorAll('[data-zodiac-tab]').forEach(function (button) {
+          const on = button.dataset.zodiacTab === kind;
+          button.classList.toggle('is-active', on);
+          button.setAttribute('aria-selected', on ? 'true' : 'false');
+          button.tabIndex = on ? 0 : -1;
+        });
+      });
+      if (focusTab) focusTab.focus();
+    }
+
+    if (primary.dataset.zodiacBound !== 'true') {
+      primary.dataset.zodiacBound = 'true';
+      const tabs = Array.prototype.slice.call(primary.querySelectorAll('[data-zodiac-tab]'));
+      tabs.forEach(function (tab) {
+        if (tab.getAttribute('aria-selected') !== 'true') tab.tabIndex = -1;
+      });
+
+      primary.addEventListener('click', function (event) {
+        const tab = event.target.closest('[data-zodiac-tab]');
+        if (tab && !tab.disabled) sync(tab.dataset.zodiacTab, null);
+      });
+      primary.addEventListener('keydown', function (event) {
+        const tab = event.target.closest('[data-zodiac-tab]');
+        if (!tab) return;
+        const usable = tabs.filter(function (t) { return !t.disabled; });
+        const i = usable.indexOf(tab);
+        if (i < 0 || !usable.length) return;
+        let next = null;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = usable[(i + 1) % usable.length];
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = usable[(i + usable.length - 1) % usable.length];
+        if (event.key === 'Home') next = usable[0];
+        if (event.key === 'End') next = usable[usable.length - 1];
+        if (next) { event.preventDefault(); sync(next.dataset.zodiacTab, next); }
+      });
+    }
+
+    sync(primary.dataset.zodiacActive || 'tropical', null);
   }
 
   // One "X sits in Y's Z seat" block. `rowHTML` is either scriptRowHTML's
@@ -732,6 +820,7 @@
   function renderRelationshipConnections(card, partner) {
     const root = document.getElementById('fLifeScript');
     if (!root) return false;
+    clearAboutLifeScript();
     const inner = root.querySelector('.ls-inner') || root;
     detachSolarPanel();
     root.classList.remove('is-empty');
@@ -798,4 +887,8 @@
 
   window.renderLifeScript = renderLifeScript;
   window.renderRelationshipConnections = renderRelationshipConnections;
+  // Shared with js/chart-table.js, whose Tropical/Sidereal picker reuses the
+  // same .ls-zodiac-block markup and should behave identically (roving
+  // tabindex, arrow/Home/End keys) rather than growing a second copy.
+  window.bindZodiacTabs = bindZodiacTabs;
 })();

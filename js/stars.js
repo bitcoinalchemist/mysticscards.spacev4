@@ -7,7 +7,7 @@
     if (!canvas || !canvas.getContext) return;
     var ctx = canvas.getContext('2d');
     var stars = [], shooters = [], dpr = 1, W = 0, H = 0, raf = null, t = 0;
-    var lastFrame = null, FRAME_INTERVAL = 1000 / 30;
+    var lastFrame = null, FRAME_INTERVAL = 1000 / 60, nextShooter = 0;
 
     function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -21,17 +21,17 @@
       var count = Math.round(Math.min(170, (W * H) / 7000));
       stars = [];
       for (var i = 0; i < count; i++) {
-        var gold = Math.random() < 0.2;
+        var roll = Math.random();
         stars.push({
           x: Math.random() * W,
           y: Math.random() * H,
-          r: rand(0.4, gold ? 1.5 : 1.25),
+          r: rand(0.35, roll < 0.18 ? 1.45 : 1.2),
           base: rand(0.12, 0.6),
           amp: rand(0.08, 0.4),
           spd: rand(0.5, 1.7),
           ph: rand(0, Math.PI * 2),
           drift: rand(0.008, 0.04),
-          gold: gold
+          tone: roll < 0.12 ? 'violet' : (roll < 0.3 ? 'gold' : 'white')
         });
       }
     }
@@ -39,9 +39,9 @@
     function paintStar(s, a) {
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = s.gold
-        ? 'rgba(231,192,116,' + a + ')'
-        : 'rgba(238,236,250,' + a + ')';
+      var color = s.tone === 'violet' ? '196,183,238'
+        : (s.tone === 'gold' ? '231,192,116' : '238,236,250');
+      ctx.fillStyle = 'rgba(' + color + ',' + a + ')';
       ctx.fill();
     }
 
@@ -52,7 +52,7 @@
         return;
       }
       lastFrame = ts;
-      t += 1 / 30;
+      t += 1 / 60;
       ctx.clearRect(0, 0, W, H);
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
@@ -63,9 +63,10 @@
         paintStar(s, a);
       }
 
-      if (Math.random() < 0.0014 && shooters.length < 1) {
+      if (ts >= nextShooter && shooters.length < 1) {
         shooters.push({ x: rand(W * 0.08, W * 0.7), y: rand(H * 0.06, H * 0.5),
                         vx: rand(3.2, 4.8), vy: rand(1, 1.8), life: 1 });
+        nextShooter = ts + rand(12000, 28000);
       }
       for (var j = shooters.length - 1; j >= 0; j--) {
         var sh = shooters[j];
@@ -77,6 +78,9 @@
         ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(sh.x, sh.y);
         ctx.lineTo(sh.x - sh.vx * 7, sh.y - sh.vy * 7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(sh.x, sh.y, 1.15, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,244,205,' + (0.75 * sh.life) + ')';
+        ctx.fill();
       }
       raf = requestAnimationFrame(frame);
     }

@@ -24,9 +24,54 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       --iching-press: .98;
     }
     .iching-page-content {
-      max-width: var(--max-w);
+      max-width: var(--reading-max-w);
       padding: 0 var(--space-6) 0;
     }
+    /* Hidden until the rail is wired — without JS the tabs would be dead
+       buttons over an already-stacked page. */
+    .iching-section-nav { display: none; }
+    .iching-primary.rail-ready .iching-section-nav {
+      display: block;
+      position: relative;
+      width: min(100%, var(--reading-max-w));
+      margin: 0 auto .55rem;
+      min-height: var(--tap-target);
+      text-align: center;
+    }
+    /* Gated on .rail-ready, added by js/iching-sections.js once the tabs are
+       wired. Without JS the nav is hidden and the three panels render as a
+       plain vertical stack. */
+    .iching-primary {
+      width: 100%;
+    }
+    .iching-section-title {
+      position: absolute;
+      top: 0;
+      appearance: none;
+      border: 0;
+      background: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font: 600 .68rem/var(--tap-target) var(--sans);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      min-height: var(--tap-target);
+      padding: 0 .75rem;
+      opacity: .72;
+      transform: translateX(-50%);
+    }
+    .iching-section-title[data-iching-tab="trigrams"] { left: 25%; }
+    .iching-section-title[data-iching-tab="oracle"] { left: 50%; }
+    .iching-section-title[data-iching-tab="hexagrams"] { left: 75%; }
+    .iching-section-title.is-active { color: var(--gold); opacity: 1; }
+    .iching-section-title:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+    /* Rail section headings are visually hidden with .vh (applied by
+       js/iching-sections.js, which also strips the now-dead toggle) rather
+       than display:none, so the <h2>s stay in the accessibility tree and the
+       document outline. */
+    .rail-ready #oracle.section-open > .section-bodywrap,
+    .rail-ready #hexagrams.section-open > .section-bodywrap,
+    .rail-ready #trigrams.section-open > .section-bodywrap { margin-top: 0; }
     /* ── Oracle ── */
     .oracle { margin-bottom: 3rem; text-align: center; }
     .inquiry-top {
@@ -38,28 +83,28 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     .question-wrap { margin-bottom: 1.5rem; }
     .question-input {
       width: 100%;
-      min-height: 5.2rem;
+      min-height: 4.5rem;
       padding: 1.15rem 1.25rem;
       font-family: var(--serif);
       font-size: 1.1rem;
       font-style: italic;
       background:
-        linear-gradient(180deg, color-mix(in srgb, var(--surface-alt) 72%, transparent), color-mix(in srgb, var(--surface) 82%, transparent));
-      border: 1px solid var(--rule-strong);
+        linear-gradient(180deg, color-mix(in srgb, var(--card-paper) 8%, var(--surface-alt)), color-mix(in srgb, var(--gold) 5%, var(--surface)));
+      border: 1px solid color-mix(in srgb, var(--gold) 32%, var(--rule-strong));
       border-radius: var(--r-md);
       resize: none;
       outline: none;
       color: var(--text);
       line-height: 1.55;
       text-align: center;
-      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent);
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--card-paper) 15%, transparent), 0 8px 24px rgba(8,6,18,.14);
       transition: border-color var(--iching-motion-fast) ease, box-shadow var(--iching-motion-fast) ease, background var(--iching-motion-fast) ease;
     }
     .question-input:focus {
       border-color: color-mix(in srgb, var(--gold) 72%, var(--rule-strong));
       background:
-        linear-gradient(180deg, color-mix(in srgb, var(--surface-alt) 82%, transparent), color-mix(in srgb, var(--surface) 90%, transparent));
-      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent), 0 0 0 1px color-mix(in srgb, var(--gold) 32%, transparent);
+        linear-gradient(180deg, color-mix(in srgb, var(--card-paper) 11%, var(--surface-alt)), color-mix(in srgb, var(--gold) 7%, var(--surface)));
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--card-paper) 19%, transparent), 0 8px 24px rgba(8,6,18,.16), 0 0 0 1px color-mix(in srgb, var(--gold) 24%, transparent);
     }
     .question-input::placeholder { color: var(--secondary); font-style: italic; opacity: .82; }
     .cast-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; justify-content: center; align-items: flex-start; }
@@ -177,7 +222,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
       flex-direction: column;
       gap: .6rem;
       width: 100%;
-      max-width: 560px;
+      max-width: var(--reading-max-w);
       margin: 1.4rem auto 0;
     }
     .pull-row {
@@ -335,6 +380,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
        .hex-ref-panel as a rounded panel. */
     .hex-ref-wrap {
       --muted: var(--text-muted);
+      max-width: var(--reading-max-w);
+      margin-inline: auto;
       margin-bottom: 3rem;
       padding: 0 1.25rem;   /* gap from --section-gap; transparent panel needs no vertical pad */
       --yang: rgba(255,255,255,.9);
@@ -440,7 +487,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     }
     .hex-ref-toggle button.active {
       color: #221734;
-      background: linear-gradient(180deg, #e4c487 0%, var(--gold) 100%);
+      background: var(--gold-control-gradient);
       border-color: color-mix(in srgb, var(--text) 22%, transparent);
       box-shadow:
         inset 0 1px 0 color-mix(in srgb, var(--text) 28%, transparent),
@@ -541,12 +588,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     .hex-tile .kw { font-family: var(--serif); font-size: .82rem; color: var(--secondary); line-height: 1; margin-bottom: .4rem; }
     .hex-tile svg { margin-bottom: 0; display: block; }
 .hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--gold); margin-top: .3rem; letter-spacing: .05em; }
-
-    .asked {
-      font-family: var(--serif); font-style: italic; font-size: 1.1rem;
-      color: var(--secondary); margin: 0 0 1.25rem; line-height: 1.5;
-    }
-    .asked span { color: var(--muted); font-style: normal; font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; display: block; margin-bottom: .3rem; }
 
     .hex-ref-cell.cast-glow {
       border-color: var(--gold);

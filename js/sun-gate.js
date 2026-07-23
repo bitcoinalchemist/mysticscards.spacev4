@@ -20,6 +20,11 @@
 //                    block (used by Solar Time for the birth card).
 //   gateOf(lon)    -> { gate, line }
 //   sunLonAt(t)    -> tropical ecliptic longitude of the Sun (degrees)
+//   ayanamsa(mode, t) -> degrees to subtract for 'lahiri' | 'fagan'
+//   hexFigSVG(val, size) -> small hexagram figure for a binary line value
+//   KW_TO_VAL      -> King Wen number -> binary line value
+// (the last three are shared with js/chart-table.js, which draws the same
+//  gate figures for every body rather than just the Sun)
 
 (function () {
   'use strict';
@@ -99,7 +104,6 @@
       ? '<div class="sun-gate-center">' + centerHTML + '</div>'
       : '';
     return '<div class="sun-gate">' +
-      '<div class="sun-gate-head">Personality Sun</div>' +
       '<div class="sun-gate-row">' +
         gateTile('Tropical', lon) +
         center +
@@ -108,5 +112,9 @@
     '</div>';
   }
 
-  window.SunGate = { html: html, gateOf: gateOf, sunLonAt: sunLonAt };
+  window.SunGate = {
+    html: html, gateOf: gateOf, sunLonAt: sunLonAt,
+    // Shared with js/chart-table.js so the gate maths has one home.
+    ayanamsa: ayanamsa, hexFigSVG: hexFigSVG, KW_TO_VAL: KW_TO_VAL
+  };
 })();

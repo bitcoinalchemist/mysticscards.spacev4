@@ -10,7 +10,8 @@
 // pieces and both are here already.
 //
 // Reads CARDS + spreadCardPips + window.RICHMOND via classic-script
-// globals. Loaded AFTER cardsdata.js and richmonddata.js.
+// globals. Richmond's large data file is requested only when Olney mode is
+// active, then this module announces readiness so Finder can rerender.
 //
 // PUBLIC on window:
 //   window.renderOlney(card, mount) — called by finder.js's
@@ -22,6 +23,25 @@
 
   const SUIT_FROM_SYM = { '♥': 'hearts', '♣': 'clubs', '♦': 'diamonds', '♠': 'spades' };
   const OLNEY_PLANETS = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
+
+  let richmondPromise = null;
+  function ensureRichmond() {
+    if (window.RICHMOND) return Promise.resolve();
+    if (richmondPromise) return richmondPromise;
+    richmondPromise = new Promise(function (resolve, reject) {
+      const script = document.createElement('script');
+      script.src = 'js/richmonddata.js';
+      script.onload = resolve;
+      script.onerror = function () {
+        richmondPromise = null;
+        reject(new Error('js/richmonddata.js failed to load'));
+      };
+      document.head.appendChild(script);
+    }).then(function () {
+      window.dispatchEvent(new CustomEvent('mc-richmond-ready'));
+    });
+    return richmondPromise;
+  }
 
   // Engraved sunburst masthead for the Grand Spread plate — identical
   // for every card, so the ray-fan is computed once.
@@ -129,6 +149,12 @@
     const inner = root.querySelector('.olney-inner') || root;
     root.classList.remove('is-empty');
     if (!card || card.suit === 'joker') { root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
+    if (!window.RICHMOND) {
+      ensureRichmond().catch(function () { /* empty state stays visible */ });
+      root.classList.add('is-empty');
+      inner.innerHTML = '';
+      return false;
+    }
     const R = window.RICHMOND && window.RICHMOND[`${card.rank}_${card.suit}`];
     if (!R) { root.classList.add('is-empty'); inner.innerHTML = ''; return false; }
     // Look the CARDS reading up so the header shows the fuller

@@ -23,9 +23,9 @@
       color: var(--gold-ink); margin-bottom: var(--space-2);
     }
 
-    /* Local hexagram ink (yang is near-black on parchment), status colours,
+    /* Local hexagram ink, status colours,
        and the checksum amber used across the seal/proof surfaces. */
-    .so-stack { --yang: var(--card-dark); }
+    .so-stack { --yang: var(--gold); }
     .so-ctx { --so-ok: #7fd79a; --so-warn: #e79a92; --so-cs: #a5702e; }
 
     #learn + #geomancy {
@@ -53,14 +53,11 @@
     .so-line-fig {
       flex: 0 0 auto; min-width: 120px; min-height: 150px;
       display: flex; align-items: center; justify-content: center;
-      border: 1px solid #e3d8c4; border-radius: var(--r-md);
+      border: 1px solid var(--rule-strong); border-radius: var(--r-md);
       padding: var(--space-4) var(--space-5);
-      background:
-        linear-gradient(165deg, rgba(255,255,255,.55), rgba(255,255,255,0) 42%),
-        linear-gradient(165deg, rgba(120,90,40,0) 62%, rgba(120,90,40,.07)),
-        var(--card-paper);
-      box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
-      --yang: var(--card-dark);
+      background: var(--surface-alt);
+      box-shadow: var(--sh-sm), inset 0 1px 0 rgba(255,255,255,.06);
+      --yang: var(--gold);
     }
     .so-line-side { flex: 0 1 260px; display: flex; flex-direction: column; align-items: center; }
     .so-line-bits { display: flex; justify-content: center; gap: 4px; min-height: 26px; }
@@ -70,22 +67,18 @@
       background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
     }
     .so-line-bit.is-empty { color: transparent; border-style: dashed; opacity: .5; }
-    .so-line-done { margin-top: var(--space-4); }
-
     /* ── II · stack : 22 slots, filled as cast ── */
     .so-stack {
       display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2);
       max-width: 440px; margin: var(--space-4) auto;
     }
     .so-hex {
-      border: 1px solid #e3d8c4;
+      border: 1px solid var(--rule-strong);
       border-radius: var(--r-md); padding: var(--space-3) var(--space-2) var(--space-2);
       text-align: center;
-      background:
-        linear-gradient(165deg, rgba(255,255,255,.55), rgba(255,255,255,0) 42%),
-        linear-gradient(165deg, rgba(120,90,40,0) 62%, rgba(120,90,40,.07)),
-        var(--card-paper);
-      box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
+      background: var(--surface);
+      box-shadow: var(--sh-sm), inset 0 1px 0 rgba(255,255,255,.06);
+      --yang: var(--gold);
     }
     #soStack .so-cell { width: 54px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
     #soStack .so-ord { font-size: var(--text-xs); color: var(--ink-muted); letter-spacing: .04em; margin-bottom: 3px; }
@@ -125,8 +118,8 @@
     #soStack .so-hex.is-sealed svg rect[data-line="4"],
     #soStack .so-hex.is-sealed svg rect[data-line="5"] { fill: #a5702e; }
     .so-hex svg { display: block; margin: 3px auto 0; }
-    .so-hex .so-hex-name { font-family: var(--serif); color: var(--card-dark); font-size: var(--text-sm); line-height: 1.25; }
-    .so-hex .so-hex-kw { color: #8a7d60; font-size: var(--text-xs); margin-top: 2px; }
+    .so-hex .so-hex-name { font-family: var(--serif); color: var(--text); font-size: var(--text-sm); line-height: 1.25; }
+    .so-hex .so-hex-kw { color: var(--gold-ink); font-size: var(--text-xs); margin-top: 2px; }
 
     .so-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: center; margin: var(--space-4) 0; }
     .so-actions .btn[hidden] { display: none; }
@@ -188,13 +181,11 @@
     }
     .so-seal-fig {
       flex: 0 0 auto;
-      border: 1px solid #e3d8c4; border-radius: var(--r-md);
+      border: 1px solid var(--rule-strong); border-radius: var(--r-md);
       padding: var(--space-4) var(--space-5);
-      background:
-        linear-gradient(165deg, rgba(255,255,255,.55), rgba(255,255,255,0) 42%),
-        linear-gradient(165deg, rgba(120,90,40,0) 62%, rgba(120,90,40,.07)),
-        var(--card-paper);
-      box-shadow: 0 1px 2px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.45);
+      background: var(--surface-alt);
+      box-shadow: var(--sh-sm), inset 0 1px 0 rgba(255,255,255,.06);
+      --yang: var(--gold);
     }
     .so-seal-figcap { flex: 0 1 300px; text-align: center; }
     /* slot-hexagram line classes (drawn by slotHexSVG in js/seedoracle.js) :
@@ -226,8 +217,11 @@
       box-sizing: border-box;
       cursor: pointer;
       padding: 12px 12px 11px;
+      background: var(--surface);
+      color: var(--text);
+      --yang: var(--gold);
       border-width: 1px;
-      border-color: color-mix(in srgb, var(--suit) 18%, #e3d8c4);
+      border-color: color-mix(in srgb, var(--suit) 28%, var(--rule-strong));
       border-radius: var(--r-md);
       isolation: isolate;
       transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease), filter var(--ease);
@@ -243,15 +237,15 @@
       inset: 0;
       background:
         radial-gradient(circle at 50% 11%, color-mix(in srgb, var(--suit) 18%, transparent), transparent 31%),
-        linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,0) 38%),
-        linear-gradient(165deg, rgba(120,90,40,0) 58%, rgba(120,90,40,.10));
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 38%),
+        linear-gradient(165deg, rgba(120,90,40,0) 58%, rgba(120,90,40,.14));
       opacity: .95;
     }
     .so-fh-opt::after {
       inset: 8px;
       border: 1px solid color-mix(in srgb, var(--suit) 36%, rgba(120,90,40,.28));
       border-radius: calc(var(--r-md) - 2px);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
     }
     .so-fh-opt:hover {
       border-color: var(--suit);
@@ -325,9 +319,9 @@
       color: color-mix(in srgb, var(--suit) 48%, #8a7d60);
     }
     .so-fh-opt.suit-red  { --suit: var(--red); }
-    .so-fh-opt.suit-dark { --suit: var(--card-dark); }
+    .so-fh-opt.suit-dark { --suit: var(--text); }
     .so-fh-opt.suit-red  .so-suit-pip, .so-fh-opt.suit-red  .so-suit-name, .so-fh-opt.suit-red  .so-suit-lines { color: var(--red); }
-    .so-fh-opt.suit-dark .so-suit-pip, .so-fh-opt.suit-dark .so-suit-name, .so-fh-opt.suit-dark .so-suit-lines { color: var(--card-dark); }
+    .so-fh-opt.suit-dark .so-suit-pip, .so-fh-opt.suit-dark .so-suit-name, .so-fh-opt.suit-dark .so-suit-lines { color: var(--text); }
     @media (max-width: 760px) {
       .so-fh-opts { grid-template-columns: repeat(2, minmax(0, min(42vw, 168px))); }
     }
@@ -508,7 +502,16 @@
     }
     .hx-popup { height: auto; }
     .hx-header { display: flex; gap: 1.25rem; align-items: flex-start; padding: 16px 28px 8px; }
-    .hx-fig-svg { background: var(--card-paper); border: 1px solid var(--border); --yang: var(--card-dark); }
+    .hx-fig-svg { background: var(--surface-alt); border: 1px solid var(--rule-strong); --yang: var(--gold); }
+
+    /* Hexagram figures sit directly on the night ground; retain the borders
+       and line colours, but remove every filled card-like surface. */
+    .so-line-fig,
+    .so-hex,
+    .so-seal-fig,
+    .so-fh-opt,
+    .hx-fig-svg { background: transparent; box-shadow: none; }
+    .so-fh-opt::before { background: none; }
     .hx-name .hx-pin { font-size: 1rem; color: var(--ink-muted); font-style: italic; }
     .hx-body { flex: 1; overflow-y: auto; min-height: 0; padding: 2px 28px 22px; }
     .hx-judgment { font-family: var(--serif); font-size: 1.12rem; line-height: 1.7; color: var(--text); margin: 0; }

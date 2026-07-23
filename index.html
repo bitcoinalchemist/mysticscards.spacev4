@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="canonical" href="https://mysticscards.space/" />
   <meta name="theme-color" content="#100c1e" />
-  <meta name="version" content="2026-07-18f" />
+  <meta name="version" content="2026-07-22f" />
   <meta name="description" content="Cardology and the I Ching - find your cards and consult the Oracle." />
   <!-- OpenGraph / Twitter link previews. og-image is 1200×630. -->
   <meta property="og:type" content="website" />
@@ -25,44 +25,113 @@
   <meta name="twitter:title" content="Mystics Cards - mysticscards.space" />
   <meta name="twitter:description" content="Cardology and the I Ching - find your cards and consult the Oracle." />
   <meta name="twitter:image" content="https://mysticscards.space/assets/og-image.png" />
-  <link rel="stylesheet" href="css/site.css?v=20260718a" />
+  <link rel="stylesheet" href="css/site.css?v=20260722aa" />
   <link rel="stylesheet" href="css/castfield.css?v=20260711c" />
-  <link rel="stylesheet" href="css/mysticscards.css?v=20260718g" />
+  <link rel="stylesheet" href="css/mysticscards.css?v=20260722ag" />
 </head>
 <body class="starry">
 <canvas class="stars-bg" aria-hidden="true"></canvas>
 <div class="castfield-stage" aria-hidden="true"><div class="field"></div></div>
-<script src="js/stars.js?v=20260714a"></script>
-<script src="js/site.js?v=20260718a"></script>
-<script src="js/castfield.js?v=20260711c" defer></script>
+<script src="js/stars.js?v=20260722r"></script>
+<script src="js/site.js?v=20260722y"></script>
+<script src="js/castfield.js?v=20260722b" defer></script>
 <script src="js/store.js?v=20260714a"></script>
 <script src="js/cardsdata.js?v=20260718e"></script>
 <script src="js/reltext.js?v=20260710a"></script>
-<script src="js/richmonddata.js?v=20260710c"></script>
-<script src="js/spread-grid.js?v=20260712a"></script>
-<script src="js/quadrations.js?v=20260714a"></script>
-<script src="js/finder.js?v=20260714d"></script>
-<script src="js/olney.js?v=20260710c"></script>
-<script src="js/lifescript.js?v=20260718f"></script>
+<script src="js/spread-grid.js?v=20260722a"></script>
+<script src="js/quadrations.js?v=20260722d"></script>
+<script src="js/finder.js?v=20260722c"></script>
+<script src="js/olney.js?v=20260722a"></script>
+<script src="js/lifescript.js?v=20260722w"></script>
 <!-- The 5 period-reading data files (dailycarddata, periodcarddata,
      yearcarddata, sevenyearcarddata, thirteenyearcarddata — ~500 KB
      total) are LAZY-loaded by js/in-time.js on first Cycles-tab open.
      Not in this eager list, and intentionally not in sw.js PRECACHE. -->
 <script src="js/tzcoords.js?v=20260711a"></script>
-<script src="js/solar-time.js?v=20260716a"></script>
-<script src="js/sun-gate.js?v=20260711b"></script>
+<script src="js/solar-time.js?v=20260722w"></script>
+<script src="js/sun-gate.js?v=20260722w"></script>
+<script src="js/chart-table.js?v=20260722b"></script>
 <script src="js/in-time.js?v=20260718h"></script>
 <script src="js/birthdays.js?v=20260716a"></script>
 <script src="js/finder-trays.js?v=20260716a"></script>
 <script src="js/planetdata.js?v=20260711a"></script>
 <script src="js/elementsdata.js?v=20260711a"></script>
 <script src="js/elements.js?v=20260716a"></script>
+<script src="js/section-rail.js?v=20260722c"></script>
 
 <main>
   <h1 class="vh">Mystics Cards — Cardology</h1>
   <datalist id="solZoneList"></datalist>
 
-  <section class="finder page-section section-open" id="finder" aria-labelledby="finderHeading">
+  <!-- Section rail, driven by js/section-rail.js (shared with iching.html).
+       The three panels are authored INSIDE .home-primary-track so the page is
+       a plain vertical stack with no JS; the module adds .rail-ready to this
+       shell, which is what switches the rail CSS on. data-section-rail is
+       both the module's hook and the signal to js/site.js not to
+       persist/restore collapse state inside — tabs replace the toggles here.
+       Each tab's aria-controls MUST name a direct child of the track. -->
+  <div class="home-primary" data-section-rail>
+    <div class="home-primary-nav" role="tablist" aria-label="Homepage tools">
+      <button type="button" class="home-primary-tab" role="tab" id="homeTabElements"
+              aria-selected="false" aria-controls="elements" data-home-tab="elements">Elements</button>
+      <button type="button" class="home-primary-tab is-active" role="tab" id="homeTabFinder"
+              aria-selected="true" aria-controls="finder" data-home-tab="finder">Finder</button>
+      <button type="button" class="home-primary-tab" role="tab" id="homeTabQuadrations"
+              aria-selected="false" aria-controls="quadrations" data-home-tab="quadrations">Quadrations</button>
+    </div>
+    <div class="home-primary-viewport">
+      <div class="home-primary-track">
+    <section class="elements page-section section-open" id="elements" role="tabpanel" tabindex="0" aria-labelledby="elementsHeading">
+      <h2 class="section-heading vh" id="elementsHeading">Elements</h2>
+      <div class="section-bodywrap">
+        <div class="section-bodymin" id="elementsBody">
+          <div class="section-shell">
+            <div class="el-inner">
+              <div class="el-topline">
+                <div class="suit-row" id="suitRow" role="group" aria-label="The four suits"></div>
+              </div>
+              <div class="num-row" id="numRow" role="group" aria-label="The thirteen numbers" hidden></div>
+              <div class="planet-row" id="planetRow" role="group" aria-label="The seven planets and the Crown" hidden></div>
+              <div class="el-detailwrap">
+                <div class="el-detailmin">
+                  <div class="el-detail" id="elDetail" aria-live="polite">
+                    <button class="el-nav el-prev" type="button" aria-label="Previous">‹</button>
+                    <div class="el-card">
+                      <div class="el-head">
+                        <span class="el-fig" id="elFig" aria-hidden="true"></span>
+                        <span class="el-name" id="elName"></span>
+                      </div>
+                      <div class="el-kws" id="elKws"></div>
+                      <div class="el-text" id="elText"></div>
+                      <p class="el-keynote" id="elKeynote"></p>
+                    </div>
+                    <button class="el-nav el-next" type="button" aria-label="Next">›</button>
+                  </div>
+                </div>
+              </div>
+              <div class="pl-pop" id="plPop">
+                <div class="pl-detailwrap"><div class="pl-detailmin">
+                  <div class="pl-detail" id="plDetail" aria-live="polite">
+                    <div class="pl-card">
+                      <div class="pl-head">
+                        <span class="pl-fig" id="plFig" aria-hidden="true"></span>
+                        <span class="pl-name" id="plName"></span>
+                      </div>
+                      <div class="pl-sub" id="plSub"></div>
+                      <div class="pl-kws" id="plKws"></div>
+                      <div class="pl-para" id="plPara"></div>
+                      <dl class="pl-attrs" id="plAttrs"></dl>
+                      <p class="pl-syn" id="plSyn"></p>
+                    </div>
+                  </div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  <section class="finder page-section section-open" id="finder" role="tabpanel" tabindex="0" aria-labelledby="finderHeading">
     <h2 class="section-heading" id="finderHeading">
     <button class="section-toggle" type="button"
             aria-expanded="true" aria-controls="finderBody"
@@ -238,9 +307,12 @@
                wrapper is hidden in triptych mode and when no card is
                picked. -->
           <div class="finder-panels" id="fPanels" hidden>
-            <div class="ns-picker" id="fPanelPicker" role="tablist" aria-label="Card reading section">
+            <div class="ns-picker" id="fPanelPicker" data-panel-active="about" role="tablist" aria-label="Card reading section">
+              <!-- DOM order is the painted order (Astrology | About | Cycles),
+                   so focus order matches what the eye sees. About stays the
+                   centre chip and the default panel. -->
+              <button type="button" class="ns-chip"           id="chipLifeScript" data-panel="lifescript" role="tab" aria-selected="false" aria-controls="fLifeScript">Astrology</button>
               <button type="button" class="ns-chip is-active" id="chipAbout"      data-panel="about"      role="tab" aria-selected="true"  aria-controls="fAbout">About</button>
-              <button type="button" class="ns-chip"           id="chipLifeScript" data-panel="lifescript" role="tab" aria-selected="false" aria-controls="fLifeScript">Stats</button>
               <button type="button" class="ns-chip"           id="chipInTime"     data-panel="intime"     role="tab" aria-selected="false" aria-controls="fInTime">Cycles</button>
             </div>
             <div class="finder-panels-body" id="fPanelBody" data-panel-active="about">
@@ -266,21 +338,21 @@
                     </div>
                   </div>
                   </div>
-                  <div class="finder-about-view finder-about-olney" id="fAboutOlney">
+                <div class="finder-about-view finder-about-olney" id="fAboutOlney">
                     <div class="olney-inner olney-panel" id="fAboutOlneyInner"></div>
                     <div class="ns-panel-empty">Richmond has no delineation for this card — pick another to view his 1893 reading.</div>
                   </div>
                 </div>
+                <div class="finder-about-lifescript" id="fAboutLifeScript"></div>
               </div>
 
-              <!-- Life Script — the picked card's seven ruling cards
-                   shown as a single row. Populated by js/lifescript.js. -->
+              <!-- Astrology — zodiac correspondences and Solar remain here;
+                   Life Script, dates, and displacements are mirrored into
+                   About by js/lifescript.js. -->
               <div class="finder-lifescript ns-panel" id="fLifeScript" role="tabpanel" aria-labelledby="chipLifeScript">
                 <div class="ls-inner"></div>
                 <div class="it-solar ls-solar" id="fSolar">
-                  <div class="ls-stat-label it-solar-title" id="solToggle">Solar</div>
                   <div class="it-solar-body" id="solBody">
-                    <p class="it-solar-intro">Births near midnight can belong to the previous or next day by the sun. Enter the birth time and place to find the true solar-day card.</p>
                     <div class="it-solar-fields">
                       <label class="it-solar-field"><span>Birth time</span>
                         <input type="time" id="solTime" step="60" aria-label="Birth time" />
@@ -309,10 +381,9 @@
           </div>
         </div>
       </div>
-    </div>
   </section>
 
-  <section class="quadrations page-section section-open" id="quadrations" aria-labelledby="quadrationsHeading">
+  <section class="quadrations page-section section-open" id="quadrations" role="tabpanel" tabindex="0" aria-labelledby="quadrationsHeading">
     <h2 class="section-heading" id="quadrationsHeading">
     <button class="section-toggle" type="button"
             aria-expanded="true" aria-controls="quadrationsBody"
@@ -345,68 +416,11 @@
       </div>
     </div>
   </section>
-
-  <section class="elements page-section section-open" id="elements" aria-labelledby="elementsHeading">
-    <h2 class="section-heading" id="elementsHeading">
-    <button class="section-toggle" type="button"
-            aria-expanded="true" aria-controls="elementsBody"
-            data-section="elements">
-      <span class="section-label">Elements</span>
-      <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    </h2>
-    <div class="section-bodywrap">
-      <div class="section-bodymin" id="elementsBody">
-        <div class="section-shell">
-          <div class="el-inner">
-            <div class="el-topline">
-              <div class="suit-row" id="suitRow" role="group" aria-label="The four suits"></div>
-            </div>
-            <div class="num-row" id="numRow" role="group" aria-label="The thirteen numbers" hidden></div>
-            <div class="planet-row" id="planetRow" role="group" aria-label="The seven planets and the Crown" hidden></div>
-            <div class="el-detailwrap">
-              <div class="el-detailmin">
-                <div class="el-detail" id="elDetail" aria-live="polite">
-                  <button class="el-nav el-prev" type="button" aria-label="Previous">‹</button>
-                  <div class="el-card">
-                    <div class="el-head">
-                      <span class="el-fig" id="elFig" aria-hidden="true"></span>
-                      <span class="el-name" id="elName"></span>
-                    </div>
-                    <div class="el-kws" id="elKws"></div>
-                    <div class="el-text" id="elText"></div>
-                    <p class="el-keynote" id="elKeynote"></p>
-                  </div>
-                  <button class="el-nav el-next" type="button" aria-label="Next">›</button>
-                </div>
-              </div>
-            </div>
-            <div class="pl-pop" id="plPop">
-              <div class="pl-detailwrap"><div class="pl-detailmin">
-                <div class="pl-detail" id="plDetail" aria-live="polite">
-                  <div class="pl-card">
-                    <div class="pl-head">
-                      <span class="pl-fig" id="plFig" aria-hidden="true"></span>
-                      <span class="pl-name" id="plName"></span>
-                    </div>
-                    <div class="pl-sub" id="plSub"></div>
-                    <div class="pl-kws" id="plKws"></div>
-                    <div class="pl-para" id="plPara"></div>
-                    <dl class="pl-attrs" id="plAttrs"></dl>
-                    <p class="pl-syn" id="plSyn"></p>
-                  </div>
-                </div>
-              </div></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  </section>
+  </div>
+
 </main>
 
-<footer class="site-footer">
-  <div class="sf-inner"></div>
-</footer>
 </body>
 </html>

@@ -203,7 +203,7 @@
     var tz = zoneFor(placeEl ? placeEl.value : '');
     var time = timeEl ? timeEl.value : '';
     if (!time || !tz) {
-      out.innerHTML = '<p class="sol-hint">Enter a birth time and choose a birthplace to check the solar day.</p>';
+      out.innerHTML = '';
       return;
     }
     var hm = time.split(':');
@@ -226,8 +226,15 @@
       // Personality Sun hexagram (gate) — hexagram only, computed from the
       // same birth instant. Owned by js/sun-gate.js; no-op if not loaded.
       var gatesBlock = (window.SunGate && typeof window.SunGate.html === 'function') ? window.SunGate.html(res.t, cardsHTML) : '';
-      out.innerHTML = verdictHTML + (gatesBlock || cardsHTML);
+      // Full natal chart table (Body/Mind/Planet/Card/Sign/Degree), owned by
+      // js/chart-table.js. Only reachable from here, which is the point: it
+      // needs a real birth instant (date + clock time + birthplace), and the
+      // Moon's gate is meaningless without one. No-op if not loaded.
+      var chartBlock = (window.ChartTable && typeof window.ChartTable.html === 'function')
+        ? window.ChartTable.html(res.t, solarCard) : '';
+      out.innerHTML = verdictHTML + (gatesBlock || cardsHTML) + chartBlock;
       bindSolCards(out);
+      if (chartBlock && window.bindZodiacTabs) window.bindZodiacTabs(out);
     }).catch(function (e) {
       out.innerHTML = '<p class="sol-hint">Could not compute solar time (' + (e && e.message ? e.message : 'error') + ').</p>';
     });

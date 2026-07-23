@@ -577,10 +577,10 @@
     const reading   = (window.CARD_READINGS || {})[jokerKey || key] || null;
     const vow       = !rel ? cardVow(card) : '';
     const bondEntry = rel && rel.comp ? (window.REL_TEXT || {})[`${rel.comp.rank}_${rel.comp.suit}`] : null;
-    const olneyOk   = !rel && typeof window.renderOlney === 'function'
+    const voice = window.CardsStore ? window.CardsStore.getVoice() : 'modern';
+    const olneyOk   = !rel && voice === 'olney' && typeof window.renderOlney === 'function'
       ? window.renderOlney(card, box.olney)
       : false;
-    const voice = window.CardsStore ? window.CardsStore.getVoice() : 'modern';
     const showOlney = voice === 'olney' && olneyOk && !rel;
     if (!reading && !bondEntry && card.suit !== 'joker') { box.root.classList.add('is-empty'); return false; }
 
@@ -1097,6 +1097,9 @@
     }
     window.addEventListener('mc-voice-toggle', function () {
       runFinderUpdate();
+    });
+    window.addEventListener('mc-richmond-ready', function () {
+      if (window.CardsStore && window.CardsStore.getVoice() === 'olney') runFinderUpdate();
     });
     window.addEventListener('mc-read-dir-toggle', function () {
       runFinderUpdate();

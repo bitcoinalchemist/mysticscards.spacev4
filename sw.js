@@ -9,10 +9,11 @@
 // precache list: js/in-time.js lazy-loads them on first Cycles-tab open.
 // The fetch handler's write-through still caches them after that first
 // fetch, so offline works once the user has opened Cycles once online.
-const CACHE = 'mysticscards-44';
+const CACHE = 'mysticscards-51';
 const PRECACHE = [
   './',
   'index.html',
+  'legal.html',
   '404.html',
   'iching.html',
   'seedoracle.html',
@@ -27,10 +28,10 @@ const PRECACHE = [
   'css/iching.css',
   'css/seedoracle.css',
   'css/site.css',
+  'css/legal.css',
   'js/store.js',
   'js/cardsdata.js',
   'js/reltext.js',
-  'js/richmonddata.js',
   'js/spread-grid.js',
   'js/quadrations.js',
   'js/finder.js',
@@ -39,6 +40,7 @@ const PRECACHE = [
   'js/tzcoords.js',
   'js/solar-time.js',
   'js/sun-gate.js',
+  'js/chart-table.js',
   'js/astronomy.js',
   'js/in-time.js',
   'js/birthdays.js',
@@ -46,6 +48,7 @@ const PRECACHE = [
   'js/planetdata.js',
   'js/elementsdata.js',
   'js/elements.js',
+  'js/section-rail.js',
   'js/castfield.js',
   'js/iching-store.js',
   'js/ichingdata.js',

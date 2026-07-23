@@ -113,15 +113,6 @@
   var _question = '';
   var _lastPrimary = null, _lastSecondary = null, _lastChanging = null;
 
-  function showAsked() {
-    var a = document.getElementById('askedLine');
-    if (_question) {
-      a.innerHTML = '<span>You asked</span>';
-      a.appendChild(document.createTextNode(_question));
-      a.style.display = 'block';
-    } else { a.style.display = 'none'; }
-  }
-
   // ── Reading history ─────────────────────────────────────
   // Backing storage moved to js/iching-store.js (window.IChingStore).
   // Thin aliases keep the many local call sites unchanged for this step.
@@ -336,8 +327,7 @@
     _question = saved.question || '';
 
     document.getElementById('questionInput').value = _question;
-    showAsked();
-
+    resizeQuestionInput();
     buildSlots();
     draws.forEach(function(card, idx) { fillSlot(idx, card, false); });
 
@@ -359,7 +349,6 @@
     pulls = [];
     deckPos = 0;
     _question = document.getElementById('questionInput').value.trim();
-    showAsked();
     buildSlots();
     document.getElementById('pullBanner').style.display = 'none';
     document.getElementById('pullBanner').innerHTML = '';
@@ -766,7 +755,14 @@
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.hist-wrap')) closeHistPanel();
   });
-  document.getElementById('questionInput').addEventListener('keydown', function(e) {
+  var questionInput = document.getElementById('questionInput');
+  function resizeQuestionInput() {
+    questionInput.style.height = 'auto';
+    questionInput.style.height = Math.max(questionInput.scrollHeight, 72) + 'px';
+  }
+  questionInput.addEventListener('input', resizeQuestionInput);
+  resizeQuestionInput();
+  questionInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); castAll(); }
   });
 

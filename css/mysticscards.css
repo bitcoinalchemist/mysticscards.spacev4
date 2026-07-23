@@ -1,6 +1,5 @@
 .finder,
 .quadrations {
-  --ctl-pill-gap: .3rem;
   --ctl-pill-pad-y: .46rem;
   --ctl-pill-pad-x: 1rem;
   --ctl-pill-font: .64rem;
@@ -14,6 +13,50 @@
   --ctl-date-minw: 11rem;
 }
 
+/* Elements / Finder / Quadrations share a horizontal, touch-friendly homepage
+   rail. Everything below is gated on .rail-ready, which js/home-sections.js
+   adds once it has wired the tabs up. Without JS the nav is hidden and the
+   three sections render as a plain vertical stack — the panels are authored
+   inside the track in index.html precisely so that fallback needs no work. */
+.home-primary {
+  width: 100%;
+}
+.home-primary-nav { display: none; }
+.home-primary.rail-ready .home-primary-nav {
+  display: block;
+  position: relative;
+  height: var(--tap-target);
+  width: min(100%, var(--reading-max-w));
+  margin: 0 auto .55rem;
+  overflow: hidden;
+}
+.home-primary-tab {
+  position: absolute;
+  top: 0;
+  min-height: var(--tap-target);
+  padding: 0 .75rem;
+  border: 0;
+  background: none;
+  color: var(--secondary);
+  font: 600 .68rem/var(--tap-target) var(--sans);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--ease), opacity var(--ease);
+  transform: translateX(-50%);
+}
+.home-primary-tab[data-home-tab="elements"] { left: 25%; }
+.home-primary-tab[data-home-tab="finder"] { left: 50%; }
+.home-primary-tab[data-home-tab="quadrations"] { left: 75%; }
+.home-primary-tab:hover,
+.home-primary-tab.is-active {
+  color: var(--gold);
+}
+.home-primary-tab:not(.is-active) { opacity: .72; }
+.home-primary-tab:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
 .spreads-top {
   display: flex; flex-direction: column;
   align-items: center; gap: .45rem; margin-bottom: 0;
@@ -67,17 +110,14 @@
 .age-input:focus { outline: none; border-color: var(--gold); }
 
 .age-controls-wrap { min-height: var(--tap-target); }
+.crown-side .age-controls-wrap { height: 100%; min-height: 0; }
 .q-mode-current {
-  /* Detached from the age stepper's centred flow and pinned to the
-     left edge of #annualGrid (the Neptune column) instead of hugging
-     the stepper. Left offset is computed in js/quadrations.js
-     (alignSpreadLabel) since it depends on the live gap between
-     .spreads-top's rail width and the grid's own (scale-dependent)
-     rendered width. */
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: .5rem;
   white-space: pre-line;
   text-align: center;
   line-height: 1.18;
@@ -86,11 +126,17 @@
 }
 
 #annualGrid { max-width: calc(560px * var(--quad-scale, 1)); }
+.quadrations .crown-row { margin-top: 0; }
 @media (max-width: 700px) {
   .spread-layout { flex-direction: column; align-items: center; }
   .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
   .spread-layout .spread-wrap { width: 100%; justify-content: center; padding-top: .15rem; }
   .spreads-top { gap: .35rem; }
+}
+@media (max-width: 480px) {
+  .crown-side .age-controls { gap: .1rem; }
+  .crown-side .age-btn { width: 1.35rem; height: 1.35rem; font-size: .9rem; }
+  .crown-side .age-input { width: 1.8rem; height: 1.35rem; padding-inline: .15rem; font-size: .78rem; }
 }
 
 .spread-card {
@@ -426,63 +472,37 @@
   text-align: center;
 }
 .finder-panels[hidden] { display: none; }
+/* Three equal columns rather than three absolutely-positioned chips, so the
+   painted order is the DOM order and focus follows what the eye sees. */
 .ns-picker {
-  display: flex;
-  gap: var(--ctl-pill-gap);
-  flex-wrap: nowrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
-  width: fit-content;
+  min-height: var(--tap-target);
   margin: 0 auto 1.1rem;
-  padding: .3rem;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  border: 1px solid rgba(199,154,84,.18);
-  border-radius: 999px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)),
-    rgba(27,20,54,.5);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 10px 24px rgba(8,6,18,.18);
+  text-align: center;
 }
 .finder-panels.is-relationship .ns-picker { display: none; }
 .ns-chip {
   appearance: none;
   background: transparent;
   color: var(--ink-muted);
-  border: 1px solid transparent;
-  border-radius: 999px;
+  border: 0;
   min-height: var(--tap-target);
-  padding: var(--ctl-pill-pad-y) var(--ctl-pill-pad-x);
+  padding: 0 .75rem;
   font-family: var(--sans);
-  font-size: var(--ctl-pill-font);
+  font-size: .68rem;
   font-weight: 600;
-  letter-spacing: var(--ctl-pill-track);
+  letter-spacing: .18em;
   text-transform: uppercase;
-  line-height: 1;
+  line-height: var(--tap-target);
   cursor: pointer;
-  transition:
-    color var(--ease),
-    border-color var(--ease),
-    background var(--ease),
-    box-shadow var(--ease),
-    transform var(--ease);
+  transition: color var(--ease), opacity var(--ease);
 }
-.ns-chip:hover {
-  color: var(--text);
-  background: rgba(255,255,255,.03);
-}
-.ns-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.ns-chip.is-active {
-  color: #221734;
-  background: linear-gradient(180deg, #e4c487 0%, #c79a54 100%);
-  border-color: rgba(255,255,255,.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.28),
-    0 4px 12px rgba(0,0,0,.16);
-}
+.ns-chip:hover { color: var(--text); }
+.ns-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.ns-chip.is-active { color: var(--gold); }
+.ns-chip:not(.is-active) { opacity: .72; }
 .ns-chip[aria-disabled="true"],
 .ns-chip.is-disabled {
   opacity: .35; cursor: not-allowed;
@@ -490,7 +510,6 @@
 @media (max-width: 420px) {
   .finder,
   .quadrations {
-    --ctl-pill-gap: .18rem;
     --ctl-pill-pad-y: .4rem;
     --ctl-pill-pad-x: .72rem;
     --ctl-pill-font: .58rem;
@@ -506,12 +525,9 @@
   .finder-panels {
     padding-inline: .45rem;
   }
-  .ns-picker {
-    padding: .22rem;
-  }
   .ns-chip { min-height: var(--tap-target); }
 }
-/* The four panel divs each hide behind the active-tab attribute.
+/* The top-level panels hide behind the active-tab attribute.
    Individual panels can still opt out by adding `.is-empty` to signal
    the placeholder text should show instead of the real body. */
 .finder-panels.is-collapsed .finder-panels-body { display: none; }
@@ -537,6 +553,12 @@
    and challenges (Shadow). Shown only in solo mode under the result
    card; hidden in triptych mode. Joker leaves the panel empty. */
 .finder-about { color: var(--text); }
+.finder-about-lifescript {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule-strong);
+}
+.finder-about-lifescript:empty { display: none; }
 .finder-about-inner {
   display: flex; flex-direction: column;
   gap: var(--space-4, 1rem);
@@ -681,7 +703,7 @@
 .olney-panel { padding: .25rem 0 .2rem; }
 .olney-sun { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-bottom: .55rem; }
 .olney-sun .spread-card { width: 100%; }
-.olney-grid { display: flex; flex-direction: column; gap: .3rem; max-width: 560px; margin: 0 auto; }
+.olney-grid { display: flex; flex-direction: column; gap: .3rem; max-width: var(--reading-max-w); margin: 0 auto; }
 .olney-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; align-items: center; }
 .olney-row .spread-card { width: 100%; }
 .olney-focus { outline: 2px solid var(--gold); outline-offset: 1px; }
@@ -981,12 +1003,137 @@
   color: var(--card-dark);
 }
 .ls-zodiac-stack {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .85rem 1rem;
-  align-items: start;
+  display: block;
   width: 100%;
 }
+.astro-zodiac-rail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, var(--reading-max-w));
+  min-height: var(--tap-target);
+  margin: .25rem auto .75rem;
+  border-bottom: 1px solid var(--rule);
+}
+.astro-zodiac-tab {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  position: relative;
+  min-height: var(--tap-target);
+  padding: 0 .75rem;
+  font: 600 .62rem/1 var(--sans);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--ease), background var(--ease);
+}
+.astro-zodiac-tab::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -1px;
+  height: 2px;
+  background: transparent;
+  transition: background var(--ease);
+}
+.astro-zodiac-tab:hover,
+.astro-zodiac-tab.is-active { color: var(--gold); }
+.astro-zodiac-tab.is-active::after { background: var(--gold); }
+.astro-zodiac-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.astro-zodiac-tab:disabled { opacity: .35; cursor: not-allowed; }
+/* ── Natal chart table (js/chart-table.js) ─────────────────────────────
+   Sits under the Solar Time birth card in the Astrology panel. Reuses the
+   Astrology rail's Tropical/Sidereal state, so the panel-visibility rules
+   below cover both the ruling-card block and these tables. */
+.ct-block { margin-top: var(--space-4); }
+.ct-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .55rem;
+}
+.ct-block > .ct-panel[data-zodiac-panel="sidereal"] { display: none; }
+.ct-block[data-zodiac-active="sidereal"] > .ct-panel[data-zodiac-panel="tropical"] { display: none; }
+.ct-block[data-zodiac-active="sidereal"] > .ct-panel[data-zodiac-panel="sidereal"] { display: block; }
+.ct-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  color: var(--text);
+}
+.ct-table th {
+  font-weight: 600;
+  font-size: .58rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: left;
+  padding: .3rem .4rem;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.ct-table td {
+  padding: .32rem .4rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+.ct-table tr:last-child td { border-bottom: 0; }
+.ct-table tr.ct-group-gap td {
+  height: .85rem;
+  padding: 0;
+  border: 0;
+}
+.ct-gate { white-space: nowrap; }
+.ct-fig { display: inline-block; vertical-align: middle; margin-right: .28rem; }
+.ct-gl { font-variant-numeric: tabular-nums; color: var(--secondary); }
+/* Design (Body) reads warm, Personality (Mind) reads as plain ink — the same
+   pairing the old astrology page used. */
+.ct-d .ct-gl { color: var(--rose, #dc8d85); }
+.ct-planet { white-space: nowrap; }
+.ct-pg { display: inline-block; width: 1.1em; color: var(--gold-ink); }
+.ct-cardchip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  padding: .1rem .32rem;
+  border-radius: var(--r-sm);
+  background: var(--card-paper);
+  color: #1a1420;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ct-cardchip.hearts, .ct-cardchip.diamonds { color: #a3242b; }
+.ct-nocard { color: var(--ink-muted); }
+.ct-sign { white-space: nowrap; }
+.ct-deg {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ct-retro { margin-left: .25rem; color: var(--ink-muted); }
+.ct-note {
+  margin: .6rem 0 0;
+  font-size: .62rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  text-align: center;
+}
+@media (max-width: 520px) {
+  /* The table is the one place on this page that genuinely needs to scroll
+     sideways on a phone; the rail's swipe handler already skips gestures
+     that start inside a nested scroller. */
+  .ct-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ct-table { min-width: 27rem; }
+}
+
+.ls-zodiac-cardlet[data-zodiac-panel="sidereal"] { display: none; }
+.ls-zodiac-block[data-zodiac-active="sidereal"] .ls-zodiac-cardlet[data-zodiac-panel="tropical"] { display: none; }
+.ls-zodiac-block[data-zodiac-active="sidereal"] .ls-zodiac-cardlet[data-zodiac-panel="sidereal"] { display: grid; }
 .ls-zodiac-cardlet {
   display: grid;
   align-content: start;
@@ -1129,7 +1276,7 @@
   .ls-ghost-label { font-size: .5rem; }
 }
 .ls-joker-note {
-  max-width: 560px; margin: 0 auto;
+  max-width: var(--reading-max-w); margin: 0 auto;
   font-family: var(--serif); font-size: 1rem; line-height: 1.7;
   color: var(--secondary); text-align: center;
 }
@@ -1441,7 +1588,7 @@
 }
 .sol-card-name { font-family: var(--serif); font-size: 1rem; color: var(--text); }
 
-/* Personality Sun hexagram (js/sun-gate.js) — tropical + two sidereal
+/* Sun gate hexagram (js/sun-gate.js) — tropical + sidereal
    gates under the solar cards. Figures use --yang for the yang lines. */
 .sun-gate {
   margin-top: 1.3rem; padding-top: .2rem;
@@ -2218,7 +2365,10 @@
    shown at the foot of the page; selecting a suit reveals the A–K ranks
    + the planets rows and fills a reading panel. Modern | Olney voice
    toggle. Mirrors the I Ching trigram row. Logic: js/elements.js. */
-.elements { padding: 0; }
+.elements {
+  padding: 0;
+  margin-top: 0;
+}
 .el-inner { max-width: var(--max-w); margin: 0 auto; }
 .el-topline {
   min-height: 3rem;

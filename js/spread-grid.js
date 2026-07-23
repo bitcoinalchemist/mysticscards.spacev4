@@ -14,7 +14,7 @@ function buildSpreadGrid(gridEl, opts) {
 
   let html = '';
   html += '<div class="crown-row">';
-  html += '<div class="crown-side crown-joker" aria-hidden="true"></div>';
+  html += '<div class="crown-side crown-joker"></div>';
   for (let i = 51; i >= 49; i--) html += `<div class="sl-seat" data-pos="${i}"></div>`;
   html += '<div class="crown-side crown-controls" aria-hidden="true"></div>';
   html += '</div>';
