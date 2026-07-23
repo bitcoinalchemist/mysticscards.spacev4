@@ -19,20 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-SCOPE — this MIT license covers the SOURCE CODE of this project only: the
-HTML, CSS, and JavaScript that make up the site's structure and behaviour.
-
-The site's CREATIVE CONTENT is licensed separately — see LICENSE-CONTENT.md.
-That includes the divination and oracle readings, the Seed Oracle teaching
-text, and the original "Quinta Essentia" Joker artwork.
-
-Bundled third-party components keep their own licenses:
-
-  - js/astronomy.js — Astronomy Engine, Copyright (c) 2019-2023 Don Cross
-    <cosinekitty@gmail.com>, MIT License (notice preserved in that file).
-
-  - assets/cards/JC…KS.webp — the twelve court-card figures are the
-    public-domain playing-card art of Byron Knoll.

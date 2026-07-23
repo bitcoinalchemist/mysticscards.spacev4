@@ -5,6 +5,9 @@ The **source code** of this project is under the MIT License (see `LICENSE`).
 The project's **creative content** is licensed under
 **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
 
+The copyright owner may also grant separate commercial licenses or assign
+rights to this content outside the CC BY-NC 4.0 license.
+
 ## What this covers
 
 - The divination, cardology, and oracle **reading texts** (the "Sage voice"),

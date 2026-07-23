@@ -23,8 +23,11 @@ browser with [Astronomy Engine](https://github.com/cosinekitty/astronomy).
 - **Code** — MIT (`LICENSE`).
 - **Creative content** — the readings, the Seed Oracle text, and the original
   Joker art are CC BY-NC 4.0 (`LICENSE-CONTENT.md`).
+- **Third-party material** — see [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
 
 ## Credits
 
-- Court-card figures: public-domain playing-card art by Byron Knoll.
+- Court-card figures: Byron Knoll's CC0 playing-card artwork; see the
+  third-party notices for the source link.
 - Astronomy Engine © 2019–2023 Don Cross (MIT).
+- The live site includes a visitor-facing [Legal & credits page](legal.html).
